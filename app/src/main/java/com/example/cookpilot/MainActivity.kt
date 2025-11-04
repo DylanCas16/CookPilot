@@ -1,5 +1,6 @@
 package com.example.cookpilot
 
+import android.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,7 +41,7 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun CookPilotApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -72,9 +73,9 @@ enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
-    HOME("History", Icons.Default.Home),
-    FAVORITES("Create", Icons.Default.Favorite),
-    PROFILE("Search", Icons.Default.AccountBox),
+    History("History", ), ),
+    Create("Create", Icons.Default.Favorite),
+    Search("Search", Icons.Default.AccountBox),
 }
 
 @Composable
