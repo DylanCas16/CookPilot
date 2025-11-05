@@ -1,16 +1,11 @@
 package com.example.cookpilot
 
-import android.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import com.example.cookpilot.ui.theme.CookPilotTheme
@@ -71,11 +65,11 @@ fun CookPilotApp() {
 
 enum class AppDestinations(
     val label: String,
-    val icon: ImageVector,
+    val icon: Int,
 ) {
-    History("History", ), ),
-    Create("Create", Icons.Default.Favorite),
-    Search("Search", Icons.Default.AccountBox),
+    History("History", R.drawable.history_tab_icon),
+    Create("Create", R.drawable.create_tab_icon),
+    Search("Search", R.drawable.search_tab_icon),
 }
 
 @Composable
