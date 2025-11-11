@@ -1,11 +1,16 @@
 package com.example.cookpilot
 
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.res.painterResource
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.theme.CookPilotTheme
 
 class MainActivity : ComponentActivity() {
@@ -38,16 +44,27 @@ fun CookPilotApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
 
     NavigationSuiteScaffold(
+        containerColor = Color.LightGray.copy(alpha = 0.5f),
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
+                val isSelected = it == currentDestination
+
+                val selectedColor = Color.Red
+                val unselectedColor = Color.DarkGray
                 item(
                     icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
-                        )
+                        CompositionLocalProvider(LocalContentColor provides if (isSelected) selectedColor else unselectedColor)
+
+                        {Icon(
+                            painter = painterResource(id = it.icon),
+                            contentDescription = it.label,
+                            modifier = Modifier.size(30.dp)
+                        )}
                     },
-                    label = { Text(it.label) },
+                    label = {
+                        CompositionLocalProvider(LocalContentColor provides if (isSelected) selectedColor else unselectedColor)
+                        {Text(it.label)}
+                            },
                     selected = it == currentDestination,
                     onClick = { currentDestination = it }
                 )
