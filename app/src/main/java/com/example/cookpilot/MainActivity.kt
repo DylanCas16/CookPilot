@@ -24,7 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import com.example.cookpilot.ui.Components.Header
 import com.example.cookpilot.ui.theme.CookPilotTheme
+import com.example.cookpilot.ui.theme.SecondaryColor
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,13 +45,15 @@ class MainActivity : ComponentActivity() {
 fun CookPilotApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
 
+    Header {  }
+
     NavigationSuiteScaffold(
         containerColor = Color.LightGray.copy(alpha = 0.5f),
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
                 val isSelected = it == currentDestination
 
-                val selectedColor = Color.Red
+                val selectedColor = SecondaryColor
                 val unselectedColor = Color.DarkGray
                 item(
                     icon = {
@@ -71,12 +75,6 @@ fun CookPilotApp() {
             }
         }
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
     }
 }
 
@@ -87,20 +85,4 @@ enum class AppDestinations(
     History("History", R.drawable.history_tab_icon),
     Create("Create", R.drawable.create_tab_icon),
     Search("Search", R.drawable.search_tab_icon),
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CookPilotTheme {
-        Greeting("Android")
-    }
 }
