@@ -8,15 +8,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,9 +29,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import com.example.cookpilot.ui.Components.HeaderApp
+import com.example.cookpilot.ui.components.HeaderApp
+import com.example.cookpilot.ui.components.LateralMenu
+import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.SecondaryColor
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,40 +61,55 @@ fun CookPilotApp() {
             indicatorColor = Color.Transparent
         )
     )
-    NavigationSuiteScaffold(
-        containerColor = Color.LightGray.copy(alpha = 0.5f),
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach { destination ->
-                val isSelected = destination == currentDestination
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-                item(
-                    selected = isSelected,
-                    onClick = { currentDestination = destination },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = destination.icon),
-                            contentDescription = destination.label,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    },
-                    label = { Text(destination.label) },
-                    colors = myItemColors
-                )
-            }
-        }
+    ModalNavigationDrawer(
+        drawerContent = {
+            LateralMenu(
+                onOptionSelected = {
+                    scope.launch { drawerState.close() }
+                    println("Opción seleccionada: $it")
+                }
+            )
+        },
+        drawerState = drawerState,
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            HeaderApp {}
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                when (currentDestination) {
-                    AppDestinations.History -> Text("Pantalla Historial", style = MaterialTheme.typography.headlineMedium)
-                    AppDestinations.Create -> Text("Pantalla Crear", style = MaterialTheme.typography.headlineMedium)
-                    AppDestinations.Search -> Text("Pantalla Buscar", style = MaterialTheme.typography.headlineMedium)
+        NavigationSuiteScaffold(
+            containerColor = Color.LightGray.copy(alpha = 0.5f),
+            navigationSuiteItems = {
+                AppDestinations.entries.forEach { destination ->
+                    val isSelected = destination == currentDestination
+
+                    item(
+                        selected = isSelected,
+                        onClick = { currentDestination = destination },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = destination.icon),
+                                contentDescription = destination.label,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        },
+                        label = { Text(destination.label) },
+                        colors = myItemColors
+                    )
+                }
+            }
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                HeaderApp {}
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (currentDestination) {
+                        AppDestinations.History -> HistoryPage()
+                        AppDestinations.Create -> Text("Pantalla Crear", style = MaterialTheme.typography.headlineMedium)
+                        AppDestinations.Search -> Text("Pantalla Buscar", style = MaterialTheme.typography.headlineMedium)
+                    }
                 }
             }
         }
@@ -99,6 +121,6 @@ enum class AppDestinations(
     val icon: Int,
 ) {
     History("History", R.drawable.ic_history_tab),
-    Create("Create", R.drawable.ic_search_tab),
+    Create("Create", R.drawable.ic_create_tab),
     Search("Search", R.drawable.ic_search_tab),
 }
