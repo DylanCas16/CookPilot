@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LateralMenu
+import com.example.cookpilot.ui.pages.CreatePage
 import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.SecondaryColor
@@ -58,7 +59,7 @@ fun CookPilotApp() {
             selectedTextColor = SecondaryColor,
             unselectedIconColor = Color.DarkGray,
             unselectedTextColor = Color.DarkGray,
-            indicatorColor = Color.Transparent
+            indicatorColor = SecondaryColor.copy(alpha = 0.2f)
         )
     )
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -69,14 +70,13 @@ fun CookPilotApp() {
             LateralMenu(
                 onOptionSelected = {
                     scope.launch { drawerState.close() }
-                    println("Opción seleccionada: $it")
                 }
             )
         },
         drawerState = drawerState,
     ) {
         NavigationSuiteScaffold(
-            containerColor = Color.LightGray.copy(alpha = 0.5f),
+            containerColor = Color.White.copy(alpha = 0.9f),
             navigationSuiteItems = {
                 AppDestinations.entries.forEach { destination ->
                     val isSelected = destination == currentDestination
@@ -98,7 +98,13 @@ fun CookPilotApp() {
             }
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                HeaderApp {}
+                HeaderApp(
+                    onMenuClick = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -107,7 +113,7 @@ fun CookPilotApp() {
                 ) {
                     when (currentDestination) {
                         AppDestinations.History -> HistoryPage()
-                        AppDestinations.Create -> Text("Pantalla Crear", style = MaterialTheme.typography.headlineMedium)
+                        AppDestinations.Create -> CreatePage()
                         AppDestinations.Search -> Text("Pantalla Buscar", style = MaterialTheme.typography.headlineMedium)
                     }
                 }

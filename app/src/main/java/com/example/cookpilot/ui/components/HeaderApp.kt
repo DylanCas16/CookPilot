@@ -19,7 +19,7 @@ import com.example.cookpilot.R
 @Composable
 fun HeaderApp(onMenuClick: () -> Unit) {
     CenterAlignedTopAppBar (
-        modifier = Modifier.height(120.dp),
+        modifier = Modifier.height(100.dp),
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
                 Icon(
