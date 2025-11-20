@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LateralMenu
 import com.example.cookpilot.ui.pages.HistoryPage
@@ -39,6 +40,16 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppwriteClient.init(this)
+        lifecycleScope.launch {
+            try {
+                createRecipe()
+                println("Receta demo creada correctamente")
+            } catch (e: Exception) {
+                println("Error creando receta: ${e.message}")
+                e.printStackTrace()
+            }
+        }
         enableEdgeToEdge()
         setContent {
             CookPilotTheme {
