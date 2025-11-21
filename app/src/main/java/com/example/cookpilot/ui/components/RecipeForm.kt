@@ -47,13 +47,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
-// Actualizamos el Data Class para incluir la imagen
+
 data class RecipeData(
-    val titulo: String,
-    val descripcion: String,
-    val pasos: String,
-    val dificultad: Int,
-    val ingredientes: List<String>,
+    val recipeName: String,
+    val description: String,
+    val steps: String,
+    val difficulty: Int,
+    val ingredients: List<String>,
     val imageUri: Uri?
 )
 
@@ -76,16 +76,16 @@ fun RecipeForm(
     val ingredients = remember { mutableStateListOf("") }
     if (ingredients.isEmpty()) ingredients.add("")
 
-    FormularioBase(
-        titulo = "New recipe",
-        textoBoton = "Create",
-        onEnviarClick = {
+    FormBase (
+        formTitle = "New recipe",
+        buttonText = "Create",
+        onCreateClick = {
             val data = RecipeData(
-                titulo = title,
-                descripcion = description,
-                pasos = steps,
-                dificultad = difficulty,
-                ingredientes = ingredients.filter { it.isNotBlank() },
+                recipeName = title,
+                description = description,
+                steps = steps,
+                difficulty = difficulty,
+                ingredients = ingredients.filter { it.isNotBlank() },
                 imageUri = selectedImageUri
             )
             onSaveRecipe(data)
@@ -113,12 +113,12 @@ fun RecipeForm(
                     // AQUÍ: Si usas la librería 'Coil', usarías AsyncImage(model = selectedImageUri)
                     // Como no sé si la tienes, pongo un icono genérico de "Imagen Cargada"
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_gallery), // Icono genérico
+                        painter = painterResource(id = android.R.drawable.ic_menu_gallery),
                         contentDescription = null,
                         modifier = Modifier.size(60.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
-                    Text("Imagen seleccionada", style = MaterialTheme.typography.bodySmall)
+                    Text("Image selected", style = MaterialTheme.typography.bodySmall)
                 }
             } else {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -159,13 +159,13 @@ fun RecipeForm(
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
         )
 
-        ingredients.forEachIndexed { index, ingrediente ->
+        ingredients.forEachIndexed { index, ingredient ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 OutlinedTextField(
-                    value = ingrediente,
+                    value = ingredient,
                     onValueChange = { newValue ->
                         ingredients[index] = newValue
 
@@ -177,7 +177,7 @@ fun RecipeForm(
                     modifier = Modifier.weight(1f)
                 )
 
-                if (index != ingredients.lastIndex || ingrediente.isNotEmpty()) {
+                if (index != ingredients.lastIndex || ingredient.isNotEmpty()) {
                     IconButton(onClick = { ingredients.removeAt(index) }) {
                         Icon(Icons.Default.Clear, contentDescription = "Delete ingredient", tint = Color.Gray)
                     }
@@ -241,18 +241,18 @@ fun RecipeForm(
         )
     }
 
-    // ================== DIÁLOGO DE RÚBRICA (El Bocadillo) ==================
+    // ================== RUBRIC DIALOGUE ==================
     if (showRubricDialog) {
         AlertDialog(
             onDismissRequest = { showRubricDialog = false },
             title = { Text("Difficulty guide") },
             text = {
                 Column {
-                    RubricItem(1, "Beginner: Sin cocción o ensamblaje simple.")
-                    RubricItem(2, "Easy: Cocción básica, pocos ingredientes.")
-                    RubricItem(3, "Medium: Requiere atención y tiempos controlados.")
-                    RubricItem(4, "Hard: Técnicas avanzadas (suflés, masas complejas).")
-                    RubricItem(5, "CP master: Requiere días, herramientas profesionales o precisión total.")
+                    RubricItem(1, "Beginner: Simple steps without cooking time.")
+                    RubricItem(2, "Easy: Few ingredients and cooking time.")
+                    RubricItem(3, "Medium: Steps more elaborated.")
+                    RubricItem(4, "Hard: Lots of ingredients with spices and large cooking time.")
+                    RubricItem(5, "CP master: May require days or previous cooking skills/knowledge.")
                 }
             },
             confirmButton = {
@@ -284,10 +284,10 @@ fun difficultyText(diff: Int): String {
 }
 
 @Composable
-fun FormularioBase(
-    titulo: String,
-    textoBoton: String,
-    onEnviarClick: () -> Unit,
+fun FormBase(
+    formTitle: String,
+    buttonText: String,
+    onCreateClick: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -305,7 +305,7 @@ fun FormularioBase(
                 .fillMaxWidth()
         ) {
             Text(
-                text = titulo,
+                text = formTitle,
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -313,10 +313,10 @@ fun FormularioBase(
             content()
             Spacer(modifier = Modifier.height(24.dp))
             Button(
-                onClick = onEnviarClick,
+                onClick = onCreateClick,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(textoBoton)
+                Text(buttonText)
             }
         }
     }
