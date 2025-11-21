@@ -93,6 +93,12 @@ fun RecipeForm(
         modifier = modifier
     ) {
         // ================== 1. IMAGE SELECTOR ==================
+        Text(
+            text = "Recipe photo:",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+        )
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -136,18 +142,30 @@ fun RecipeForm(
         Spacer(modifier = Modifier.height(16.dp))
 
         // ================== TITLE ==================
+        Text(
+            text = "Recipe name:",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+        )
+
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
-            label = { Text("Recipe name") },
+            label = { Text("Required") },
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
 
         // ================== DESCRIPTION ==================
+        Text(
+            text = "Description:",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+        )
+
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
-            label = { Text("Description") },
+            label = { Text("About the recipe") },
             maxLines = 3,
             modifier = Modifier.fillMaxWidth().height(100.dp).padding(vertical = 8.dp)
         )
