@@ -35,6 +35,7 @@ import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LateralMenu
 import com.example.cookpilot.ui.pages.CreatePage
 import com.example.cookpilot.ui.pages.HistoryPage
+import com.example.cookpilot.ui.pages.SearchPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.SecondaryColor
 import kotlinx.coroutines.launch
@@ -126,7 +127,7 @@ fun CookPilotApp() {
                     when (currentDestination) {
                         AppDestinations.History -> HistoryPage()
                         AppDestinations.Create -> CreatePage()
-                        AppDestinations.Search -> Text("Pantalla Buscar", style = MaterialTheme.typography.headlineMedium)
+                        AppDestinations.Search -> SearchPage()
                     }
                 }
             }

@@ -31,13 +31,14 @@ fun HeaderApp(onMenuClick: () -> Unit) {
             }
         },
         title = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_user),
-                contentDescription = "LoginIcon",
-                modifier = Modifier
-                    .size(60.dp)
-                    .clickable { onMenuClick() }
-            )
+            IconButton(onMenuClick) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_user),
+                    contentDescription = "LoginIcon",
+                    modifier = Modifier
+                        .size(60.dp)
+                )
+            }
         }
     )
 }
