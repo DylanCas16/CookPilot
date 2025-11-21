@@ -10,17 +10,14 @@ import com.example.cookpilot.ui.components.RecipeForm
 
 @Composable
 fun CreatePage() {
-    // Añadimos un Column con scroll para que el formulario quepa en pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()) // Habilita el scroll vertical
+            .verticalScroll(rememberScrollState())
     ) {
         RecipeForm(
-            onSaveRecipe = { datos ->
-                // Aquí recibes los datos cuando pulsas el botón
-                println("Guardando receta: ${datos.titulo}")
-                println("Ingredientes: ${datos.ingredientes}")
+            onSaveRecipe = { data ->
+                println("created")
             }
         )
     }
