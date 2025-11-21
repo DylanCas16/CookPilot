@@ -79,7 +79,7 @@ fun RecipeForm(
     FormBase (
         formTitle = "New recipe",
         buttonText = "Create",
-        onCreateClick = {
+        onConfirmClick = {
             val data = RecipeData(
                 recipeName = title,
                 description = description,
@@ -298,44 +298,5 @@ fun difficultyText(diff: Int): String {
         4 -> "Hard"
         5 -> "CP master"
         else -> ""
-    }
-}
-
-@Composable
-fun FormBase(
-    formTitle: String,
-    buttonText: String,
-    onCreateClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        shape = MaterialTheme.shapes.medium,
-        shadowElevation = 4.dp,
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(24.dp)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = formTitle,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            content()
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = onCreateClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(buttonText)
-            }
-        }
     }
 }
