@@ -43,15 +43,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppwriteClient.init(this)
-        lifecycleScope.launch {
-            try {
-                RecipeRepository().createRecipe()
-                RecipeRepository().getAllRecipes()
-            } catch (e: Exception) {
-                println("Error creando receta: ${e.message}")
-                e.printStackTrace()
-            }
-        }
         enableEdgeToEdge()
         setContent {
             CookPilotTheme {
