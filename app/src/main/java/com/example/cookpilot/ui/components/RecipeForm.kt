@@ -48,7 +48,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.cookpilot.model.Recipe
 
 data class RecipeData(
     val title: String,
@@ -63,8 +62,8 @@ data class RecipeData(
 
 @Composable
 fun RecipeForm(
-    onSaveRecipe: (RecipeData) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSaveRecipe: (RecipeData) -> Unit = {}
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
