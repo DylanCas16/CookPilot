@@ -1,7 +1,6 @@
 package com.example.cookpilot.model
 
 data class Recipe(
-    val id: String,
     val title: String,
     val difficulty: Int,
     val cookingTime: Int,
@@ -12,9 +11,8 @@ data class Recipe(
     val imageUri: String? = null
 ) {
     companion object {
-        fun fromMap(id: String, data: Map<String, Any?>): Recipe {
+        fun fromMap(data: Map<String, Any?>): Recipe {
             return Recipe(
-                id = id,
                 title = data["title"] as? String ?: "",
                 difficulty = (data["difficulty"] as? Number)?.toInt() ?: 0,
                 cookingTime = (data["cooking_time"] as? Number)?.toInt() ?: 0,

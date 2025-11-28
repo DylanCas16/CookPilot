@@ -1,6 +1,5 @@
 package com.example.cookpilot.ui.components
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,33 +45,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.cookpilot.model.Recipe
 
-data class RecipeData(
-    val recipeName: String,
-    val description: String,
-    val steps: String,
-    val difficulty: Int,
-    val ingredients: List<String>,
-    val cookingTime: Int,
-    val creator: String = "anon",
-    val imageUri: Uri?
-)
 
 @Composable
 fun RecipeForm(
     modifier: Modifier = Modifier,
-    onSaveRecipe: (RecipeData) -> Unit = {}
+    onSaveRecipe: (Recipe) -> Unit = {}
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var steps by remember { mutableStateOf("") }
     var difficulty by remember { mutableIntStateOf(1) }
     var showRubricDialog by remember { mutableStateOf(false) }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedImageUri by remember { mutableStateOf<String?>(null) }
     var cookingTimeText by remember { mutableStateOf("") }
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedImageUri = uri }
+        onResult = { uri -> selectedImageUri = uri.toString() }
     )
     val ingredients = remember { mutableStateListOf("") }
     if (ingredients.isEmpty()) ingredients.add("")
@@ -93,8 +83,8 @@ fun RecipeForm(
         formTitle = "New recipe",
         buttonText = "Create",
         onConfirmClick = {
-            val data = RecipeData(
-                recipeName = title,
+            val data = Recipe(
+                title = title,
                 description = description,
                 steps = steps,
                 difficulty = difficulty,
