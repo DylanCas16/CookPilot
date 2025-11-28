@@ -84,7 +84,7 @@ fun RecipeForm(
         buttonText = "Create",
         onConfirmClick = {
             val data = RecipeData(
-                title = title,
+                recipeName = title,
                 description = description,
                 steps = steps,
                 difficulty = difficulty,
@@ -356,4 +356,3 @@ fun difficultyText(diff: Int): String =
         5 -> "CP master"
         else -> ""
     }
-}

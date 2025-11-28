@@ -22,7 +22,7 @@ fun CreatePage(
         RecipeForm(
             onSaveRecipe = { recipe ->
                 viewModel.createRecipeFromForm(
-                    title = recipe.title,
+                    title = recipe.recipeName,
                     description = recipe.description,
                     steps = recipe.steps,
                     difficulty = recipe.difficulty,
