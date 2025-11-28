@@ -1,3 +1,3 @@
 const val APPWRITE_PROJECT_ID = "691f356a001b2d4dd517"
 const val APPWRITE_PROJECT_NAME = "CookPilot"
-const val APPWRITE_PUBLIC_ENDPOINT = "http://10.0.2.2/v1"
+const val APPWRITE_PUBLIC_ENDPOINT = "http://172.20.10.9/v1"
