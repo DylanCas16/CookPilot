@@ -26,12 +26,10 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -79,12 +77,24 @@ fun RecipeForm(
     val ingredients = remember { mutableStateListOf("") }
     if (ingredients.isEmpty()) ingredients.add("")
 
+    val resetFormStates = {
+        title = ""
+        description = ""
+        steps = ""
+        difficulty = 1
+        cookingTimeText = ""
+        selectedImageUri = null
+
+        ingredients.clear()
+        ingredients.add("")
+    }
+
     FormBase(
         formTitle = "New recipe",
         buttonText = "Create",
         onConfirmClick = {
             val data = RecipeData(
-                title = title,
+                recipeName = title,
                 description = description,
                 steps = steps,
                 difficulty = difficulty,
@@ -94,6 +104,7 @@ fun RecipeForm(
                 imageUri = selectedImageUri
             )
             onSaveRecipe(data)
+            resetFormStates()
         },
         modifier = modifier
     ) {
@@ -356,4 +367,3 @@ fun difficultyText(diff: Int): String =
         5 -> "CP master"
         else -> ""
     }
-}
