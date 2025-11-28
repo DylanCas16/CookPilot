@@ -8,7 +8,8 @@ data class Recipe(
     val description: String,
     val steps: String,
     val ingredients: List<String>,
-    val creator: String
+    val creator: String,
+    val imageUri: String? = null
 ) {
     companion object {
         fun fromMap(id: String, data: Map<String, Any?>): Recipe {
@@ -20,7 +21,8 @@ data class Recipe(
                 description = data["description"] as? String ?: "",
                 steps = data["steps"] as? String ?: "",
                 ingredients = (data["ingredients"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
-                creator = data["creator"] as? String ?: ""
+                creator = data["creator"] as? String ?: "",
+                imageUri = data["imageUri"] as? String
             )
         }
     }

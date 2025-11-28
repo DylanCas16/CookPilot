@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -45,8 +46,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-
 
 data class RecipeData(
     val recipeName: String,
@@ -54,13 +55,15 @@ data class RecipeData(
     val steps: String,
     val difficulty: Int,
     val ingredients: List<String>,
+    val cookingTime: Int,
+    val creator: String = "anon",
     val imageUri: Uri?
 )
 
 @Composable
 fun RecipeForm(
-    onSaveRecipe: (RecipeData) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSaveRecipe: (RecipeData) -> Unit = {}
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -68,7 +71,7 @@ fun RecipeForm(
     var difficulty by remember { mutableIntStateOf(1) }
     var showRubricDialog by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-
+    var cookingTimeText by remember { mutableStateOf("") }
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
@@ -76,22 +79,25 @@ fun RecipeForm(
     val ingredients = remember { mutableStateListOf("") }
     if (ingredients.isEmpty()) ingredients.add("")
 
-    FormBase (
+    FormBase(
         formTitle = "New recipe",
         buttonText = "Create",
         onConfirmClick = {
             val data = RecipeData(
-                recipeName = title,
+                title = title,
                 description = description,
                 steps = steps,
                 difficulty = difficulty,
                 ingredients = ingredients.filter { it.isNotBlank() },
+                cookingTime = cookingTimeText.toIntOrNull() ?: 0,
+                creator = "anon",
                 imageUri = selectedImageUri
             )
             onSaveRecipe(data)
         },
         modifier = modifier
     ) {
+
         // ================== 1. IMAGE SELECTOR ==================
         Text(
             text = "Recipe photo:",
@@ -108,16 +114,15 @@ fun RecipeForm(
                 .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                 .clickable {
                     singlePhotoPickerLauncher.launch(
-                        PickVisualMediaRequest(ActivityResultContracts
-                            .PickVisualMedia.ImageOnly)
+                        PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
                     )
                 },
             contentAlignment = Alignment.Center
         ) {
             if (selectedImageUri != null) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    // AQUÍ: Si usas la librería 'Coil', usarías AsyncImage(model = selectedImageUri)
-                    // Como no sé si la tienes, pongo un icono genérico de "Imagen Cargada"
                     Icon(
                         painter = painterResource(id = android.R.drawable.ic_menu_gallery),
                         contentDescription = null,
@@ -152,7 +157,9 @@ fun RecipeForm(
             value = title,
             onValueChange = { title = it },
             label = { Text("Required") },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
         )
 
         // ================== DESCRIPTION ==================
@@ -167,7 +174,10 @@ fun RecipeForm(
             onValueChange = { description = it },
             label = { Text("About the recipe") },
             maxLines = 3,
-            modifier = Modifier.fillMaxWidth().height(100.dp).padding(vertical = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(vertical = 8.dp)
         )
 
         // ================== INGREDIENTS ==================
@@ -186,7 +196,6 @@ fun RecipeForm(
                     value = ingredient,
                     onValueChange = { newValue ->
                         ingredients[index] = newValue
-
                         if (index == ingredients.lastIndex && newValue.isNotEmpty()) {
                             ingredients.add("")
                         }
@@ -196,12 +205,21 @@ fun RecipeForm(
                 )
 
                 if (index != ingredients.lastIndex || ingredient.isNotEmpty()) {
-                    IconButton(onClick = { ingredients.removeAt(index) }) {
-                        Icon(Icons.Default.Clear, contentDescription = "Delete ingredient", tint = Color.Gray)
+                    IconButton(onClick = {
+                        ingredients.removeAt(index)
+                        if (ingredients.isEmpty()) ingredients.add("")
+                    }) {
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = "Delete ingredient",
+                            tint = Color.Gray
+                        )
                     }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // ================== STEPS ==================
         Text(
@@ -215,13 +233,42 @@ fun RecipeForm(
             onValueChange = { steps = it },
             label = { Text("Recipe steps") },
             minLines = 5,
-            modifier = Modifier.fillMaxWidth().height(150.dp).padding(vertical = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp)
+                .padding(vertical = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ================== COOKING TIME ==================
+        Text(
+            text = "Cooking time (minutes):",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+        )
+
+        OutlinedTextField(
+            value = cookingTimeText,
+            onValueChange = { new ->
+                if (new.all { it.isDigit() } || new.isEmpty()) {
+                    cookingTimeText = new
+                }
+            },
+            label = { Text("Minutes") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // ================== DIFFICULTY ==================
-        Text(text = "Difficulty (Required):", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Difficulty (Required):",
+            style = MaterialTheme.typography.titleMedium
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -257,41 +304,51 @@ fun RecipeForm(
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(vertical = 4.dp)
         )
-    }
 
-    // ================== RUBRIC DIALOGUE ==================
-    if (showRubricDialog) {
-        AlertDialog(
-            onDismissRequest = { showRubricDialog = false },
-            title = { Text("Difficulty guide") },
-            text = {
-                Column {
-                    RubricItem(1, "Beginner: Simple steps without cooking time.")
-                    RubricItem(2, "Easy: Few ingredients and cooking time.")
-                    RubricItem(3, "Medium: Steps more elaborated.")
-                    RubricItem(4, "Hard: Lots of ingredients with spices and large cooking time.")
-                    RubricItem(5, "CP master: May require days or previous cooking skills/knowledge.")
+        // ================== RUBRIC DIALOGUE ==================
+        if (showRubricDialog) {
+            AlertDialog(
+                onDismissRequest = { showRubricDialog = false },
+                title = { Text("Difficulty guide") },
+                text = {
+                    Column {
+                        RubricItem(1, "Beginner: Simple steps without cooking time.")
+                        RubricItem(2, "Easy: Few ingredients and cooking time.")
+                        RubricItem(3, "Medium: Steps more elaborated.")
+                        RubricItem(4, "Hard: Lots of ingredients and long cooking time.")
+                        RubricItem(5, "CP master: May require days or advanced skills.")
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showRubricDialog = false }) {
+                        Text("Understood")
+                    }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { showRubricDialog = false }) {
-                    Text("Understood")
-                }
-            }
-        )
+            )
+        }
     }
 }
 
 @Composable
 fun RubricItem(stars: Int, description: String) {
-    Row(modifier = Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.Top) {
-        Text(text = "★".repeat(stars), modifier = Modifier.width(60.dp), color = MaterialTheme.colorScheme.primary)
-        Text(text = description, style = MaterialTheme.typography.bodySmall)
+    Row(
+        modifier = Modifier.padding(vertical = 4.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = "★".repeat(stars),
+            modifier = Modifier.width(60.dp),
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }
 
-fun difficultyText(diff: Int): String {
-    return when(diff) {
+fun difficultyText(diff: Int): String =
+    when (diff) {
         1 -> "Beginner"
         2 -> "Easy"
         3 -> "Medium"

@@ -8,7 +8,8 @@ import io.appwrite.services.Databases
 
 object AppwriteClient {
 
-    private lateinit var client: Client
+    lateinit var client: Client
+        private set
     lateinit var databases: Databases
         private set
 
