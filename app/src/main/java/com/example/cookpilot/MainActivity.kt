@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.Sidebar
 import com.example.cookpilot.ui.pages.CreatePage
@@ -35,6 +36,7 @@ import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.pages.SearchPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.SecondaryColor
+import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -53,6 +55,7 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun CookPilotApp() {
+    val userViewModel: UserViewModel = viewModel()
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
     val myItemColors = NavigationSuiteDefaults.itemColors(
         navigationBarItemColors = NavigationBarItemDefaults.colors(
@@ -71,7 +74,9 @@ fun CookPilotApp() {
             Sidebar(
                 onOptionSelected = {
                     scope.launch { drawerState.close() }
-                }
+                },
+                userViewModel = userViewModel,
+                drawerState = drawerState
             )
         },
         drawerState = drawerState,
