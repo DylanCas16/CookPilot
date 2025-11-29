@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cookpilot.repository.AuthRepository
-import com.example.cookpilot.ui.components.User
+import com.example.cookpilot.ui.components.RegisterUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -16,13 +16,10 @@ data class UserUiState(
 )
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
-
     private val authRepository = AuthRepository()
-
     private val _uiState = MutableStateFlow(UserUiState())
-    val uiState: StateFlow<UserUiState> = _uiState
 
-    fun register(user: User) {
+    fun register(user: RegisterUser) {
         viewModelScope.launch {
             _uiState.value = UserUiState(isLoading = true)
             try {
@@ -41,7 +38,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.value = UserUiState(isLoading = true)
             try {
-                authRepository.login(email, password)
+                authRepository.loginUser(email, password)
                 _uiState.value = UserUiState(success = true)
             } catch (e: Exception) {
                 _uiState.value = UserUiState(
@@ -49,6 +46,15 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     error = e.message ?: "Unknown error"
                 )
             }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            try {
+                authRepository.logout()
+                _uiState.value = UserUiState(success = true)
+            } catch (e: Exception) { }
         }
     }
 }

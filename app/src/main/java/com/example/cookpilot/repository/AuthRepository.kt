@@ -1,7 +1,7 @@
 package com.example.cookpilot.repository
 
 import com.example.cookpilot.AppwriteClient
-import com.example.cookpilot.ui.components.User
+import com.example.cookpilot.ui.components.RegisterUser
 import io.appwrite.ID
 import io.appwrite.services.Account
 import kotlinx.coroutines.Dispatchers
@@ -14,12 +14,12 @@ class AuthRepository {
     private val databaseId = "691f3585001c7edb5dd2"
     private val usersCollectionId = "users"
 
-    suspend fun registerUser(userForm: User) = withContext(Dispatchers.IO) {
+    suspend fun registerUser(userForm: RegisterUser) = withContext(Dispatchers.IO) {
         val createdUser = account.create(
             userId = ID.unique(),
             email = userForm.email,
             password = userForm.password,
-            name = userForm.user      // nombre visible
+            name = userForm.user
         )
 
         delay(1000)
@@ -46,10 +46,14 @@ class AuthRepository {
         return millis.coerceIn(minDate, maxDate)
     }
 
-    suspend fun login(email: String, password: String) = withContext(Dispatchers.IO) {
+    suspend fun loginUser(email: String, password: String) = withContext(Dispatchers.IO) {
         account.createEmailPasswordSession(
             email = email,
             password = password
-        ) // [web:333][web:336]
+        )
+    }
+
+    suspend fun logout() = withContext(Dispatchers.IO) {
+        account.deleteSession(sessionId = "current")
     }
 }

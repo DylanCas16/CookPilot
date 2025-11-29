@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
@@ -30,7 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.components.HeaderApp
-import com.example.cookpilot.ui.components.LateralMenu
+import com.example.cookpilot.ui.components.Sidebar
 import com.example.cookpilot.ui.pages.CreatePage
 import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.pages.SearchPage
@@ -69,7 +68,7 @@ fun CookPilotApp() {
 
     ModalNavigationDrawer(
         drawerContent = {
-            LateralMenu(
+            Sidebar(
                 onOptionSelected = {
                     scope.launch { drawerState.close() }
                 }
@@ -114,10 +113,13 @@ fun CookPilotApp() {
                     contentAlignment = Alignment.Center
                 ) {
                     when (currentDestination) {
-                        AppDestinations.History -> HistoryPage()
+                        AppDestinations.History -> HistoryPage(
+                            onNavigateToCreate = { currentDestination = AppDestinations.Create }
+                        )
                         AppDestinations.Create -> CreatePage()
                         AppDestinations.Search -> SearchPage()
                     }
+
                 }
             }
         }

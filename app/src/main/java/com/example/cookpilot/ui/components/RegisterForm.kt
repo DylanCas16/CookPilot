@@ -30,7 +30,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-data class User(
+data class RegisterUser(
     val user: String,
     val birthdate: Long,
     val email: String,
@@ -45,7 +45,7 @@ fun Long.toDate(): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserRegistrationForm(
-    onRegisterUser: (User) -> Unit,
+    onRegisterUser: (RegisterUser) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var user by remember { mutableStateOf("") }
@@ -64,7 +64,7 @@ fun UserRegistrationForm(
         modifier = modifier,
         onConfirmClick = {
             if (user.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword == password && birthdateMillis != null) {
-                onRegisterUser(User(user, birthdateMillis!!, email, password))
+                onRegisterUser(RegisterUser(user, birthdateMillis!!, email, password))
             }
         }
     ) {
