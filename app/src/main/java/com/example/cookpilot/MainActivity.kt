@@ -147,7 +147,11 @@ fun CookPilotApp() {
                                 userViewModel.openLoginDialog()
                             }
                         )
-                        AppDestinations.Search -> SearchPage()
+                        AppDestinations.Search -> SearchPage(
+                            recipeViewModel = recipeViewModel,
+                            onOpenRecipe = { //TODO RECIPE PAGE
+                            }
+                        )
                     }
 
                 }

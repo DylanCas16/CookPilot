@@ -29,25 +29,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
+import com.example.cookpilot.model.Recipe
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBar() {
+fun SearchBar(
+    recipes: List<Recipe>,
+    onRecipeSelected: (Recipe) -> Unit
+) {
     var query by rememberSaveable { mutableStateOf("") }
     var active by rememberSaveable { mutableStateOf(false) }
 
-    // Datos de prueba (Simulando tu base de datos)
-    val allRecipes = listOf(
-        "Pasta Carbonara", "Pizza Margarita", "Sushi de Salmón",
-        "Hamburguesa Vegana", "Ensalada César", "Tacos al Pastor",
-        "Paella Valenciana", "Brownie de Chocolate", "Tortilla de Patatas",
-        "Pollo al Curry", "Lasaña de Carne", "Gazpacho Andaluz"
-    )
+    val allRecipes = recipes
 
-    val results = if (query.isBlank()) {
+    val results: List<Recipe> = if (query.isBlank()) {
         emptyList()
     } else {
-        allRecipes.filter { it.contains(query, ignoreCase = true) }
+        val term = query.lowercase().trim()
+        allRecipes.filter { recipe ->
+            val lowerIngredients = recipe.ingredients.map { it.lowercase() }
+            lowerIngredients.any { it.contains(term) }
+        }
     }
 
     Box(
@@ -75,30 +77,37 @@ fun SearchBar() {
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (query.isBlank()) {
-                    items(listOf("Pollo", "Pasta", "Vegano")) { sugerencia ->
+                    items(listOf("chicken", "pasta", "eggs")) { suggestion ->
                         ListItem(
-                            headlineContent = { Text(sugerencia) },
-                            leadingContent = { Icon(
-                                painter = painterResource(R.drawable.ic_history_tab),
-                                contentDescription = "History icon")
+                            headlineContent = { Text(suggestion) },
+                            leadingContent = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_history_tab),
+                                    contentDescription = "History icon"
+                                )
                             },
-                            modifier = Modifier.clickable {
-                                query = sugerencia
-                                active = false
-                            }.size(40.dp)
+                            modifier = Modifier
+                                .clickable {
+                                    query = suggestion
+                                    active = false
+                                }
+                                .size(40.dp)
                         )
                     }
                 } else {
-                    items(results) { receta ->
+                    // Ahora results es List<Recipe>
+                    items(results) { recipe ->
                         ListItem(
-                            headlineContent = { Text(receta) },
+                            headlineContent = { Text(recipe.title) },
                             leadingContent = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_pizza_search),
@@ -107,9 +116,9 @@ fun SearchBar() {
                                 )
                             },
                             modifier = Modifier.clickable {
-                                query = receta
+                                query = recipe.title
                                 active = false
-                                println("Navegar a receta: $receta")
+                                onRecipeSelected(recipe)
                             }
                         )
                     }
