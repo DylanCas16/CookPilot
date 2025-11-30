@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.R
 import com.example.cookpilot.viewmodel.UserViewModel
 
@@ -25,7 +24,7 @@ import com.example.cookpilot.viewmodel.UserViewModel
 @Composable
 fun HeaderApp(
     onMenuClick: () -> Unit,
-    userViewModel: UserViewModel = viewModel()
+    userViewModel: UserViewModel
 ) {
 
     var showAuthMenu by remember { mutableStateOf(false) }

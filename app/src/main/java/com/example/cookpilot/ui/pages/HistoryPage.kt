@@ -17,9 +17,9 @@ import com.example.cookpilot.viewmodel.RecipeViewModel
 @Composable
 fun HistoryPage(
     onNavigateToCreate: () -> Unit,
-    viewModel: RecipeViewModel = viewModel()
+    recipeViewModel: RecipeViewModel
 ) {
-    val recipes by viewModel.recipes.collectAsState()
+    val recipes by recipeViewModel.recipes.collectAsState()
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),

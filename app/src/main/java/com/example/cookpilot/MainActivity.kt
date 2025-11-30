@@ -17,6 +17,8 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaul
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,12 +32,15 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.ui.components.HeaderApp
+import com.example.cookpilot.ui.components.LoginDialog
 import com.example.cookpilot.ui.components.Sidebar
+import com.example.cookpilot.ui.components.UserLoginForm
 import com.example.cookpilot.ui.pages.CreatePage
 import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.pages.SearchPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.SecondaryColor
+import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -56,6 +61,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CookPilotApp() {
     val userViewModel: UserViewModel = viewModel()
+    val recipeViewModel: RecipeViewModel = viewModel()
+    val uiState by userViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        userViewModel.checkSession()
+    }
+
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
     val myItemColors = NavigationSuiteDefaults.itemColors(
         navigationBarItemColors = NavigationBarItemDefaults.colors(
@@ -105,12 +117,18 @@ fun CookPilotApp() {
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 HeaderApp(
-                    onMenuClick = {
-                        scope.launch {
-                            drawerState.open()
-                        }
-                    }
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    userViewModel = userViewModel
                 )
+                if (uiState.showLoginDialog) {
+                    LoginDialog(
+                        uiState = uiState,
+                        onLogin = { email, password ->
+                            userViewModel.login(email, password)
+                        },
+                        onDismiss = { userViewModel.closeLoginDialog() }
+                    )
+                }
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -119,9 +137,16 @@ fun CookPilotApp() {
                 ) {
                     when (currentDestination) {
                         AppDestinations.History -> HistoryPage(
-                            onNavigateToCreate = { currentDestination = AppDestinations.Create }
+                            onNavigateToCreate = { currentDestination = AppDestinations.Create },
+                            recipeViewModel = recipeViewModel
                         )
-                        AppDestinations.Create -> CreatePage()
+                        AppDestinations.Create -> CreatePage(
+                            recipeViewModel = recipeViewModel,
+                            userViewModel = userViewModel,
+                            onGoToLogin = {
+                                userViewModel.openLoginDialog()
+                            }
+                        )
                         AppDestinations.Search -> SearchPage()
                     }
 

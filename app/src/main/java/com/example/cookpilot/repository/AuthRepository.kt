@@ -16,6 +16,15 @@ class AuthRepository {
     private val databaseId = "691f3585001c7edb5dd2"
     private val usersCollectionId = "users"
 
+    suspend fun hasActiveSession(): Boolean = withContext(Dispatchers.IO) {
+        return@withContext try {
+            account.get()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     suspend fun registerUser(userForm: RegisterUser) = withContext(Dispatchers.IO) {
         val createdUser = account.create(
             userId = ID.unique(),
