@@ -1,5 +1,6 @@
 package com.example.cookpilot.ui.pages
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -47,7 +48,7 @@ fun CreatePage(
             RecipeForm(
                 onSaveRecipe = { recipe ->
                     viewModel.createRecipeFromForm(
-                        title = recipe.recipeName,
+                        title = recipe.title,
                         description = recipe.description,
                         steps = recipe.steps,
                         difficulty = recipe.difficulty,

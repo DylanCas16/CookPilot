@@ -1,5 +1,6 @@
 package com.example.cookpilot.ui.components
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,11 +59,11 @@ fun RecipeForm(
     var steps by remember { mutableStateOf("") }
     var difficulty by remember { mutableIntStateOf(1) }
     var showRubricDialog by remember { mutableStateOf(false) }
-    var selectedImageUri by remember { mutableStateOf<String?>(null) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var cookingTimeText by remember { mutableStateOf("") }
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedImageUri = uri.toString() }
+        onResult = { uri -> selectedImageUri = uri }
     )
     val ingredients = remember { mutableStateListOf("") }
     if (ingredients.isEmpty()) ingredients.add("")
