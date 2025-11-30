@@ -1,7 +1,6 @@
 package com.example.cookpilot.ui.pages
 
 import androidx.compose.foundation.layout.Arrangement
-import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -87,7 +86,7 @@ fun CreatePage(
                         )
                     }
                 )
-
+                showSuccessMessage()
             }
         }
     }

@@ -1,7 +1,5 @@
 package com.example.cookpilot.model
 
-import android.net.Uri
-
 data class Recipe(
     val id: String? = null,
     val title: String,
