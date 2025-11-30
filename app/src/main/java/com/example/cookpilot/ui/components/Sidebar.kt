@@ -58,9 +58,6 @@ fun Sidebar(
             onClick = {
                 userViewModel.logout()
                 onOptionSelected("Logout")
-                CoroutineScope(Dispatchers.Main).launch {
-                    drawerState.close()
-                }
             },
             icon = { Icon(Icons.Default.ExitToApp, contentDescription = "Logout") },
             modifier = Modifier.padding(horizontal = 12.dp)
