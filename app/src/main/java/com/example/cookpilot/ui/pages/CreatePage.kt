@@ -74,7 +74,7 @@ fun CreatePage(
                     .padding(paddingValues)
             ) {
                 RecipeForm(
-                    onSaveRecipe = { recipe ->
+                    onSaveRecipe = { recipe, imageUri ->
                         recipeViewModel.createRecipeFromForm(
                             title = recipe.title,
                             description = recipe.description,
@@ -83,11 +83,11 @@ fun CreatePage(
                             ingredients = recipe.ingredients,
                             cookingTime = recipe.cookingTime,
                             creator = recipe.creator,
-                            imageUri = recipe.imageUri
+                            fileId = imageUri
                         )
-                        showSuccessMessage()
                     }
                 )
+
             }
         }
     }

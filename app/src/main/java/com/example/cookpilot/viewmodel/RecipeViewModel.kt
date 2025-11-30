@@ -25,7 +25,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         ingredients: List<String>,
         cookingTime: Int,
         creator: String,
-        imageUri: Uri?
+        fileId: Uri?
     ) {
         viewModelScope.launch {
             repository.createRecipeFromForm(
@@ -36,7 +36,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                 ingredients,
                 cookingTime,
                 creator,
-                imageUri
+                fileId
             )
             _recipes.value = repository.getAllRecipes()
         }

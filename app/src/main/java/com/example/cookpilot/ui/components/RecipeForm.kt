@@ -52,7 +52,7 @@ import com.example.cookpilot.model.Recipe
 @Composable
 fun RecipeForm(
     modifier: Modifier = Modifier,
-    onSaveRecipe: (Recipe) -> Unit = {}
+    onSaveRecipe: (Recipe, Uri?) -> Unit = { _, _ -> }
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -92,9 +92,9 @@ fun RecipeForm(
                 ingredients = ingredients.filter { it.isNotBlank() },
                 cookingTime = cookingTimeText.toIntOrNull() ?: 0,
                 creator = "anon",
-                imageUri = selectedImageUri
+                fileId = null
             )
-            onSaveRecipe(data)
+            onSaveRecipe(data, selectedImageUri)
             resetFormStates()
         },
         modifier = modifier

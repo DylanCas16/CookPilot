@@ -27,9 +27,9 @@ class RecipeRepository(
         ingredients: List<String>,
         cookingTime: Int,
         creator: String,
-        imageUri: Uri?
+        fileUri: Uri?
     ): Recipe = withContext(Dispatchers.IO) {
-        val imageUrl = uploadImageAndGetUrl(imageUri)
+        val fileId = uploadImageAndGetFileId(fileUri)
 
         val data = mapOf(
             "title" to title,
@@ -39,7 +39,7 @@ class RecipeRepository(
             "ingredients" to ingredients,
             "cooking_time" to cookingTime,
             "creator" to creator,
-            "imageUrl" to imageUrl
+            "fileId" to fileId
         )
 
         val doc = AppwriteClient.databases.createDocument(
@@ -52,25 +52,21 @@ class RecipeRepository(
         Recipe.fromMap(doc.id, doc.data)
     }
 
-    suspend fun getAllRecipes(): List<Recipe> = withContext(Dispatchers.IO) {
-        val result = AppwriteClient.databases.listDocuments(
-            databaseId = databaseId,
-            collectionId = collectionId
-        )
-        result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
-    }
-
-    private suspend fun uploadImageAndGetUrl(imageUri: Uri?): String? =
+    private suspend fun uploadImageAndGetFileId(fileUri: Uri?): String? =
         withContext(Dispatchers.IO) {
-            if (imageUri == null) return@withContext null
-            val inputStream = appContext.contentResolver.openInputStream(imageUri)
+            if (fileUri == null) return@withContext null
+
+            val inputStream = appContext.contentResolver.openInputStream(fileUri)
                 ?: return@withContext null
             val bytes = inputStream.readBytes()
             inputStream.close()
 
+            val mimeType = appContext.contentResolver.getType(fileUri) ?: "image/jpeg"
+
             val inputFile = InputFile.fromBytes(
                 bytes,
-                "recipe_${System.currentTimeMillis()}.jpg"
+                "recipe_${System.currentTimeMillis()}.jpg",
+                mimeType
             )
 
             val file = storage.createFile(
@@ -79,7 +75,14 @@ class RecipeRepository(
                 file = inputFile
             )
 
-            val endpoint = "http://10.0.2.2/v1"
-            "$endpoint/storage/buckets/$bucketId/files/${file.id}/view"
+            file.id
         }
+
+    suspend fun getAllRecipes(): List<Recipe> = withContext(Dispatchers.IO) {
+        val result = AppwriteClient.databases.listDocuments(
+            databaseId = databaseId,
+            collectionId = collectionId
+        )
+        result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
+    }
 }
