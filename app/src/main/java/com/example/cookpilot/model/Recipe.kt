@@ -1,15 +1,17 @@
 package com.example.cookpilot.model
 
+import android.net.Uri
+
 data class Recipe(
-    val id: String,
+    val id: String? = null,
     val title: String,
-    val difficulty: Int,
-    val cookingTime: Int,
     val description: String,
-    val steps: String,
+    val cookingTime: Int,
     val ingredients: List<String>,
+    val steps: String,
+    val difficulty: Int,
     val creator: String,
-    val imageUri: String? = null
+    val imageUri: Uri? = null
 ) {
     companion object {
         fun fromMap(id: String, data: Map<String, Any?>): Recipe {
@@ -22,7 +24,7 @@ data class Recipe(
                 steps = data["steps"] as? String ?: "",
                 ingredients = (data["ingredients"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                 creator = data["creator"] as? String ?: "",
-                imageUri = data["imageUri"] as? String
+                imageUri = data["imageUri"] as Uri?
             )
         }
     }
