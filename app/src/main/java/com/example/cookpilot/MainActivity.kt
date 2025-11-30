@@ -34,10 +34,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LoginDialog
 import com.example.cookpilot.ui.components.Sidebar
-import com.example.cookpilot.ui.components.UserLoginForm
 import com.example.cookpilot.ui.pages.CreatePage
 import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.pages.SearchPage
+import com.example.cookpilot.ui.pages.UserPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.SecondaryColor
 import com.example.cookpilot.viewmodel.RecipeViewModel
@@ -94,9 +94,10 @@ fun CookPilotApp() {
         drawerState = drawerState,
     ) {
         NavigationSuiteScaffold(
-            containerColor = Color.White.copy(alpha = 0.9f),
+            containerColor = Color.LightGray.copy(alpha = 0.5f),
             navigationSuiteItems = {
-                AppDestinations.entries.forEach { destination ->
+                AppDestinations.entries.filter { it != AppDestinations.Profile }.forEach { destination ->
+
                     val isSelected = destination == currentDestination
 
                     item(
@@ -118,6 +119,7 @@ fun CookPilotApp() {
             Column(modifier = Modifier.fillMaxSize()) {
                 HeaderApp(
                     onMenuClick = { scope.launch { drawerState.open() } },
+                    onGoToProfile = { currentDestination = AppDestinations.Profile },
                     userViewModel = userViewModel
                 )
                 if (uiState.showLoginDialog) {
@@ -148,6 +150,7 @@ fun CookPilotApp() {
                             }
                         )
                         AppDestinations.Search -> SearchPage()
+                        AppDestinations.Profile -> UserPage()
                     }
 
                 }
@@ -163,4 +166,6 @@ enum class AppDestinations(
     History("History", R.drawable.ic_history_tab),
     Create("Create", R.drawable.ic_create_tab),
     Search("Search", R.drawable.ic_search_tab),
+    Profile("Profile", R.drawable.ic_user)
+
 }
