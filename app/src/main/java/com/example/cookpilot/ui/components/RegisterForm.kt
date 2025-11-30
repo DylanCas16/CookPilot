@@ -32,7 +32,7 @@ import java.time.format.DateTimeFormatter
 
 data class RegisterUser(
     val user: String,
-    val birthdate: Long,
+    val birthdate: Long? = null,
     val email: String,
     val password: String
 )

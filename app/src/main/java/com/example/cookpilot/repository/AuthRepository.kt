@@ -7,6 +7,8 @@ import io.appwrite.services.Account
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import java.time.Instant
+import java.time.ZoneOffset
 
 class AuthRepository {
     private val account by lazy { Account(AppwriteClient.client) }
@@ -24,12 +26,18 @@ class AuthRepository {
 
         delay(1000)
 
-        val profileData = mapOf(
+        val profileData = mutableMapOf<String, Any>(
             "userId" to createdUser.id,
             "username" to userForm.user,
-            "birthdate" to clampBirthdate(userForm.birthdate),
             "email" to userForm.email
         )
+
+        userForm.birthdate?.let { millis ->
+            val iso = Instant.ofEpochMilli(millis)
+                .atOffset(ZoneOffset.UTC)
+                .toString() // ISO 8601
+            profileData["birthdate"] = iso
+        }
 
         databases.createDocument(
             databaseId = databaseId,
@@ -39,12 +47,6 @@ class AuthRepository {
         )
     }
 
-    private fun clampBirthdate(millis: Long): Long {
-        val minDate = 1000L * 365L * 24L * 60L * 60L * 1000L
-        val maxDate = 9999L * 365L * 24L * 60L * 60L * 1000L
-
-        return millis.coerceIn(minDate, maxDate)
-    }
 
     suspend fun loginUser(email: String, password: String) = withContext(Dispatchers.IO) {
         account.createEmailPasswordSession(
