@@ -1,9 +1,10 @@
 package com.example.cookpilot.ui.components
 
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,13 +17,24 @@ fun RecipeList(
     onRecipeClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier, contentPadding = PaddingValues(16.dp)) {
-        items(recipes) { recipe ->
-            RecipeCard(
-                recipe = recipe,
-                onClick = onRecipeClick,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+    Column(modifier = modifier.fillMaxWidth()) {
+        recipes.chunked(2).forEach { rowRecipes ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+                rowRecipes.forEach { recipe ->
+                    RecipeCard(
+                        recipe = recipe,
+                        onClick = onRecipeClick,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp)
+                    )
+                }
+                if (rowRecipes.size == 1) { Spacer(modifier = Modifier.weight(1f)) }
+            }
         }
     }
 }

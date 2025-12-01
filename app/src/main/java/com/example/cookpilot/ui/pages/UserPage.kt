@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -60,7 +62,6 @@ fun UserPage() {
     )}
 
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
-    var showActionDialog by remember { mutableStateOf(false) }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -69,81 +70,84 @@ fun UserPage() {
 
     // --- INTERFACE ---
     Scaffold { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // 1. HEADER
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
-            ) {
-                Text(
-                    text = userName,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                        .background(Color.LightGray)
-                        .clickable {
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        },
-                    contentAlignment = Alignment.Center
+            item {
+                // 1. HEADER
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
                 ) {
-                    if (profileImageUri != null) {
-                        Icon(
-                            painter = painterResource(android.R.drawable.ic_menu_gallery),
-                            contentDescription = null,
-                            modifier = Modifier.size(50.dp),
-                            tint = Color.DarkGray
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Placeholder picture",
-                            modifier = Modifier.size(60.dp),
-                            tint = Color.White
-                        )
+                    Text(
+                        text = userName,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape)
+                            .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                            .background(Color.LightGray)
+                            .clickable {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (profileImageUri != null) {
+                            Icon(
+                                painter = painterResource(android.R.drawable.ic_menu_gallery),
+                                contentDescription = null,
+                                modifier = Modifier.size(50.dp),
+                                tint = Color.DarkGray
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Placeholder picture",
+                                modifier = Modifier.size(60.dp),
+                                tint = Color.White
+                            )
+                        }
                     }
+                    Text(
+                        text = "Change profile picture",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
+
+                HorizontalDivider()
+
                 Text(
-                    text = "Change profile picture",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 8.dp)
+                    text = "My Recipes (${recetas.size})",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
                 )
             }
-
-            HorizontalDivider()
-
-            Text(
-                text = "My Recipes (${recetas.size})",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            )
-
-            // RECIPE LIST
-            RecipeList(
-                recipes = recetas,
-                onRecipeClick = { recipe ->
-                    selectedRecipe = recipe
-                },
-                modifier = Modifier.weight(1f)
-            )
+            item {
+                RecipeList(
+                    recipes = recetas,
+                    onRecipeClick = { recipe ->
+                        selectedRecipe = recipe
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                )
+            }
         }
     }
 

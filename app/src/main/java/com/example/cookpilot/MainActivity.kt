@@ -96,7 +96,7 @@ fun CookPilotApp() {
         NavigationSuiteScaffold(
             containerColor = Color.LightGray.copy(alpha = 0.5f),
             navigationSuiteItems = {
-                AppDestinations.entries.filter { it != AppDestinations.Profile }.forEach { destination ->
+                AppDestinations.entries/*.filter { it != AppDestinations.Profile }*/.forEach { destination ->
 
                     val isSelected = destination == currentDestination
 

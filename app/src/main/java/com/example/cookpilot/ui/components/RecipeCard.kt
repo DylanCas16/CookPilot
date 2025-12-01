@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.cookpilot.model.Recipe
+import androidx.core.net.toUri
 
 
 data class RecipeAction(
@@ -56,12 +57,19 @@ data class RecipeAction(
 )
 
 @Composable
-fun rememberBitmapFromUri(uri: Uri?): ImageBitmap? {
+fun rememberBitmapFromUri(image: String?): ImageBitmap? {
+    val recipeUri: Uri? = remember(image) {
+        if (image.isNullOrEmpty()) {
+            null
+        } else {
+            image.toUri()
+        }
+    }
     val context = LocalContext.current
-    return remember(uri) {
-        if (uri == null) return@remember null
+    return remember(recipeUri) {
+        if (recipeUri == null) return@remember null
         try {
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            context.contentResolver.openInputStream(recipeUri)?.use { inputStream ->
                 return@remember BitmapFactory.decodeStream(inputStream)?.asImageBitmap()
             }
         } catch (e: Exception) {
@@ -77,7 +85,7 @@ fun RecipeCard(
     onClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val recipeBitmap: ImageBitmap? = rememberBitmapFromUri(recipe.imageUri)
+    val recipeBitmap: ImageBitmap? = rememberBitmapFromUri(recipe.fileId)
 
     Card(
         modifier = modifier
@@ -162,7 +170,7 @@ fun RecipeDetailDialog(
                 ) {
                     item {
                         // === IMAGE ===
-                        val recipeBitmap = rememberBitmapFromUri(recipe.imageUri)
+                        val recipeBitmap = rememberBitmapFromUri(recipe.fileId)
 
                         Box(
                             modifier = Modifier
