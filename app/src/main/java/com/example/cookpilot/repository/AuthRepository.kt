@@ -20,7 +20,7 @@ class AuthRepository {
         return@withContext try {
             account.get()
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -28,7 +28,7 @@ class AuthRepository {
     suspend fun getCurrentUser() = withContext(Dispatchers.IO) {
         return@withContext try {
             account.get()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
