@@ -136,7 +136,6 @@ fun SearchPage(
                                     uiState.userId?.let { userId ->
                                         recipe.id?.let { recipeId ->
                                             historyViewModel.saveRecipeView(userId, recipeId)
-                                            println("✅ Saving to history: userId=$userId, recipeId=$recipeId")
                                         }
                                     }
                                     selectedRecipe = recipe

@@ -39,8 +39,8 @@ fun HistoryPage(
         }
     }
 
-    val totalSlots = 6
-    val filledSlots = historyRecipes.take(totalSlots)  // máximo 6 recetas
+    val totalSlots = 10
+    val filledSlots = historyRecipes.take(totalSlots)
     val emptySlots = totalSlots - filledSlots.size
 
     LazyVerticalGrid(
