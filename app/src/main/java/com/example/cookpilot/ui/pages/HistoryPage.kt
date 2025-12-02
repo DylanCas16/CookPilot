@@ -5,21 +5,43 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.HistoryEmptyCard
-import com.example.cookpilot.viewmodel.RecipeViewModel
+import com.example.cookpilot.ui.components.RecipeAction
+import com.example.cookpilot.ui.components.RecipeCard
+import com.example.cookpilot.ui.components.RecipeDetailDialog
+import com.example.cookpilot.viewmodel.HistoryViewModel
+import com.example.cookpilot.viewmodel.UserViewModel
 
 @Composable
 fun HistoryPage(
-    onNavigateToCreate: () -> Unit,
-    recipeViewModel: RecipeViewModel
+    historyViewModel: HistoryViewModel,
+    userViewModel: UserViewModel,
+    onNavigateToCreate: () -> Unit
 ) {
-    val recipes by recipeViewModel.recipes.collectAsState()
+    val historyRecipes by historyViewModel.historyRecipes.collectAsState()
+    val uiState by userViewModel.uiState.collectAsState()
+    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
+
+    LaunchedEffect(uiState.userId) {
+        uiState.userId?.let { userId ->
+            historyViewModel.loadUserHistory(userId)
+        }
+    }
+
+    val totalSlots = 6
+    val filledSlots = historyRecipes.take(totalSlots)  // máximo 6 recetas
+    val emptySlots = totalSlots - filledSlots.size
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -28,19 +50,27 @@ fun HistoryPage(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        if (recipes.isEmpty()) {
-            items(20) { _ ->
-                HistoryEmptyCard(
-                    onClick = onNavigateToCreate
-                )
-            }
-        } /*else {
-            items(recipes) { recipe ->
-                HistoryCard(
-                    recipe = recipe,
-                    onClick = { /* más tarde */ }
-                )
-            }
-        }*/
+        items(filledSlots) { recipe ->
+            RecipeCard(
+                recipe = recipe,
+                onClick = { selectedRecipe = recipe }
+            )
+        }
+
+        items(emptySlots) {
+            HistoryEmptyCard(
+                onClick = onNavigateToCreate
+            )
+        }
+    }
+
+    selectedRecipe?.let { recipe ->
+        RecipeDetailDialog(
+            recipe = recipe,
+            actions = listOf(
+                RecipeAction("Close") { selectedRecipe = null }
+            ),
+            onDismiss = { selectedRecipe = null }
+        )
     }
 }

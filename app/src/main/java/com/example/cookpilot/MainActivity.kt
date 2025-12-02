@@ -40,6 +40,7 @@ import com.example.cookpilot.ui.pages.SearchPage
 import com.example.cookpilot.ui.pages.UserPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.SecondaryColor
+import com.example.cookpilot.viewmodel.HistoryViewModel
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
@@ -62,6 +63,7 @@ class MainActivity : ComponentActivity() {
 fun CookPilotApp() {
     val userViewModel: UserViewModel = viewModel()
     val recipeViewModel: RecipeViewModel = viewModel()
+    val historyViewModel: HistoryViewModel = viewModel()
     val uiState by userViewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -139,8 +141,9 @@ fun CookPilotApp() {
                 ) {
                     when (currentDestination) {
                         AppDestinations.History -> HistoryPage(
-                            onNavigateToCreate = { currentDestination = AppDestinations.Create },
-                            recipeViewModel = recipeViewModel
+                            historyViewModel = historyViewModel,
+                            userViewModel = userViewModel,
+                            onNavigateToCreate = { currentDestination = AppDestinations.Create }
                         )
                         AppDestinations.Create -> CreatePage(
                             recipeViewModel = recipeViewModel,
@@ -151,8 +154,8 @@ fun CookPilotApp() {
                         )
                         AppDestinations.Search -> SearchPage(
                             recipeViewModel = recipeViewModel,
-                            onOpenRecipe = { //TODO RECIPE PAGE
-                            }
+                            historyViewModel = historyViewModel,
+                            userViewModel = userViewModel,
                         )
                         AppDestinations.Profile -> UserPage()
                     }
