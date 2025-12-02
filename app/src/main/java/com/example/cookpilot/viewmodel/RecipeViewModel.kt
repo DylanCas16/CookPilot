@@ -41,4 +41,10 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             _recipes.value = repository.getAllRecipes()
         }
     }
+
+    fun loadAllRecipes() {
+        viewModelScope.launch {
+            _recipes.value = repository.getAllRecipes()
+        }
+    }
 }

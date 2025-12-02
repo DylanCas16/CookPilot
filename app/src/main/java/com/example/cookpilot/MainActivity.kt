@@ -42,6 +42,7 @@ import com.example.cookpilot.ui.pages.SearchPage
 import com.example.cookpilot.ui.pages.UserPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.SecondaryColor
+import com.example.cookpilot.viewmodel.HistoryViewModel
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
@@ -67,12 +68,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @PreviewScreenSizes
-    @Composable
-    fun CookPilotApp() {
-        val userViewModel: UserViewModel = viewModel()
-        val recipeViewModel: RecipeViewModel = viewModel()
-        val uiState by userViewModel.uiState.collectAsState()
+@PreviewScreenSizes
+@Composable
+fun CookPilotApp() {
+    val userViewModel: UserViewModel = viewModel()
+    val recipeViewModel: RecipeViewModel = viewModel()
+    val historyViewModel: HistoryViewModel = viewModel()
+    val uiState by userViewModel.uiState.collectAsState()
 
         LaunchedEffect(Unit) {
             userViewModel.checkSession()
@@ -110,71 +112,67 @@ class MainActivity : ComponentActivity() {
 
                         val isSelected = destination == currentDestination
 
-                        item(
-                            selected = isSelected,
-                            onClick = { currentDestination = destination },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(id = destination.icon),
-                                    contentDescription = destination.label,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            },
-                            label = { Text(destination.label) },
-                            colors = myItemColors
-                        )
-                    }
-                }
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    HeaderApp(
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onGoToProfile = { currentDestination = AppDestinations.Profile },
-                        userViewModel = userViewModel
+                    item(
+                        selected = isSelected,
+                        onClick = { currentDestination = destination },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = destination.icon),
+                                contentDescription = destination.label,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        },
+                        label = { Text(destination.label) },
+                        colors = myItemColors
                     )
-                    if (uiState.showLoginDialog) {
-                        LoginDialog(
-                            uiState = uiState,
-                            onLogin = { email, password ->
-                                userViewModel.login(email, password)
-                            },
-                            onDismiss = { userViewModel.closeLoginDialog() },
-                            onRegisterClick = {
-                                userViewModel.closeLoginDialog()
-                                userViewModel.openRegisterDialog()
+                }
+            }
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                HeaderApp(
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onGoToProfile = { currentDestination = AppDestinations.Profile },
+                    userViewModel = userViewModel
+                )
+                if (uiState.showLoginDialog) {
+                    LoginDialog(
+                        uiState = uiState,
+                        onLogin = { email, password ->
+                            userViewModel.login(email, password)
+                        },
+                        onDismiss = { userViewModel.closeLoginDialog() },
+                        onRegisterClick = {
+                            userViewModel.closeLoginDialog()
+                            userViewModel.openRegisterDialog()
+                        }
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    when (currentDestination) {
+                        AppDestinations.History -> HistoryPage(
+                            historyViewModel = historyViewModel,
+                            userViewModel = userViewModel,
+                            onNavigateToCreate = { currentDestination = AppDestinations.Create }
+                        )
+                        AppDestinations.Create -> CreatePage(
+                            recipeViewModel = recipeViewModel,
+                            userViewModel = userViewModel,
+                            onGoToLogin = {
+                                userViewModel.openLoginDialog()
                             }
                         )
+                        AppDestinations.Search -> SearchPage(
+                            recipeViewModel = recipeViewModel,
+                            historyViewModel = historyViewModel,
+                            userViewModel = userViewModel,
+                        )
+                        AppDestinations.Profile -> UserPage()
                     }
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        when (currentDestination) {
-                            AppDestinations.History -> HistoryPage(
-                                onNavigateToCreate = {
-                                    currentDestination = AppDestinations.Create
-                                },
-                                recipeViewModel = recipeViewModel
-                            )
-
-                            AppDestinations.Create -> CreatePage(
-                                recipeViewModel = recipeViewModel,
-                                userViewModel = userViewModel,
-                                onGoToLogin = {
-                                    userViewModel.openLoginDialog()
-                                }
-                            )
-
-                            AppDestinations.Search -> SearchPage(
-                                recipeViewModel = recipeViewModel,
-                                onOpenRecipe = { //TODO RECIPE PAGE
-                                }
-                            )
-
-                            AppDestinations.Profile -> UserPage()
-                        }
 
                     }
                 }

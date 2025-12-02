@@ -20,10 +20,19 @@ class AuthRepository {
         return@withContext try {
             account.get()
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
+
+    suspend fun getCurrentUser() = withContext(Dispatchers.IO) {
+        return@withContext try {
+            account.get()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
 
     suspend fun registerUser(userForm: RegisterUser) = withContext(Dispatchers.IO) {
         val createdUser = account.create(

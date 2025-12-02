@@ -17,6 +17,7 @@ data class UserUiState(
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
     val success: Boolean = false,
+    val userId: String? = null,
     val error: String? = null
 )
 
@@ -28,7 +29,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     fun checkSession() {
         viewModelScope.launch {
             val loggedIn = authRepository.hasActiveSession()
-            _uiState.update { it.copy(isLoggedIn = loggedIn) }
+            if (loggedIn) {
+                val user = authRepository.getCurrentUser()
+                _uiState.update { it.copy(isLoggedIn = true, userId = user?.id) }
+            }
         }
     }
 
@@ -67,11 +71,14 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                authRepository.loginUser(email, password)
+                val session = authRepository.loginUser(email, password)
+                val user = authRepository.getCurrentUser()  // ← nuevo método
+
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isLoggedIn = true,
+                        userId = user?.id,  // ← guardar userId
                         success = true,
                         error = null,
                         showLoginDialog = false

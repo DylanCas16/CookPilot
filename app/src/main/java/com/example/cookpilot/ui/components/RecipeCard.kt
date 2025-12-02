@@ -1,5 +1,7 @@
 package com.example.cookpilot.ui.components
 
+import APPWRITE_PUBLIC_ENDPOINT
+import android.R
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -42,11 +44,13 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
 import com.example.cookpilot.model.Recipe
 import androidx.core.net.toUri
 
@@ -57,26 +61,10 @@ data class RecipeAction(
 )
 
 @Composable
-fun rememberBitmapFromUri(image: String?): ImageBitmap? {
-    val recipeUri: Uri? = remember(image) {
-        if (image.isNullOrEmpty()) {
-            null
-        } else {
-            image.toUri()
-        }
-    }
-    val context = LocalContext.current
-    return remember(recipeUri) {
-        if (recipeUri == null) return@remember null
-        try {
-            context.contentResolver.openInputStream(recipeUri)?.use { inputStream ->
-                return@remember BitmapFactory.decodeStream(inputStream)?.asImageBitmap()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return@remember null
-    }
+fun buildImageUrl(fileId: String?, bucketId: String = "6925e55b001dba9c68fc"): String? {
+    if (fileId == null) return null
+    val endpoint = APPWRITE_PUBLIC_ENDPOINT
+    return "$endpoint/storage/buckets/$bucketId/files/$fileId/view"
 }
 
 @Composable
@@ -85,7 +73,7 @@ fun RecipeCard(
     onClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val recipeBitmap: ImageBitmap? = rememberBitmapFromUri(recipe.fileId)
+    val imageUrl = buildImageUrl(recipe.fileId)  // ← ahora fileId en vez de imageUri
 
     Card(
         modifier = modifier
@@ -95,20 +83,23 @@ fun RecipeCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             // --- IMAGE / PLACEHOLDER ---
-            if (recipeBitmap != null) {
-                Image(
-                    bitmap = recipeBitmap,
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
                     contentDescription = "${recipe.title} picture",
-                    modifier = Modifier.fillMaxSize().align(Alignment.Center),
-                    contentScale = ContentScale.Crop
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center),
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(R.drawable.ic_lock_power_off)
                 )
             } else {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(Color.LightGray.copy(alpha = 0.5f)),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.LightGray.copy(alpha = 0.5f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -121,7 +112,7 @@ fun RecipeCard(
             }
 
             // --- TITLE ---
-            Column (
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
@@ -154,6 +145,8 @@ fun RecipeDetailDialog(
     actions: List<RecipeAction>,
     onDismiss: () -> Unit
 ) {
+    val imageUrl = buildImageUrl(recipe.fileId)
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -163,15 +156,9 @@ fun RecipeDetailDialog(
             elevation = CardDefaults.cardElevation(8.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-
-                // --- RECIPE CONTENT ---
-                LazyColumn(
-                    modifier = Modifier.weight(1f)
-                ) {
+                LazyColumn(modifier = Modifier.weight(1f)) {
                     item {
                         // === IMAGE ===
-                        val recipeBitmap = rememberBitmapFromUri(recipe.fileId)
-
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -179,12 +166,13 @@ fun RecipeDetailDialog(
                                 .background(Color.LightGray.copy(alpha = 0.5f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            if (recipeBitmap != null) {
-                                Image(
-                                    bitmap = recipeBitmap,
+                            if (imageUrl != null) {
+                                AsyncImage(
+                                    model = imageUrl,
                                     contentDescription = "Recipe image",
                                     modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
+                                    contentScale = ContentScale.Crop,
+                                    error = painterResource(R.drawable.ic_lock_power_off)
                                 )
                             } else {
                                 Icon(
@@ -204,13 +192,11 @@ fun RecipeDetailDialog(
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-
                             Text(
                                 text = recipe.description,
                                 style = MaterialTheme.typography.bodyLarge
                             )
-                            Divider(modifier = Modifier.padding(vertical = 16.dp))
-
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
                             // === COOKING TIME ===
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
