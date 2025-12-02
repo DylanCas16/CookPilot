@@ -29,9 +29,7 @@ fun SearchPage(
     val recipes by recipeViewModel.recipes.collectAsState()
     val uiState by userViewModel.uiState.collectAsState()
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
-
     var query by rememberSaveable { mutableStateOf("") }
-    var isSearching by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (recipes.isEmpty()) {
@@ -64,11 +62,10 @@ fun SearchPage(
         SearchBar(
             query = query,
             onQueryChange = { query = it },
-            onSearch = { isSearching = true },
+            onSearch = { },
             suggestions = suggestions.filter { it.contains(query.lowercase()) },
             onSuggestionClick = { suggestion ->
                 query = suggestion
-                isSearching = true
             }
         )
 
