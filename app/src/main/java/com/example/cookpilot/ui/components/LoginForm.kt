@@ -37,9 +37,9 @@ data class LogUser(
 @Composable
 fun UserLoginForm(
     onLoggingUser: (LogUser) -> Unit,
+    onRegisterClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var user by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -113,10 +113,8 @@ fun UserLoginForm(
                     tag = "register",
                     start = offset,
                     end = offset
-                ).firstOrNull()?.let { annotation ->
-                    UserRegistrationForm(onRegisterUser = {
-                        userViewModel.register(it)
-                    })
+                ).firstOrNull()?.let {
+                    onRegisterClick()
                 }
             },
             modifier = Modifier.padding(16.dp)

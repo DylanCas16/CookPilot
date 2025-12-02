@@ -8,7 +8,8 @@ import com.example.cookpilot.viewmodel.UserUiState
 fun LoginDialog(
     uiState: UserUiState,
     onLogin: (String, String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onRegisterClick: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -17,8 +18,8 @@ fun LoginDialog(
             UserLoginForm(
                 onLoggingUser = { logUser ->
                     onLogin(logUser.email, logUser.password)
-                }
-            )
+                },
+                onRegisterClick = onRegisterClick            )
         }
     )
 }

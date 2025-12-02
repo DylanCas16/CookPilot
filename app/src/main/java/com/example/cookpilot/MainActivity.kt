@@ -138,7 +138,11 @@ class MainActivity : ComponentActivity() {
                             onLogin = { email, password ->
                                 userViewModel.login(email, password)
                             },
-                            onDismiss = { userViewModel.closeLoginDialog() }
+                            onDismiss = { userViewModel.closeLoginDialog() },
+                            onRegisterClick = {
+                                userViewModel.closeLoginDialog()
+                                userViewModel.openRegisterDialog()
+                            }
                         )
                     }
                     Box(
