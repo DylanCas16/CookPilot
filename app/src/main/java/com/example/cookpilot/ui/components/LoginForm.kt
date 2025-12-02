@@ -2,11 +2,13 @@ package com.example.cookpilot.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,8 +18,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
 
@@ -37,6 +43,24 @@ fun UserLoginForm(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val registerText = buildAnnotatedString {
+        append("Don't have an account? ")
+
+        pushStringAnnotation(
+            tag = "register",
+            annotation = "register_route"
+        )
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        ) {
+            append("Register")
+        }
+        pop()
+    }
 
     FormBase(
         formTitle = "LOG IN",
@@ -79,6 +103,23 @@ fun UserLoginForm(
                 }
             },
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        )
+
+        // ================== REGISTER LINK ==================
+        ClickableText(
+            text = registerText,
+            onClick = { offset ->
+                registerText.getStringAnnotations(
+                    tag = "register",
+                    start = offset,
+                    end = offset
+                ).firstOrNull()?.let { annotation ->
+                    UserRegistrationForm(onRegisterUser = {
+                        userViewModel.register(it)
+                    })
+                }
+            },
+            modifier = Modifier.padding(16.dp)
         )
     }
 }

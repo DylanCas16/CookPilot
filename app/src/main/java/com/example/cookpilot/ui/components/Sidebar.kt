@@ -14,6 +14,8 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -29,6 +31,8 @@ fun Sidebar(
     userViewModel: UserViewModel = viewModel(),
     drawerState: DrawerState
 ) {
+    val uiState by userViewModel.uiState.collectAsState()
+
     ModalDrawerSheet {
         Text(
             text = "Main menu",
@@ -52,15 +56,17 @@ fun Sidebar(
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 
-        NavigationDrawerItem(
-            label = { Text("Logout") },
-            selected = false,
-            onClick = {
-                userViewModel.logout()
-                onOptionSelected("Logout")
-            },
-            icon = { Icon(Icons.Default.ExitToApp, contentDescription = "Logout") },
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
+        if (uiState.isLoggedIn) {
+            NavigationDrawerItem(
+                label = { Text("Logout") },
+                selected = false,
+                onClick = {
+                    userViewModel.logout()
+                    onOptionSelected("Logout")
+                },
+                icon = { Icon(Icons.Default.ExitToApp, contentDescription = "Logout") },
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+        }
     }
 }
