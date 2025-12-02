@@ -3,6 +3,7 @@ package com.example.cookpilot.repository
 import com.example.cookpilot.AppwriteClient
 import com.example.cookpilot.ui.components.RegisterUser
 import io.appwrite.ID
+import io.appwrite.models.User
 import io.appwrite.services.Account
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -24,6 +25,15 @@ class AuthRepository {
             false
         }
     }
+
+    suspend fun getCurrentUser() = withContext(Dispatchers.IO) {
+        return@withContext try {
+            account.get()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
 
     suspend fun registerUser(userForm: RegisterUser) = withContext(Dispatchers.IO) {
         val createdUser = account.create(
