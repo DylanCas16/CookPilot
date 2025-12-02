@@ -43,7 +43,7 @@ class HistoryRepository {
                     data = mapOf("viewedAt" to now)
                 )
             }
-        } catch (e: Exception) { }
+        } catch (_: Exception) { }
     }
     suspend fun getUserHistory(userId: String): List<Recipe> = withContext(Dispatchers.IO) {
         try {
@@ -70,7 +70,7 @@ class HistoryRepository {
             )
 
             recipesDocs.documents.map { Recipe.fromMap(it.id, it.data) }
-        } catch (e: Exception) { emptyList() }
+        } catch (_: Exception) { emptyList() }
     }
 
 
