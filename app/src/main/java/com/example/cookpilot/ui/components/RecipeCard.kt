@@ -1,10 +1,9 @@
 package com.example.cookpilot.ui.components
 
+import APPWRITE_BUCKET_ID
+import APPWRITE_PROJECT_ID
 import APPWRITE_PUBLIC_ENDPOINT
 import android.R
-import android.graphics.BitmapFactory
-import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,14 +35,10 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,11 +54,13 @@ data class RecipeAction(
     val onClick: () -> Unit
 )
 @Composable
-fun buildImageUrl(fileId: String?, bucketId: String = "6925e55b001dba9c68fc"): String? {
+fun buildImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID): String? {
     if (fileId == null) return null
     val endpoint = APPWRITE_PUBLIC_ENDPOINT
-    return "$endpoint/storage/buckets/$bucketId/files/$fileId/view"
+    val projectId = APPWRITE_PROJECT_ID
+    return "$endpoint/storage/buckets/$bucketId/files/$fileId/view?project=$projectId"
 }
+
 
 @Composable
 fun RecipeCard(
@@ -71,7 +68,7 @@ fun RecipeCard(
     onClick: (Recipe) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val imageUrl = buildImageUrl(recipe.fileId)  // ← ahora fileId en vez de imageUri
+    val imageUrl = buildImageUrl(recipe.fileId)
 
     Card(
         modifier = modifier

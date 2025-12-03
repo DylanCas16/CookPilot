@@ -1,5 +1,6 @@
 package com.example.cookpilot.repository
 
+import APPWRITE_BUCKET_ID
 import android.content.Context
 import android.net.Uri
 import com.example.cookpilot.AppwriteClient
@@ -15,7 +16,7 @@ class RecipeRepository(
 ) {
     private val databaseId = "691f3585001c7edb5dd2"
     private val collectionId = "recipes"
-    private val bucketId = "6925e55b001dba9c68fc"
+    private val bucketId = APPWRITE_BUCKET_ID
 
     private val storage by lazy { Storage(AppwriteClient.client) }
 
