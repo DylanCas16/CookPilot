@@ -19,7 +19,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.cookpilot.R
-import com.example.cookpilot.ui.pages.UserPage
 import com.example.cookpilot.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,8 +30,7 @@ fun HeaderApp(
 ) {
     val uiState by userViewModel.uiState.collectAsState()
     var showAuthMenu by remember { mutableStateOf(false) }
-    var showLogin by remember { mutableStateOf(false) }
-    var showRegister by remember { mutableStateOf(false) }
+    var currentView: String? by remember { mutableStateOf(null) }
 
 
     CenterAlignedTopAppBar (
@@ -73,26 +71,35 @@ fun HeaderApp(
     if (showAuthMenu) {
         AuthMenu(
             onDismiss = { showAuthMenu = false },
-            onLoginClick = { showLogin = true; showAuthMenu = false },
-            onRegisterClick = { showRegister = true; showAuthMenu = false }
+            onLoginClick = { currentView = "LOGIN"; showAuthMenu = false},
+            onRegisterClick = { currentView = "REGISTER"; showAuthMenu = false }
         )
     }
 
-    if (showLogin) {
-        Dialog(onDismissRequest = { showLogin = false }) {
-            UserLoginForm(onLoggingUser = {
+    if (currentView == "LOGIN") {
+        Dialog(onDismissRequest = { currentView = null }) {
+            UserLoginForm(
+                onLoggingUser = {
                 userViewModel.login(it.email, it.password)
-                showLogin = false
-            })
+                currentView = null
+            },
+                onRegisterClick = {
+                    currentView = "REGISTER"
+                }
+            )
         }
     }
 
-    if (showRegister) {
-        Dialog(onDismissRequest = { showRegister = false }) {
+    if (currentView == "REGISTER") {
+        Dialog(onDismissRequest = { currentView = null }) {
             UserRegistrationForm(onRegisterUser = {
                 userViewModel.register(it)
-                showRegister = false
-            })
+                currentView = null
+            },
+                onLoginClick = {
+                    currentView = "LOGIN"
+                }
+            )
         }
     }
 }

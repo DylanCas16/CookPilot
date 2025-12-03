@@ -47,12 +47,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.cookpilot.model.Recipe
+import androidx.core.net.toUri
 
 
 data class RecipeAction(
     val label: String,
     val onClick: () -> Unit
 )
+
 @Composable
 fun buildImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID): String? {
     if (fileId == null) return null

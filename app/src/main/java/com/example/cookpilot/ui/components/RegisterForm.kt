@@ -2,6 +2,7 @@ package com.example.cookpilot.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
@@ -11,6 +12,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,8 +24,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
 import java.time.Instant
@@ -46,6 +52,7 @@ fun Long.toDate(): String {
 @Composable
 fun UserRegistrationForm(
     onRegisterUser: (RegisterUser) -> Unit,
+    onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var user by remember { mutableStateOf("") }
@@ -57,6 +64,24 @@ fun UserRegistrationForm(
 
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
+
+    val loginText = buildAnnotatedString {
+        append("Already have an account? ")
+
+        pushStringAnnotation(
+            tag = "login",
+            annotation = "login_route"
+        )
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        ) {
+            append("Log in")
+        }
+        pop()
+    }
 
     FormBase(
         formTitle = "SIGN UP",
@@ -135,6 +160,20 @@ fun UserRegistrationForm(
             label = { Text("Confirm password") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        )
+
+        ClickableText(
+            text = loginText,
+            onClick = { offset ->
+                loginText.getStringAnnotations(
+                    tag = "login",
+                    start = offset,
+                    end = offset
+                ).firstOrNull()?.let {
+                    onLoginClick()
+                }
+            },
+            modifier = Modifier.padding(16.dp)
         )
     }
 

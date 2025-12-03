@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
@@ -51,12 +53,20 @@ class MainActivity : ComponentActivity() {
         AppwriteClient.init(this)
         enableEdgeToEdge()
         setContent {
-            CookPilotTheme {
-                CookPilotApp()
+            val fondoChefPainter = painterResource(id = R.drawable.background_image)
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = fondoChefPainter,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+                CookPilotTheme {
+                    CookPilotApp()
+                }
             }
         }
     }
-}
 
 @PreviewScreenSizes
 @Composable
@@ -66,41 +76,41 @@ fun CookPilotApp() {
     val historyViewModel: HistoryViewModel = viewModel()
     val uiState by userViewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        userViewModel.checkSession()
-    }
+        LaunchedEffect(Unit) {
+            userViewModel.checkSession()
+        }
 
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
-    val myItemColors = NavigationSuiteDefaults.itemColors(
-        navigationBarItemColors = NavigationBarItemDefaults.colors(
-            selectedIconColor = SecondaryColor,
-            selectedTextColor = SecondaryColor,
-            unselectedIconColor = Color.DarkGray,
-            unselectedTextColor = Color.DarkGray,
-            indicatorColor = SecondaryColor.copy(alpha = 0.2f)
-        )
-    )
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
-    ModalNavigationDrawer(
-        drawerContent = {
-            Sidebar(
-                onOptionSelected = {
-                    scope.launch { drawerState.close() }
-                },
-                userViewModel = userViewModel,
-                drawerState = drawerState
+        var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
+        val myItemColors = NavigationSuiteDefaults.itemColors(
+            navigationBarItemColors = NavigationBarItemDefaults.colors(
+                selectedIconColor = SecondaryColor,
+                selectedTextColor = SecondaryColor,
+                unselectedIconColor = Color.DarkGray,
+                unselectedTextColor = Color.DarkGray,
+                indicatorColor = SecondaryColor.copy(alpha = 0.2f)
             )
-        },
-        drawerState = drawerState,
-    ) {
-        NavigationSuiteScaffold(
-            containerColor = Color.LightGray.copy(alpha = 0.5f),
-            navigationSuiteItems = {
-                AppDestinations.entries.filter { it != AppDestinations.Profile }.forEach { destination ->
+        )
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scope = rememberCoroutineScope()
 
-                    val isSelected = destination == currentDestination
+        ModalNavigationDrawer(
+            drawerContent = {
+                Sidebar(
+                    onOptionSelected = {
+                        scope.launch { drawerState.close() }
+                    },
+                    userViewModel = userViewModel,
+                    drawerState = drawerState
+                )
+            },
+            drawerState = drawerState,
+        ) {
+            NavigationSuiteScaffold(
+                containerColor = Color.Transparent,
+                navigationSuiteItems = {
+                    AppDestinations.entries/*.filter { it != AppDestinations.Profile }*/.forEach { destination ->
+
+                        val isSelected = destination == currentDestination
 
                     item(
                         selected = isSelected,
@@ -130,7 +140,11 @@ fun CookPilotApp() {
                         onLogin = { email, password ->
                             userViewModel.login(email, password)
                         },
-                        onDismiss = { userViewModel.closeLoginDialog() }
+                        onDismiss = { userViewModel.closeLoginDialog() },
+                        onRegisterClick = {
+                            userViewModel.closeLoginDialog()
+                            userViewModel.openRegisterDialog()
+                        }
                     )
                 }
                 Box(
@@ -160,19 +174,20 @@ fun CookPilotApp() {
                         AppDestinations.Profile -> UserPage()
                     }
 
+                    }
                 }
             }
         }
     }
-}
 
-enum class AppDestinations(
-    val label: String,
-    val icon: Int,
-) {
-    History("History", R.drawable.ic_history_tab),
-    Create("Create", R.drawable.ic_create_tab),
-    Search("Search", R.drawable.ic_search_tab),
-    Profile("Profile", R.drawable.ic_user)
+    enum class AppDestinations(
+        val label: String,
+        val icon: Int,
+    ) {
+        History("History", R.drawable.ic_history_tab),
+        Create("Create", R.drawable.ic_create_tab),
+        Search("Search", R.drawable.ic_search_tab),
+        Profile("Profile", R.drawable.ic_user)
 
+    }
 }

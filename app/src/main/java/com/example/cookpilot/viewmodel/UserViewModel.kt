@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 
 data class UserUiState(
     val showLoginDialog: Boolean = false,
+    val showRegisterDialog: Boolean = false,
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
     val success: Boolean = false,
@@ -41,6 +42,14 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     fun closeLoginDialog() {
         _uiState.update { it.copy(showLoginDialog = false) }
+    }
+
+    fun openRegisterDialog() {
+        _uiState.update { it.copy(showRegisterDialog = true) }
+    }
+
+    fun closeRegisterDialog() {
+            _uiState.update { it.copy(showRegisterDialog = false) }
     }
 
     fun register(user: RegisterUser) {
