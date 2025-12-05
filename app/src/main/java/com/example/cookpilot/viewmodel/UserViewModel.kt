@@ -117,7 +117,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                         error = null
                     )
                 }
-            } catch (e: Exception) { }
+            } catch (_: Exception) { }
         }
     }
 }
