@@ -32,7 +32,6 @@ fun HeaderApp(
     var showAuthMenu by remember { mutableStateOf(false) }
     var currentView: String? by remember { mutableStateOf(null) }
 
-
     CenterAlignedTopAppBar (
         modifier = Modifier.height(100.dp),
         navigationIcon = {
@@ -93,8 +92,13 @@ fun HeaderApp(
     if (currentView == "REGISTER") {
         Dialog(onDismissRequest = { currentView = null }) {
             UserRegistrationForm(onRegisterUser = {
-                userViewModel.register(it)
-                currentView = null
+                try {
+                    userViewModel.register(it)
+                    userViewModel.login(it.email, it.password)
+                    currentView = null
+                } catch (e: Exception) {
+
+                }
             },
                 onLoginClick = {
                     currentView = "LOGIN"

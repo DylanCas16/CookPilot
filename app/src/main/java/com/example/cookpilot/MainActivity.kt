@@ -76,9 +76,9 @@ fun CookPilotApp() {
     val historyViewModel: HistoryViewModel = viewModel()
     val uiState by userViewModel.uiState.collectAsState()
 
-        LaunchedEffect(Unit) {
-            userViewModel.checkSession()
-        }
+    LaunchedEffect(Unit) {
+        userViewModel.checkSession()
+    }
 
         var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
         val myItemColors = NavigationSuiteDefaults.itemColors(
