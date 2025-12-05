@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.cookpilot.model.Recipe
-import androidx.core.net.toUri
 
 
 data class RecipeAction(
@@ -182,7 +181,7 @@ fun RecipeDetailDialog(
                         }
 
                         // === TITLE AND DESCRIPTION ===
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        Column(modifier = Modifier.padding(15.dp)) {
                             Text(
                                 text = recipe.title,
                                 style = MaterialTheme.typography.headlineMedium,
@@ -202,6 +201,17 @@ fun RecipeDetailDialog(
                                 Text("Cooking time:", fontWeight = FontWeight.SemiBold)
                                 Text("${recipe.cookingTime} minutes")
                             }
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // === CREATOR ===
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("CP Chef:", fontWeight = FontWeight.SemiBold)
+                                Text(recipe.creator)
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             // DIFFICULTY
                             Row(

@@ -10,7 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -18,14 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.components.RecipeForm
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun CreatePage(
@@ -36,16 +33,6 @@ fun CreatePage(
 
     val uiState by userViewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    val showSuccessMessage: () -> Unit = {
-        scope.launch {
-            snackbarHostState.showSnackbar(
-                message = "Recipe created successfully",
-                actionLabel = "OK",
-                duration = SnackbarDuration.Short
-            )
-        }
-    }
 
     if (!uiState.isLoggedIn) {
         Column(
@@ -73,6 +60,7 @@ fun CreatePage(
                     .padding(paddingValues)
             ) {
                 RecipeForm(
+                    snackbarHostState = snackbarHostState,
                     onSaveRecipe = { recipe, imageUri ->
                         recipeViewModel.createRecipeFromForm(
                             title = recipe.title,
@@ -86,7 +74,6 @@ fun CreatePage(
                         )
                     }
                 )
-                showSuccessMessage()
             }
         }
     }

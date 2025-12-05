@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
+import com.example.cookpilot.viewmodel.UserUiState
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
