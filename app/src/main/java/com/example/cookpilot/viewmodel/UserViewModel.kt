@@ -16,6 +16,7 @@ data class UserUiState(
     val showRegisterDialog: Boolean = false,
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
+    val userName: String? = null,
     val success: Boolean = false,
     val userId: String? = null,
     val error: String? = null
@@ -31,7 +32,14 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             val loggedIn = authRepository.hasActiveSession()
             if (loggedIn) {
                 val user = authRepository.getCurrentUser()
-                _uiState.update { it.copy(isLoggedIn = true, userId = user?.id) }
+                val userName = user?.id?.let { authRepository.getUsernameByUserId(it) }
+                _uiState.update {
+                    it.copy(
+                        isLoggedIn = true,
+                        userId = user?.id,
+                        userName = userName
+                    )
+                }
             }
         }
     }
@@ -72,13 +80,15 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
                 val session = authRepository.loginUser(email, password)
-                val user = authRepository.getCurrentUser()  // ← nuevo método
+                val user = authRepository.getCurrentUser()
+                val userName = user?.id?.let { authRepository.getUsernameByUserId(it) }
 
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isLoggedIn = true,
-                        userId = user?.id,  // ← guardar userId
+                        userId = user?.id,
+                        userName = userName,
                         success = true,
                         error = null,
                         showLoginDialog = false

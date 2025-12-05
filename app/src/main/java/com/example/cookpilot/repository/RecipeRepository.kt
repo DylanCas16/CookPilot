@@ -6,6 +6,7 @@ import android.net.Uri
 import com.example.cookpilot.AppwriteClient
 import com.example.cookpilot.model.Recipe
 import io.appwrite.ID
+import io.appwrite.Query
 import io.appwrite.models.InputFile
 import io.appwrite.services.Storage
 import kotlinx.coroutines.Dispatchers
@@ -79,11 +80,31 @@ class RecipeRepository(
             file.id
         }
 
+    suspend fun getRecipesByCreator(userId: String): List<Recipe> = withContext(Dispatchers.IO) {
+        try {
+            val result = AppwriteClient.databases.listDocuments(
+                databaseId = databaseId,
+                collectionId = collectionId,
+                queries = listOf(
+                    Query.equal("creator", userId),
+                    Query.orderDesc("\$createdAt")
+                )
+            )
+            result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
     suspend fun getAllRecipes(): List<Recipe> = withContext(Dispatchers.IO) {
-        val result = AppwriteClient.databases.listDocuments(
-            databaseId = databaseId,
-            collectionId = collectionId
-        )
-        result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
+        try {
+            val result = AppwriteClient.databases.listDocuments(
+                databaseId = databaseId,
+                collectionId = collectionId
+            )
+            result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 }

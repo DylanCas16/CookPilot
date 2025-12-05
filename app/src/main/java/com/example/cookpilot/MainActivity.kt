@@ -108,7 +108,7 @@ fun CookPilotApp() {
             NavigationSuiteScaffold(
                 containerColor = Color.Transparent,
                 navigationSuiteItems = {
-                    AppDestinations.entries/*.filter { it != AppDestinations.Profile }*/.forEach { destination ->
+                    AppDestinations.entries.forEach { destination ->
 
                         val isSelected = destination == currentDestination
 
@@ -171,7 +171,10 @@ fun CookPilotApp() {
                             historyViewModel = historyViewModel,
                             userViewModel = userViewModel,
                         )
-                        AppDestinations.Profile -> UserPage()
+                        AppDestinations.Profile -> UserPage(
+                            recipeViewModel = recipeViewModel,
+                            userViewModel = userViewModel
+                        )
                     }
 
                     }

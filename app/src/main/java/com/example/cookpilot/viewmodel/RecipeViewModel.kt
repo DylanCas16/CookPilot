@@ -17,6 +17,23 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     val recipes: StateFlow<List<Recipe>> = _recipes
 
+    private val _userRecipes = MutableStateFlow<List<Recipe>>(emptyList())
+    val userRecipes: StateFlow<List<Recipe>> = _userRecipes
+
+    fun loadAllRecipes() {
+        viewModelScope.launch {
+            val recipes = repository.getAllRecipes()
+            _recipes.value = recipes
+        }
+    }
+
+    fun loadUserRecipes(userId: String) {
+        viewModelScope.launch {
+            val userRecipes = repository.getRecipesByCreator(userId)
+            _userRecipes.value = userRecipes
+        }
+    }
+
     fun createRecipeFromForm(
         title: String,
         description: String,
@@ -25,26 +42,20 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         ingredients: List<String>,
         cookingTime: Int,
         creator: String,
-        fileId: Uri?
+        fileUri: Uri?
     ) {
         viewModelScope.launch {
-            repository.createRecipeFromForm(
-                title,
-                description,
-                steps,
-                difficulty,
-                ingredients,
-                cookingTime,
-                creator,
-                fileId
-            )
-            _recipes.value = repository.getAllRecipes()
-        }
-    }
+            try {
+                repository.createRecipeFromForm(
+                    title, description, steps, difficulty,
+                    ingredients, cookingTime, creator, fileUri
+                )
+                _recipes.value = repository.getAllRecipes()
+                loadUserRecipes(creator)
 
-    fun loadAllRecipes() {
-        viewModelScope.launch {
-            _recipes.value = repository.getAllRecipes()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

@@ -45,6 +45,7 @@ class HistoryRepository {
             }
         } catch (_: Exception) { }
     }
+
     suspend fun getUserHistory(userId: String): List<Recipe> = withContext(Dispatchers.IO) {
         try {
             val historyDocs = AppwriteClient.databases.listDocuments(
@@ -69,9 +70,16 @@ class HistoryRepository {
                 )
             )
 
-            recipesDocs.documents.map { Recipe.fromMap(it.id, it.data) }
-        } catch (_: Exception) { emptyList() }
+            val recipesMap = recipesDocs.documents
+                .map { Recipe.fromMap(it.id, it.data) }
+                .associateBy { it.id }
+
+            recipeIds.mapNotNull { recipeId ->
+                recipesMap[recipeId]
+            }
+
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
-
-
 }

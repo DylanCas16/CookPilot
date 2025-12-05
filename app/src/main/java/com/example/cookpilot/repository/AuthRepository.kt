@@ -3,6 +3,7 @@ package com.example.cookpilot.repository
 import com.example.cookpilot.AppwriteClient
 import com.example.cookpilot.ui.components.RegisterUser
 import io.appwrite.ID
+import io.appwrite.Query
 import io.appwrite.services.Account
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -28,6 +29,25 @@ class AuthRepository {
     suspend fun getCurrentUser() = withContext(Dispatchers.IO) {
         return@withContext try {
             account.get()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    suspend fun getUsernameByUserId(userId: String): String? = withContext(Dispatchers.IO) {
+        try {
+            val result = databases.listDocuments(
+                databaseId = databaseId,
+                collectionId = usersCollectionId,
+                queries = listOf(
+                    Query.equal("userId", userId),
+                    Query.limit(1)
+                )
+            )
+
+            if (result.documents.isNotEmpty()) {
+                result.documents[0].data["username"] as? String
+            } else null
         } catch (_: Exception) {
             null
         }

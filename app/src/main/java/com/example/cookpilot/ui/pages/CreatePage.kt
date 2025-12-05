@@ -81,8 +81,8 @@ fun CreatePage(
                             difficulty = recipe.difficulty,
                             ingredients = recipe.ingredients,
                             cookingTime = recipe.cookingTime,
-                            creator = recipe.creator,
-                            fileId = imageUri
+                            creator = uiState.userId ?: "anon",
+                            fileUri = imageUri
                         )
                     }
                 )
