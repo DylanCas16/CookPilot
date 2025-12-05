@@ -1,32 +1,61 @@
-// UserPage.kt
 package com.example.cookpilot.ui.pages
 
-import android.net.Uri
+import APPWRITE_BUCKET_ID
+import APPWRITE_PROJECT_ID
+import APPWRITE_PUBLIC_ENDPOINT
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.RecipeAction
 import com.example.cookpilot.ui.components.RecipeDetailDialog
 import com.example.cookpilot.ui.components.RecipeList
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
+
+@Composable
+fun buildProfileImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID): String? {
+    if (fileId == null) return null
+    val endpoint = APPWRITE_PUBLIC_ENDPOINT
+    val projectId = APPWRITE_PROJECT_ID
+    return "$endpoint/storage/buckets/$bucketId/files/$fileId/view?project=$projectId"
+}
 
 @Composable
 fun UserPage(
@@ -36,9 +65,9 @@ fun UserPage(
     // --- STATES ---
     val uiState by userViewModel.uiState.collectAsState()
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
-    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
 
+    // Cargar recetas del usuario
     LaunchedEffect(uiState.userId) {
         uiState.userId?.let { userId ->
             recipeViewModel.loadUserRecipes(userId)
@@ -58,7 +87,12 @@ fun UserPage(
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> profileImageUri = uri }
+        onResult = { uri ->
+            uri?.let {
+                println("🔵 Image selected: $uri")
+                userViewModel.uploadProfilePicture(it)
+            }
+        }
     )
 
     // --- INTERFACE ---
@@ -83,6 +117,7 @@ fun UserPage(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
+                    // PROFILE PICTURE
                     Box(
                         modifier = Modifier
                             .size(120.dp)
@@ -96,12 +131,31 @@ fun UserPage(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Profile picture",
-                            modifier = Modifier.size(60.dp),
-                            tint = Color.White
-                        )
+                        val profileImageUrl = buildProfileImageUrl(uiState.profilePictureId)
+
+                        if (profileImageUrl != null) {
+                            AsyncImage(
+                                model = profileImageUrl,
+                                contentDescription = "Profile picture",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Default profile picture",
+                                modifier = Modifier.size(60.dp),
+                                tint = Color.White
+                            )
+                        }
+
+                        // Loading indicator
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(40.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
 
                     Text(

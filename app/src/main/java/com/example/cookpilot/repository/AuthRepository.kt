@@ -96,4 +96,24 @@ class AuthRepository {
     suspend fun logout() = withContext(Dispatchers.IO) {
         account.deleteSession(sessionId = "current")
     }
+
+    suspend fun getUserData(userId: String): Map<String, Any?>? = withContext(Dispatchers.IO) {
+        try {
+            val result = databases.listDocuments(
+                databaseId = databaseId,
+                collectionId = usersCollectionId,
+                queries = listOf(
+                    Query.equal("userId", userId),
+                    Query.limit(1)
+                )
+            )
+
+            if (result.documents.isNotEmpty()) {
+                result.documents[0].data
+            } else null
+        } catch (_: Exception) {
+            null
+        }
+    }
+
 }
