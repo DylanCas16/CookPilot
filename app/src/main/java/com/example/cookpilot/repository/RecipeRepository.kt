@@ -105,7 +105,7 @@ class RecipeRepository(
                 if (oldFileId != null && newFileId != null) {
                     try {
                         storage.deleteFile(bucketId = bucketId, fileId = oldFileId)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                     }
                 }
                 newFileId

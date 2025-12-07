@@ -3,7 +3,7 @@ package com.example.cookpilot.ui.components
 import APPWRITE_BUCKET_ID
 import APPWRITE_PROJECT_ID
 import APPWRITE_PUBLIC_ENDPOINT
-import android.R
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
+import com.example.cookpilot.R
 import com.example.cookpilot.model.Recipe
 
 
@@ -178,7 +179,7 @@ fun RecipeDetailDialog(
                                     contentDescription = "Recipe image",
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop,
-                                    error = painterResource(R.drawable.ic_lock_power_off)
+                                    error = painterResource(R.drawable.ic_pizza_search)
                                 )
                             } else {
                                 Icon(
