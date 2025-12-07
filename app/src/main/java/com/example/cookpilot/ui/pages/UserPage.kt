@@ -21,10 +21,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.cookpilot.model.Recipe
+import com.example.cookpilot.ui.components.EditRecipeDialog
 import com.example.cookpilot.ui.components.RecipeAction
 import com.example.cookpilot.ui.components.RecipeDetailDialog
 import com.example.cookpilot.ui.components.RecipeList
@@ -62,12 +67,12 @@ fun UserPage(
     recipeViewModel: RecipeViewModel,
     userViewModel: UserViewModel
 ) {
-    // --- STATES ---
     val uiState by userViewModel.uiState.collectAsState()
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
+    var recipeToEdit by remember { mutableStateOf<Recipe?>(null) }
+    var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
 
-    // Cargar recetas del usuario
     LaunchedEffect(uiState.userId) {
         uiState.userId?.let { userId ->
             recipeViewModel.loadUserRecipes(userId)
@@ -77,10 +82,10 @@ fun UserPage(
     val userRecipeActions: (Recipe) -> List<RecipeAction> = { recipe ->
         listOf(
             RecipeAction("Edit") {
-                // TODO: Navegar a edición
+                recipeToEdit = recipe
             },
             RecipeAction("Delete") {
-                // TODO: Implementar eliminación
+                recipeToDelete = recipe
             }
         )
     }
@@ -105,7 +110,6 @@ fun UserPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                // 1. HEADER
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
@@ -117,7 +121,6 @@ fun UserPage(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    // PROFILE PICTURE
                     Box(
                         modifier = Modifier
                             .size(120.dp)
@@ -149,7 +152,6 @@ fun UserPage(
                             )
                         }
 
-                        // Loading indicator
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(40.dp),
@@ -178,7 +180,6 @@ fun UserPage(
             }
 
             item {
-                // 2. RECIPE LIST
                 if (userRecipes.isEmpty()) {
                     Column(
                         modifier = Modifier
@@ -213,12 +214,66 @@ fun UserPage(
         }
     }
 
-    // --- ACTION DIALOGUE ---
     selectedRecipe?.let { recipe ->
         RecipeDetailDialog(
             recipe = recipe,
             actions = userRecipeActions(recipe),
             onDismiss = { selectedRecipe = null }
+        )
+    }
+
+    recipeToEdit?.let { recipe ->
+        EditRecipeDialog(
+            recipe = recipe,
+            onDismiss = { recipeToEdit = null },
+            onSave = { title, description, steps, difficulty, ingredients, cookingTime, newImageUri ->
+                uiState.userId?.let { userId ->
+                    recipeViewModel.updateRecipe(
+                        recipeId = recipe.id ?: return@let,
+                        title = title,
+                        description = description,
+                        steps = steps,
+                        difficulty = difficulty,
+                        ingredients = ingredients,
+                        cookingTime = cookingTime,
+                        creator = userId,
+                        newImageUri = newImageUri
+                    )
+                }
+            }
+        )
+    }
+
+    recipeToDelete?.let { recipe ->
+        AlertDialog(
+            onDismissRequest = { recipeToDelete = null },
+            title = { Text("Delete Recipe") },
+            text = {
+                Text("Are you sure you want to delete \"${recipe.title}\"? This action cannot be undone.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        uiState.userId?.let { userId ->
+                            recipeViewModel.deleteRecipe(
+                                recipeId = recipe.id ?: return@let,
+                                creator = userId
+                            )
+                        }
+                        recipeToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { recipeToDelete = null }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }
