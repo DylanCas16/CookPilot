@@ -38,6 +38,7 @@ fun EditRecipeDialog(
         difficulty: Int,
         ingredients: List<String>,
         cookingTime: Int,
+        dietaryTags: List<String>,
         newImageUri: Uri?
     ) -> Unit
 ) {
@@ -47,6 +48,7 @@ fun EditRecipeDialog(
     var difficulty by remember { mutableIntStateOf(recipe.difficulty) }
     var cookingTimeText by remember { mutableStateOf(recipe.cookingTime.toString()) }
     val ingredients = remember { mutableStateListOf<String>().apply { addAll(recipe.ingredients) } }
+    val selectedDietaryTags = remember { mutableStateListOf<String>().apply { addAll(recipe.dietaryTags) } }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -216,6 +218,20 @@ fun EditRecipeDialog(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    DietaryTagSelector(
+                        selectedTags = selectedDietaryTags,
+                        onTagToggle = { tag ->
+                            if (selectedDietaryTags.contains(tag)) {
+                                selectedDietaryTags.remove(tag)
+                            } else {
+                                selectedDietaryTags.add(tag)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     // Difficulty
                     Text(
                         text = "Difficulty:",
@@ -263,6 +279,7 @@ fun EditRecipeDialog(
                                 difficulty,
                                 ingredients.filter { it.isNotBlank() },
                                 cookingTimeText.toIntOrNull() ?: 0,
+                                selectedDietaryTags.toList(),
                                 selectedImageUri
                             )
                             onDismiss()

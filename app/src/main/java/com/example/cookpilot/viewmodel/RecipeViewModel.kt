@@ -41,13 +41,14 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         ingredients: List<String>,
         cookingTime: Int,
         creator: String,
+        dietaryTags: List<String>,
         fileUri: Uri?
     ) {
         viewModelScope.launch {
             try {
                 repository.createRecipeFromForm(
                     title, description, steps, difficulty,
-                    ingredients, cookingTime, creator, fileUri
+                    ingredients, cookingTime, creator, dietaryTags, fileUri
                 )
 
                 _recipes.value = repository.getAllRecipes()
@@ -67,6 +68,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         ingredients: List<String>,
         cookingTime: Int,
         creator: String,
+        dietaryTags: List<String>,
         newImageUri: Uri?
     ) {
         viewModelScope.launch {
@@ -74,7 +76,7 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                 println("🔵 Updating recipe from ViewModel")
                 repository.updateRecipe(
                     recipeId, title, description, steps,
-                    difficulty, ingredients, cookingTime, newImageUri
+                    difficulty, ingredients, cookingTime, dietaryTags, newImageUri
                 )
 
                 // Recargar listas

@@ -226,7 +226,7 @@ fun UserPage(
         EditRecipeDialog(
             recipe = recipe,
             onDismiss = { recipeToEdit = null },
-            onSave = { title, description, steps, difficulty, ingredients, cookingTime, newImageUri ->
+            onSave = { title, description, steps, difficulty, ingredients, cookingTime, dietaryTags, newImageUri ->
                 uiState.userId?.let { userId ->
                     recipeViewModel.updateRecipe(
                         recipeId = recipe.id ?: return@let,
@@ -237,6 +237,7 @@ fun UserPage(
                         ingredients = ingredients,
                         cookingTime = cookingTime,
                         creator = userId,
+                        dietaryTags = dietaryTags,
                         newImageUri = newImageUri
                     )
                 }

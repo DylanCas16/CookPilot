@@ -66,6 +66,7 @@ fun RecipeForm(
     var showRubricDialog by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var cookingTimeText by remember { mutableStateOf("") }
+    val selectedDietaryTags = remember { mutableStateListOf<String>() }
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
@@ -91,9 +92,9 @@ fun RecipeForm(
         difficulty = 1
         cookingTimeText = ""
         selectedImageUri = null
-
         ingredients.clear()
         ingredients.add("")
+        selectedDietaryTags.clear()
     }
 
     FormBase(
@@ -108,7 +109,8 @@ fun RecipeForm(
                 ingredients = ingredients.filter { it.isNotBlank() },
                 cookingTime = cookingTimeText.toIntOrNull() ?: 0,
                 creator = "anon",
-                fileId = null
+                fileId = null,
+                dietaryTags = selectedDietaryTags.toList()
             )
             onSaveRecipe(data, selectedImageUri)
             showSuccessMessage()
@@ -121,7 +123,7 @@ fun RecipeForm(
         Text(
             text = "Recipe photo:",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
         )
 
         Box(
@@ -256,6 +258,21 @@ fun RecipeForm(
                 .fillMaxWidth()
                 .height(150.dp)
                 .padding(vertical = 8.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ================== DIETARY TAGS ==================
+        DietaryTagSelector(
+            selectedTags = selectedDietaryTags,
+            onTagToggle = { tag ->
+                if (selectedDietaryTags.contains(tag)) {
+                    selectedDietaryTags.remove(tag)
+                } else {
+                    selectedDietaryTags.add(tag)
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))

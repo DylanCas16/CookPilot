@@ -1,3 +1,4 @@
+// Recipe.kt - ACTUALIZADO
 package com.example.cookpilot.model
 
 data class Recipe(
@@ -9,7 +10,8 @@ data class Recipe(
     val steps: String,
     val difficulty: Int,
     val creator: String,
-    val fileId: String? = null
+    val fileId: String? = null,
+    val dietaryTags: List<String> = emptyList()
 ) {
     companion object {
         fun fromMap(id: String, data: Map<String, Any?>): Recipe {
@@ -22,7 +24,8 @@ data class Recipe(
                 steps = data["steps"] as? String ?: "",
                 ingredients = (data["ingredients"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
                 creator = data["creator"] as? String ?: "",
-                fileId = data["fileId"] as? String
+                fileId = data["fileId"] as? String,
+                dietaryTags = (data["dietaryTags"] as? List<*>)?.filterIsInstance<String>() ?: emptyList()
             )
         }
     }

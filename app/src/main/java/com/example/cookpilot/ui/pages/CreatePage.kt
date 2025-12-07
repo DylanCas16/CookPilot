@@ -70,6 +70,7 @@ fun CreatePage(
                             ingredients = recipe.ingredients,
                             cookingTime = recipe.cookingTime,
                             creator = uiState.userId ?: "anon",
+                            dietaryTags = recipe.dietaryTags,
                             fileUri = imageUri
                         )
                     }

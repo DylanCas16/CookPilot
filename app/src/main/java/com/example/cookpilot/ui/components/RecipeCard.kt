@@ -62,7 +62,6 @@ fun buildImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID): Strin
     return "$endpoint/storage/buckets/$bucketId/files/$fileId/view?project=$projectId"
 }
 
-
 @Composable
 fun RecipeCard(
     recipe: Recipe,
@@ -89,7 +88,7 @@ fun RecipeCard(
                         .fillMaxSize()
                         .align(Alignment.Center),
                     contentScale = ContentScale.Crop,
-                    error = painterResource(R.drawable.ic_lock_power_off)
+                    error = painterResource(android.R.drawable.ic_menu_report_image)
                 )
             } else {
                 Box(
@@ -105,6 +104,16 @@ fun RecipeCard(
                         tint = Color.Gray
                     )
                 }
+            }
+
+            if (recipe.dietaryTags.isNotEmpty()) {
+                DietaryTagDisplay(
+                    tags = recipe.dietaryTags,
+                    maxVisible = 2,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                )
             }
 
             // --- TITLE ---
@@ -124,6 +133,7 @@ fun RecipeCard(
                     overflow = TextOverflow.Ellipsis,
                     color = Color.White
                 )
+
                 Text(
                     text = "Difficulty: ${recipe.difficulty}/5 • ${recipe.cookingTime} min",
                     style = MaterialTheme.typography.bodySmall,
@@ -238,6 +248,23 @@ fun RecipeDetailDialog(
                             }
 
                             Divider(modifier = Modifier.padding(vertical = 16.dp))
+                        }
+                    }
+                    if (recipe.dietaryTags.isNotEmpty()) {
+                        item {
+                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+
+                            Text(
+                                text = "Dietary Information:",
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+
+                            DietaryTagDisplay(
+                                tags = recipe.dietaryTags,
+                                maxVisible = 10,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
                         }
                     }
 

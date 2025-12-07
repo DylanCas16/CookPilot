@@ -29,6 +29,7 @@ class RecipeRepository(
         ingredients: List<String>,
         cookingTime: Int,
         creator: String,
+        dietaryTags: List<String>,
         fileUri: Uri?
     ): Recipe = withContext(Dispatchers.IO) {
         val fileId = uploadImageAndGetFileId(fileUri)
@@ -41,6 +42,7 @@ class RecipeRepository(
             "ingredients" to ingredients,
             "cooking_time" to cookingTime,
             "creator" to creator,
+            "dietaryTags" to dietaryTags,
             "fileId" to fileId
         )
 
@@ -88,35 +90,27 @@ class RecipeRepository(
         difficulty: Int,
         ingredients: List<String>,
         cookingTime: Int,
-        newImageUri: Uri?  // Si es null, mantiene la imagen actual
+        dietaryTags: List<String>,
+        newImageUri: Uri?
     ): Recipe = withContext(Dispatchers.IO) {
         try {
-            println("🔵 Updating recipe: $recipeId")
-
-            // Obtener la receta actual para saber si tiene imagen
             val currentDoc = AppwriteClient.databases.getDocument(
                 databaseId = databaseId,
                 collectionId = collectionId,
                 documentId = recipeId
             )
-
             val oldFileId = currentDoc.data["fileId"] as? String
-
-            // Si hay nueva imagen, subirla y eliminar la anterior
             val fileId = if (newImageUri != null) {
                 val newFileId = uploadImageAndGetFileId(newImageUri)
-                // Eliminar imagen anterior si existe
                 if (oldFileId != null && newFileId != null) {
                     try {
                         storage.deleteFile(bucketId = bucketId, fileId = oldFileId)
-                        println("✅ Old image deleted: $oldFileId")
                     } catch (e: Exception) {
-                        println("⚠️ Could not delete old image: ${e.message}")
                     }
                 }
                 newFileId
             } else {
-                oldFileId  // Mantener la imagen actual
+                oldFileId
             }
 
             val data = mapOf(
@@ -126,6 +120,7 @@ class RecipeRepository(
                 "difficulty" to difficulty,
                 "ingredients" to ingredients,
                 "cooking_time" to cookingTime,
+                "dietaryTags" to dietaryTags,
                 "fileId" to fileId
             )
 
@@ -136,20 +131,14 @@ class RecipeRepository(
                 data = data
             )
 
-            println("✅ Recipe updated successfully")
             Recipe.fromMap(doc.id, doc.data)
         } catch (e: Exception) {
-            println("❌ Error updating recipe: ${e.message}")
             throw e
         }
     }
 
-    // NUEVO: Eliminar receta
     suspend fun deleteRecipe(recipeId: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            println("🔵 Deleting recipe: $recipeId")
-
-            // Obtener la receta para eliminar su imagen del storage
             val doc = AppwriteClient.databases.getDocument(
                 databaseId = databaseId,
                 collectionId = collectionId,
@@ -158,27 +147,20 @@ class RecipeRepository(
 
             val fileId = doc.data["fileId"] as? String
 
-            // Eliminar imagen del storage si existe
             if (fileId != null) {
                 try {
                     storage.deleteFile(bucketId = bucketId, fileId = fileId)
-                    println("✅ Recipe image deleted from storage")
-                } catch (e: Exception) {
-                    println("⚠️ Could not delete image: ${e.message}")
-                }
+                } catch (e: Exception) { }
             }
 
-            // Eliminar documento de la base de datos
             AppwriteClient.databases.deleteDocument(
                 databaseId = databaseId,
                 collectionId = collectionId,
                 documentId = recipeId
             )
 
-            println("✅ Recipe deleted successfully")
             true
         } catch (e: Exception) {
-            println("❌ Error deleting recipe: ${e.message}")
             false
         }
     }
