@@ -182,7 +182,7 @@ fun CookPilotApp(onRestartApp: () -> Unit) {
                             recipeViewModel = recipeViewModel,
                             userViewModel = userViewModel,
                             onGoToAuthMenu = {
-                                showAuthMenu = true;
+                                showAuthMenu = true
                             }
                         )
                         AppDestinations.Search -> SearchPage(

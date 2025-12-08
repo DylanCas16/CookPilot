@@ -4,6 +4,8 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cookpilot.data.PreferencesManager
+import com.example.cookpilot.notifications.NotificationScheduler
 import com.example.cookpilot.repository.AuthRepository
 import com.example.cookpilot.repository.UserRepository
 import com.example.cookpilot.ui.components.RegisterUser
@@ -31,6 +33,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val userRepository = UserRepository(application)
     private val _uiState = MutableStateFlow(UserUiState())
     val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
+    private val preferencesManager = PreferencesManager(application)
+    private val notificationScheduler = NotificationScheduler(application)
 
     fun checkSession() {
         viewModelScope.launch {
@@ -170,6 +174,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 authRepository.logout()
+                notificationScheduler.cancelAllNotifications()
+                preferencesManager.clearPreferences()
                 _uiState.value = UserUiState(
                     isLoggedIn = false,
                     success = false,
