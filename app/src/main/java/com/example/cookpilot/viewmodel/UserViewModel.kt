@@ -147,7 +147,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun closeRegisterDialog() {
-            _uiState.update { it.copy(showRegisterDialog = false) }
+        _uiState.update { it.copy(showRegisterDialog = false) }
     }
 
     fun register(user: RegisterUser) {
@@ -156,6 +156,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 authRepository.registerUser(user)
                 _uiState.value = UserUiState(success = true)
+                login(user.email, user.password)
             } catch (e: Exception) {
                 _uiState.value = UserUiState(
                     success = false,

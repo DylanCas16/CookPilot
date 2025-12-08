@@ -28,7 +28,7 @@ import com.example.cookpilot.viewmodel.UserViewModel
 fun CreatePage(
     recipeViewModel: RecipeViewModel,
     userViewModel: UserViewModel,
-    onGoToLogin: () -> Unit
+    onGoToAuthMenu: () -> Unit
 ) {
 
     val uiState by userViewModel.uiState.collectAsState()
@@ -44,7 +44,7 @@ fun CreatePage(
         ) {
             Text("You must be logged in to create a recipe")
             Spacer(Modifier.height(16.dp))
-            Button(onClick = onGoToLogin) {
+            Button(onClick = onGoToAuthMenu) {
                 Text("Go to log in")
             }
         }

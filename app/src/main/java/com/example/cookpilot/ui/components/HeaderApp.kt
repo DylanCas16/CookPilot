@@ -17,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.example.cookpilot.R
 import com.example.cookpilot.viewmodel.UserViewModel
 
@@ -30,7 +29,6 @@ fun HeaderApp(
 ) {
     val uiState by userViewModel.uiState.collectAsState()
     var showAuthMenu by remember { mutableStateOf(false) }
-    var currentView: String? by remember { mutableStateOf(null) }
 
     CenterAlignedTopAppBar (
         modifier = Modifier.height(100.dp),
@@ -70,40 +68,7 @@ fun HeaderApp(
     if (showAuthMenu) {
         AuthMenu(
             onDismiss = { showAuthMenu = false },
-            onLoginClick = { currentView = "LOGIN"; showAuthMenu = false},
-            onRegisterClick = { currentView = "REGISTER"; showAuthMenu = false }
+            userViewModel = userViewModel
         )
-    }
-
-    if (currentView == "LOGIN") {
-        Dialog(onDismissRequest = { currentView = null }) {
-            UserLoginForm(
-                onLoggingUser = {
-                userViewModel.login(it.email, it.password)
-                currentView = null
-            },
-                onRegisterClick = {
-                    currentView = "REGISTER"
-                }
-            )
-        }
-    }
-
-    if (currentView == "REGISTER") {
-        Dialog(onDismissRequest = { currentView = null }) {
-            UserRegistrationForm(onRegisterUser = {
-                try {
-                    userViewModel.register(it)
-                    userViewModel.login(it.email, it.password)
-                    currentView = null
-                } catch (e: Exception) {
-
-                }
-            },
-                onLoginClick = {
-                    currentView = "LOGIN"
-                }
-            )
-        }
     }
 }
