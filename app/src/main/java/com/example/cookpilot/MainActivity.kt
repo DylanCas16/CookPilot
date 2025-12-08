@@ -1,5 +1,6 @@
 package com.example.cookpilot
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -62,15 +63,25 @@ class MainActivity : ComponentActivity() {
                     contentScale = ContentScale.Crop,
                 )
                 CookPilotTheme {
-                    CookPilotApp()
+                    CookPilotApp(
+                        onRestartApp = { restartApp() }
+                    )
                 }
             }
+        }
+
+        fun restartApp() {
+            println("🔄 Restarting app...")
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(intent)
+            finish()
         }
     }
 
 @PreviewScreenSizes
 @Composable
-fun CookPilotApp() {
+fun CookPilotApp(onRestartApp: () -> Unit) {
     val userViewModel: UserViewModel = viewModel()
     val recipeViewModel: RecipeViewModel = viewModel()
     val historyViewModel: HistoryViewModel = viewModel()

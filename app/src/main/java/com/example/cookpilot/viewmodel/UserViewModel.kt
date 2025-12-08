@@ -165,18 +165,24 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun logout() {
+    fun logout(onLogoutComplete: () -> Unit) {
         viewModelScope.launch {
             try {
                 authRepository.logout()
-                _uiState.update {
-                    it.copy(
-                        isLoggedIn = false,
-                        success = true,
-                        error = null
+                _uiState.value = UserUiState(
+                    isLoggedIn = false,
+                    success = false,
+                    error = null,
+                    userId = null,
+                    userName = null,
+                    profilePictureId = null
                     )
+                onLogoutComplete()
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(error = "Failed to logout: ${e.message}")
                 }
-            } catch (_: Exception) { }
+            }
         }
     }
 }
