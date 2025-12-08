@@ -72,17 +72,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-        fun restartApp() {
-            println("🔄 Restarting app...")
-            val intent = Intent(this, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            startActivity(intent)
+    private fun restartApp() {
+        println("🔄 Restarting app...")
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
             finish()
-        }
+    }
 
-@PreviewScreenSizes
 @Composable
-fun CookPilotApp(onRestartApp: () -> Unit) {
+fun CookPilotApp(onRestartApp: () -> Unit = {}) {
     val userViewModel: UserViewModel = viewModel()
     val recipeViewModel: RecipeViewModel = viewModel()
     val historyViewModel: HistoryViewModel = viewModel()
@@ -193,11 +192,6 @@ fun CookPilotApp(onRestartApp: () -> Unit) {
                         AppDestinations.Profile -> UserPage(
                             recipeViewModel = recipeViewModel,
                             userViewModel = userViewModel,
-                            onLogout = {
-                                userViewModel.logout(onLogoutComplete = {
-                                    onRestartApp()
-                                })
-                            }
                         )
                     }
                     if (showAuthMenu) {
