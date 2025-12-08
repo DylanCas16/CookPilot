@@ -44,7 +44,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                             isLoggedIn = true,
                             userId = userId,
                             userName = userData?.get("username") as? String,
-                            profilePictureId = userData?.get("profilePictureId") as? String  // ← CARGAR
+                            profilePictureId = userData?.get("profilePictureId") as? String
                         )
                     }
                 }
@@ -97,9 +97,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                println("🔵 Uploading profile picture...")
 
-                // 1. Subir imagen a Storage
                 val fileId = userRepository.uploadProfilePicture(imageUri)
                 if (fileId == null) {
                     _uiState.update {
@@ -108,13 +106,11 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // 2. Eliminar imagen anterior si existe
                 val oldFileId = _uiState.value.profilePictureId
                 if (oldFileId != null) {
                     userRepository.deleteProfilePicture(oldFileId)
                 }
 
-                // 3. Actualizar documento del usuario
                 val success = userRepository.updateProfilePicture(userId, fileId)
 
                 if (success) {
@@ -125,14 +121,12 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                             error = null
                         )
                     }
-                    println("✅ Profile picture updated successfully")
                 } else {
                     _uiState.update {
                         it.copy(isLoading = false, error = "Failed to update profile")
                     }
                 }
             } catch (e: Exception) {
-                println("❌ Error: ${e.message}")
                 _uiState.update {
                     it.copy(isLoading = false, error = e.message)
                 }
