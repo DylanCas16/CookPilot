@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 fun Sidebar(
     onOptionSelected: (String) -> Unit,
     userViewModel: UserViewModel,
-    drawerState: DrawerState,
     onLogout: () -> Unit
 ) {
     val uiState by userViewModel.uiState.collectAsState()
@@ -73,17 +72,14 @@ fun Sidebar(
         }
     }
 
-    // Settings Dialog
     if (showSettingsDialog) {
         SettingsDialog(
             currentPreferences = mealPreferences,
             onDismiss = { showSettingsDialog = false },
             onSave = { newPreferences ->
-                // Guardar preferencias
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                     preferencesManager.saveMealPreferences(newPreferences)
                 }
-                // Programar/cancelar notificaciones
                 notificationScheduler.scheduleMealNotifications(newPreferences)
             }
         )

@@ -37,15 +37,10 @@ fun SettingsDialog(
     var showLunchPicker by remember { mutableStateOf(false) }
     var showDinnerPicker by remember { mutableStateOf(false) }
 
-    // Permission launcher para Android 13+
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         notificationsEnabled = isGranted
-        if (!isGranted) {
-            // Mostrar mensaje de que se necesita el permiso
-            println("⚠️ Notification permission denied")
-        }
     }
 
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -64,7 +59,6 @@ fun SettingsDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Switch para activar/desactivar notificaciones
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -79,27 +73,21 @@ fun SettingsDialog(
                         checked = notificationsEnabled,
                         onCheckedChange = { enabled ->
                             if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                // Verificar si ya tiene permiso
                                 val hasPermission = ContextCompat.checkSelfPermission(
                                     context,
                                     Manifest.permission.POST_NOTIFICATIONS
                                 ) == PackageManager.PERMISSION_GRANTED
 
-                                if (hasPermission) {
-                                    notificationsEnabled = true
-                                } else {
-                                    // Pedir permiso
+                                if (hasPermission) notificationsEnabled = true
+                                else
                                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                }
-                            } else {
-                                notificationsEnabled = enabled
-                            }
+                            } else notificationsEnabled = enabled
                         }
                     )
                 }
 
                 if (notificationsEnabled) {
-                    Divider()
+                    HorizontalDivider()
 
                     // Breakfast
                     MealTimeRow(

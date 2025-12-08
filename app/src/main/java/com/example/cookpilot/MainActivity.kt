@@ -32,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.ui.components.AuthMenu
@@ -73,7 +72,6 @@ class MainActivity : ComponentActivity() {
         }
     }
     private fun restartApp() {
-        println("🔄 Restarting app...")
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         startActivity(intent)
@@ -112,7 +110,6 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                         scope.launch { drawerState.close() }
                     },
                     userViewModel = userViewModel,
-                    drawerState = drawerState,
                     onLogout = {
                         scope.launch { drawerState.close() }
                         userViewModel.logout(onLogoutComplete = {
