@@ -31,9 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.ui.components.AuthMenu
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LoginDialog
@@ -55,6 +57,10 @@ class MainActivity : ComponentActivity() {
         AppwriteClient.init(this)
         enableEdgeToEdge()
         setContent {
+            val context = LocalContext.current
+            val preferencesManager = remember { PreferencesManager(context) }
+            val isDarkMode by preferencesManager.isDarkModeFlow.collectAsState(initial = false)
+
             val fondoChefPainter = painterResource(id = R.drawable.background_image)
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(
@@ -63,7 +69,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
-                CookPilotTheme {
+                CookPilotTheme(
+                    darkTheme = isDarkMode
+                ) {
                     CookPilotApp(
                         onRestartApp = { restartApp() }
                     )

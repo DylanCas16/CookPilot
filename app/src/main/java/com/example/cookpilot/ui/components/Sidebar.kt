@@ -1,9 +1,14 @@
 package com.example.cookpilot.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -11,7 +16,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -31,8 +38,9 @@ fun Sidebar(
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
     val mealPreferences by preferencesManager.mealPreferencesFlow.collectAsState(initial = MealPreferences())
+    val isDarkMode by preferencesManager.isDarkModeFlow.collectAsState(initial = false)  // ← NUEVO
     val notificationScheduler = remember { NotificationScheduler(context) }
-
+    val scope = rememberCoroutineScope()  // ← NUEVO
     var showSettingsDialog by remember { mutableStateOf(false) }
 
     ModalDrawerSheet {
@@ -41,6 +49,41 @@ fun Sidebar(
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(16.dp)
         )
+
+        NavigationDrawerItem(
+            label = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(if (isDarkMode) "Dark Mode" else "Light Mode")
+                    Switch(
+                        checked = isDarkMode,
+                        onCheckedChange = { enabled ->
+                            scope.launch {
+                                preferencesManager.setDarkMode(enabled)
+                            }
+                        }
+                    )
+                }
+            },
+            selected = false,
+            onClick = {
+                scope.launch {
+                    preferencesManager.setDarkMode(!isDarkMode)
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Filled.DarkMode else Icons.Filled.LightMode,
+                    contentDescription = "Theme toggle"
+                )
+            },
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         NavigationDrawerItem(
             label = { Text("Settings") },
@@ -62,6 +105,8 @@ fun Sidebar(
         )
 
         if (uiState.isLoggedIn) {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
             NavigationDrawerItem(
                 label = { Text("Logout") },
                 selected = false,
@@ -77,7 +122,7 @@ fun Sidebar(
             currentPreferences = mealPreferences,
             onDismiss = { showSettingsDialog = false },
             onSave = { newPreferences ->
-                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                scope.launch {
                     preferencesManager.saveMealPreferences(newPreferences)
                 }
                 notificationScheduler.scheduleMealNotifications(newPreferences)

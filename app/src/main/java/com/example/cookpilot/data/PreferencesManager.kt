@@ -21,6 +21,11 @@ class PreferencesManager(private val context: Context) {
         private val DINNER_HOUR = intPreferencesKey("dinner_hour")
         private val DINNER_MINUTE = intPreferencesKey("dinner_minute")
         private val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        private val DARK_MODE_ENABLED = booleanPreferencesKey("dark_mode_enabled")
+    }
+
+    val isDarkModeFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[DARK_MODE_ENABLED] ?: false
     }
 
     val mealPreferencesFlow: Flow<MealPreferences> = context.dataStore.data.map { preferences ->
@@ -50,6 +55,12 @@ class PreferencesManager(private val context: Context) {
             preferences[DINNER_HOUR] = mealPreferences.dinnerTime.hour
             preferences[DINNER_MINUTE] = mealPreferences.dinnerTime.minute
             preferences[NOTIFICATIONS_ENABLED] = mealPreferences.notificationsEnabled
+        }
+    }
+
+    suspend fun setDarkMode(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[DARK_MODE_ENABLED] = enabled
         }
     }
 
