@@ -13,7 +13,7 @@ fun LoginDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = { }, // vacío, el botón ya está en UserLoginForm
+        confirmButton = { },
         text = {
             UserLoginForm(
                 onLoggingUser = { logUser ->

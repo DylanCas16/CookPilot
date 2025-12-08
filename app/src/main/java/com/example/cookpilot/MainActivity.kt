@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -33,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cookpilot.ui.components.AuthMenu
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LoginDialog
 import com.example.cookpilot.ui.components.Sidebar
@@ -75,6 +77,7 @@ fun CookPilotApp() {
     val recipeViewModel: RecipeViewModel = viewModel()
     val historyViewModel: HistoryViewModel = viewModel()
     val uiState by userViewModel.uiState.collectAsState()
+    var showAuthMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         userViewModel.checkSession()
@@ -162,8 +165,8 @@ fun CookPilotApp() {
                         AppDestinations.Create -> CreatePage(
                             recipeViewModel = recipeViewModel,
                             userViewModel = userViewModel,
-                            onGoToLogin = {
-                                userViewModel.openLoginDialog()
+                            onGoToAuthMenu = {
+                                showAuthMenu = true;
                             }
                         )
                         AppDestinations.Search -> SearchPage(
@@ -176,7 +179,12 @@ fun CookPilotApp() {
                             userViewModel = userViewModel
                         )
                     }
-
+                    if (showAuthMenu) {
+                        AuthMenu(
+                            onDismiss = { showAuthMenu = false },
+                            userViewModel = userViewModel
+                        )
+                    }
                     }
                 }
             }
