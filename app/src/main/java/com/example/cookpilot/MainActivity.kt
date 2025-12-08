@@ -1,5 +1,6 @@
 package com.example.cookpilot
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -30,10 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.ui.components.AuthMenu
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LoginDialog
@@ -55,6 +57,10 @@ class MainActivity : ComponentActivity() {
         AppwriteClient.init(this)
         enableEdgeToEdge()
         setContent {
+            val context = LocalContext.current
+            val preferencesManager = remember { PreferencesManager(context) }
+            val isDarkMode by preferencesManager.isDarkModeFlow.collectAsState(initial = false)
+
             val fondoChefPainter = painterResource(id = R.drawable.background_image)
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(
@@ -63,16 +69,25 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
-                CookPilotTheme {
-                    CookPilotApp()
+                CookPilotTheme(
+                    darkTheme = isDarkMode
+                ) {
+                    CookPilotApp(
+                        onRestartApp = { restartApp() }
+                    )
                 }
             }
         }
     }
+    private fun restartApp() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(intent)
+            finish()
+    }
 
-@PreviewScreenSizes
 @Composable
-fun CookPilotApp() {
+fun CookPilotApp(onRestartApp: () -> Unit = {}) {
     val userViewModel: UserViewModel = viewModel()
     val recipeViewModel: RecipeViewModel = viewModel()
     val historyViewModel: HistoryViewModel = viewModel()
@@ -103,7 +118,12 @@ fun CookPilotApp() {
                         scope.launch { drawerState.close() }
                     },
                     userViewModel = userViewModel,
-                    drawerState = drawerState
+                    onLogout = {
+                        scope.launch { drawerState.close() }
+                        userViewModel.logout(onLogoutComplete = {
+                            onRestartApp()
+                        })
+                    }
                 )
             },
             drawerState = drawerState,
@@ -166,7 +186,7 @@ fun CookPilotApp() {
                             recipeViewModel = recipeViewModel,
                             userViewModel = userViewModel,
                             onGoToAuthMenu = {
-                                showAuthMenu = true;
+                                showAuthMenu = true
                             }
                         )
                         AppDestinations.Search -> SearchPage(
@@ -176,7 +196,7 @@ fun CookPilotApp() {
                         )
                         AppDestinations.Profile -> UserPage(
                             recipeViewModel = recipeViewModel,
-                            userViewModel = userViewModel
+                            userViewModel = userViewModel,
                         )
                     }
                     if (showAuthMenu) {

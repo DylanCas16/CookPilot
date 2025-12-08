@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.model.Recipe
@@ -202,11 +203,74 @@ fun RecipeForm(
         )
 
         // ================== INGREDIENTS ==================
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Ingredients:",
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            var showInfoDialog by remember { mutableStateOf(false) }
+
+            IconButton(
+                onClick = { showInfoDialog = true },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Ingredients help",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            if (showInfoDialog) {
+                AlertDialog(
+                    onDismissRequest = { showInfoDialog = false },
+                    icon = { Icon(Icons.Default.Info, contentDescription = null) },
+                    title = { Text("Ingredient Guidelines") },
+                    text = {
+                        Column {
+                            Text("Always use singular form for consistency. Measurements must be described in steps dialog.")
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "✅ Correct:",
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF4CAF50)
+                            )
+                            Text("• tomato\n• egg\n• rice\n• garlic")
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "❌ Incorrect:",
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFF44336)
+                            )
+                            Text("• tomatoes\n• eggs\n• cup of rice\n• garlic clove")
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showInfoDialog = false }) {
+                            Text("Understood")
+                        }
+                    }
+                )
+            }
+        }
+
         Text(
-            text = "Ingredients (use singular form):",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            text = "Use singular form (e.g., \"tomato\" not \"tomatoes\")",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
+
+        val exampleIngredients = listOf("tomato", "onion", "egg", "garlic", "chicken")
 
         ingredients.forEachIndexed { index, ingredient ->
             Row(
@@ -222,6 +286,12 @@ fun RecipeForm(
                         }
                     },
                     label = { Text("Ingredient ${index + 1}") },
+                    placeholder = {
+                        Text(
+                            text = "e.g., ${exampleIngredients[index % exampleIngredients.size]}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    },
                     modifier = Modifier.weight(1f)
                 )
 

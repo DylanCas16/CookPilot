@@ -4,6 +4,8 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cookpilot.data.PreferencesManager
+import com.example.cookpilot.notifications.NotificationScheduler
 import com.example.cookpilot.repository.AuthRepository
 import com.example.cookpilot.repository.UserRepository
 import com.example.cookpilot.ui.components.RegisterUser
@@ -31,6 +33,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val userRepository = UserRepository(application)
     private val _uiState = MutableStateFlow(UserUiState())
     val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
+    private val preferencesManager = PreferencesManager(application)
+    private val notificationScheduler = NotificationScheduler(application)
 
     fun checkSession() {
         viewModelScope.launch {
@@ -44,7 +48,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                             isLoggedIn = true,
                             userId = userId,
                             userName = userData?.get("username") as? String,
-                            profilePictureId = userData?.get("profilePictureId") as? String  // ← CARGAR
+                            profilePictureId = userData?.get("profilePictureId") as? String
                         )
                     }
                 }
@@ -97,9 +101,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                println("🔵 Uploading profile picture...")
 
-                // 1. Subir imagen a Storage
                 val fileId = userRepository.uploadProfilePicture(imageUri)
                 if (fileId == null) {
                     _uiState.update {
@@ -108,13 +110,11 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // 2. Eliminar imagen anterior si existe
                 val oldFileId = _uiState.value.profilePictureId
                 if (oldFileId != null) {
                     userRepository.deleteProfilePicture(oldFileId)
                 }
 
-                // 3. Actualizar documento del usuario
                 val success = userRepository.updateProfilePicture(userId, fileId)
 
                 if (success) {
@@ -125,14 +125,12 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                             error = null
                         )
                     }
-                    println("✅ Profile picture updated successfully")
                 } else {
                     _uiState.update {
                         it.copy(isLoading = false, error = "Failed to update profile")
                     }
                 }
             } catch (e: Exception) {
-                println("❌ Error: ${e.message}")
                 _uiState.update {
                     it.copy(isLoading = false, error = e.message)
                 }
@@ -172,18 +170,26 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun logout() {
+    fun logout(onLogoutComplete: () -> Unit) {
         viewModelScope.launch {
             try {
                 authRepository.logout()
-                _uiState.update {
-                    it.copy(
-                        isLoggedIn = false,
-                        success = true,
-                        error = null
+                notificationScheduler.cancelAllNotifications()
+                preferencesManager.clearPreferences()
+                _uiState.value = UserUiState(
+                    isLoggedIn = false,
+                    success = false,
+                    error = null,
+                    userId = null,
+                    userName = null,
+                    profilePictureId = null
                     )
+                onLogoutComplete()
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(error = "Failed to logout: ${e.message}")
                 }
-            } catch (_: Exception) { }
+            }
         }
     }
 }

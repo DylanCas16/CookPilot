@@ -105,13 +105,10 @@ class RecipeRepository(
                 if (oldFileId != null && newFileId != null) {
                     try {
                         storage.deleteFile(bucketId = bucketId, fileId = oldFileId)
-                    } catch (_: Exception) {
-                    }
+                    } catch (_: Exception) {}
                 }
                 newFileId
-            } else {
-                oldFileId
-            }
+            } else oldFileId
 
             val data = mapOf(
                 "title" to title,
@@ -150,7 +147,7 @@ class RecipeRepository(
             if (fileId != null) {
                 try {
                     storage.deleteFile(bucketId = bucketId, fileId = fileId)
-                } catch (e: Exception) { }
+                } catch (_: Exception) { }
             }
 
             AppwriteClient.databases.deleteDocument(

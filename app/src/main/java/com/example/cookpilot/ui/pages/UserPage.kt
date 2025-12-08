@@ -65,7 +65,7 @@ fun buildProfileImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID)
 @Composable
 fun UserPage(
     recipeViewModel: RecipeViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
 ) {
     val uiState by userViewModel.uiState.collectAsState()
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
