@@ -101,12 +101,12 @@ fun UserPage(
     )
 
     // --- INTERFACE ---
-    Scaffold { paddingValues ->
+    Scaffold(containerColor = Color.Transparent.copy(alpha = 0.3f)) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {

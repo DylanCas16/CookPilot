@@ -1,12 +1,10 @@
 package com.example.cookpilot.ui.theme
 
 import androidx.compose.ui.graphics.Color
-val PrimaryColor = Color(0xFFFFD5A1)
-val SecondaryColor = Color(0xFFF95353)
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val PrimaryColorLight = Color(0xFFFFD5A1)
+val SecondaryColorLight = Color(0xFF8A0303)
+val TertiaryColorLight = Color(0xFF009688)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val PrimaryColorDark = Color(0xFF4A646C)
+val SecondaryColorDark = Color(0xFF0A0202)
+val TertiaryColorDark = Color(0xFFFF9800)

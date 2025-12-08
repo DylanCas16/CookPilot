@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
@@ -35,6 +36,7 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.ui.components.AuthMenu
+import com.example.cookpilot.ui.components.DashedDivider
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LoginDialog
 import com.example.cookpilot.ui.components.Sidebar
@@ -43,7 +45,6 @@ import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.pages.SearchPage
 import com.example.cookpilot.ui.pages.UserPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
-import com.example.cookpilot.ui.theme.SecondaryColor
 import com.example.cookpilot.viewmodel.HistoryViewModel
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
@@ -86,11 +87,13 @@ fun CookPilotApp() {
         var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
         val myItemColors = NavigationSuiteDefaults.itemColors(
             navigationBarItemColors = NavigationBarItemDefaults.colors(
-                selectedIconColor = SecondaryColor,
-                selectedTextColor = SecondaryColor,
-                unselectedIconColor = Color.DarkGray,
-                unselectedTextColor = Color.DarkGray,
-                indicatorColor = SecondaryColor.copy(alpha = 0.2f)
+                selectedIconColor = MaterialTheme.colorScheme.secondary,
+                selectedTextColor = MaterialTheme.colorScheme.secondary,
+
+                unselectedIconColor = MaterialTheme.colorScheme.primary,
+                unselectedTextColor = MaterialTheme.colorScheme.primary,
+
+                indicatorColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
             )
         )
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -110,34 +113,38 @@ fun CookPilotApp() {
         ) {
             NavigationSuiteScaffold(
                 containerColor = Color.Transparent,
+                navigationSuiteColors = NavigationSuiteDefaults.colors(
+                    navigationBarContainerColor = Color.Transparent,
+                    navigationRailContainerColor = Color.Transparent,
+                    navigationDrawerContainerColor = Color.Transparent
+                ),
                 navigationSuiteItems = {
                     AppDestinations.entries.forEach { destination ->
-
                         val isSelected = destination == currentDestination
-
-                    item(
-                        selected = isSelected,
-                        onClick = { currentDestination = destination },
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = destination.icon),
-                                contentDescription = destination.label,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        },
-                        label = { Text(destination.label) },
-                        colors = myItemColors
-                    )
+                        item(
+                            selected = isSelected,
+                            onClick = { currentDestination = destination },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = destination.icon),
+                                    contentDescription = destination.label,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            },
+                            label = { Text(destination.label) },
+                            colors = myItemColors
+                        )
+                    }
                 }
-            }
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                HeaderApp(
-                    onMenuClick = { scope.launch { drawerState.open() } },
-                    onGoToProfile = { currentDestination = AppDestinations.Profile },
-                    userViewModel = userViewModel
-                )
-                if (uiState.showLoginDialog) {
+            ) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    HeaderApp(
+                        onMenuClick = { scope.launch { drawerState.open() } },
+                        onGoToProfile = { currentDestination = AppDestinations.Profile },
+                        userViewModel = userViewModel
+                    )
+
+                    if (uiState.showLoginDialog) {
                     LoginDialog(
                         uiState = uiState,
                         onLogin = { email, password ->
@@ -148,44 +155,50 @@ fun CookPilotApp() {
                             userViewModel.closeLoginDialog()
                             userViewModel.openRegisterDialog()
                         }
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when (currentDestination) {
-                        AppDestinations.History -> HistoryPage(
+                    )}
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        when (currentDestination) {
+                            AppDestinations.History -> HistoryPage(
                             historyViewModel = historyViewModel,
                             userViewModel = userViewModel,
                             onNavigateToCreate = { currentDestination = AppDestinations.Create }
-                        )
-                        AppDestinations.Create -> CreatePage(
+                            )
+                            AppDestinations.Create -> CreatePage(
                             recipeViewModel = recipeViewModel,
                             userViewModel = userViewModel,
                             onGoToAuthMenu = {
                                 showAuthMenu = true;
-                            }
-                        )
-                        AppDestinations.Search -> SearchPage(
+                            })
+                            AppDestinations.Search -> SearchPage(
                             recipeViewModel = recipeViewModel,
                             historyViewModel = historyViewModel,
                             userViewModel = userViewModel,
-                        )
-                        AppDestinations.Profile -> UserPage(
+                            )
+                            AppDestinations.Profile -> UserPage(
                             recipeViewModel = recipeViewModel,
                             userViewModel = userViewModel
-                        )
-                    }
-                    if (showAuthMenu) {
-                        AuthMenu(
+                            )
+                        }
+                        if (showAuthMenu) {
+                            AuthMenu(
                             onDismiss = { showAuthMenu = false },
                             userViewModel = userViewModel
-                        )
+                            )
+                        }
                     }
-                    }
+
+                    DashedDivider(
+                        color = MaterialTheme.colorScheme.tertiary,
+                        strokeWidth = 5.dp,
+                        modifier = Modifier
+                    )
                 }
             }
         }
