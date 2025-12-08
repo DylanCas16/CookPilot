@@ -65,13 +65,15 @@ fun buildProfileImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID)
 @Composable
 fun UserPage(
     recipeViewModel: RecipeViewModel,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    onLogout: () -> Unit
 ) {
     val uiState by userViewModel.uiState.collectAsState()
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
     var recipeToEdit by remember { mutableStateOf<Recipe?>(null) }
     var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.userId) {
         uiState.userId?.let { userId ->

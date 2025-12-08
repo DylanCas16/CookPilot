@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
+    }
         fun restartApp() {
             println("🔄 Restarting app...")
             val intent = Intent(this, MainActivity::class.java)
@@ -79,7 +79,6 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
             finish()
         }
-    }
 
 @PreviewScreenSizes
 @Composable
@@ -114,7 +113,13 @@ fun CookPilotApp(onRestartApp: () -> Unit) {
                         scope.launch { drawerState.close() }
                     },
                     userViewModel = userViewModel,
-                    drawerState = drawerState
+                    drawerState = drawerState,
+                    onLogout = {
+                        scope.launch { drawerState.close() }
+                        userViewModel.logout(onLogoutComplete = {
+                            onRestartApp()
+                        })
+                    }
                 )
             },
             drawerState = drawerState,
@@ -187,7 +192,12 @@ fun CookPilotApp(onRestartApp: () -> Unit) {
                         )
                         AppDestinations.Profile -> UserPage(
                             recipeViewModel = recipeViewModel,
-                            userViewModel = userViewModel
+                            userViewModel = userViewModel,
+                            onLogout = {
+                                userViewModel.logout(onLogoutComplete = {
+                                    onRestartApp()
+                                })
+                            }
                         )
                     }
                     if (showAuthMenu) {
