@@ -109,7 +109,6 @@ fun DietaryTagChip(
     }
 }
 
-// Componente para mostrar tags en RecipeCard (solo lectura)
 @Composable
 fun DietaryTagDisplay(
     tags: List<String>,
