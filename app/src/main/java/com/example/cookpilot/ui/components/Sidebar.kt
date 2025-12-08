@@ -1,8 +1,14 @@
 package com.example.cookpilot.ui.components
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -20,13 +26,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.MealPreferences
 import com.example.cookpilot.notifications.NotificationScheduler
 import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @Composable
 fun Sidebar(
@@ -38,9 +48,9 @@ fun Sidebar(
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
     val mealPreferences by preferencesManager.mealPreferencesFlow.collectAsState(initial = MealPreferences())
-    val isDarkMode by preferencesManager.isDarkModeFlow.collectAsState(initial = false)  // ← NUEVO
+    val isDarkMode by preferencesManager.isDarkModeFlow.collectAsState(initial = false)
     val notificationScheduler = remember { NotificationScheduler(context) }
-    val scope = rememberCoroutineScope()  // ← NUEVO
+    val scope = rememberCoroutineScope()
     var showSettingsDialog by remember { mutableStateOf(false) }
 
     ModalDrawerSheet {
@@ -96,13 +106,87 @@ fun Sidebar(
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 
+        var showAboutUsDialog by remember { mutableStateOf(false) }
+
         NavigationDrawerItem(
             label = { Text("About us") },
             selected = false,
-            onClick = { onOptionSelected("About us") },
+            onClick = {
+                showAboutUsDialog = true
+                onOptionSelected("About us")
+            },
             icon = { Icon(Icons.Filled.Info, contentDescription = "About us") },
             modifier = Modifier.padding(horizontal = 12.dp)
         )
+
+        if (showAboutUsDialog) {
+            AlertDialog(
+                onDismissRequest = { showAboutUsDialog = false },
+                icon = { Icon(Icons.Default.Info, contentDescription = null) },
+                title = { Text("About CookPilot") },
+                text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "CookPilot is an academic project developed to help people discover " +
+                                    "new recipes with just a few clicks and avoid repeating the same meals over and over.",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        HorizontalDivider()
+
+                        Text(
+                            text = "Developed by:",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "• Juan Carlos Rodríguez\n• Dylan Alexander Castrillón",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Text(
+                            text = "Computer Science Engineering Students\nUniversidad de Las Palmas de Gran Canaria",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Text(
+                            text = "Version 1.0 • 2025",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Text(
+                            text = "Academic Year 2025-2026",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Text(
+                            text = "GitHub: github.com/DylanCas16/CookPilot/tree/main",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
+                            modifier = Modifier.clickable {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://github.com/DylanCas16/CookPilot/tree/main")
+                                )
+                                context.startActivity(intent)
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAboutUsDialog = false }) {
+                        Text("Close")
+                    }
+                }
+            )
+        }
+
 
         if (uiState.isLoggedIn) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
