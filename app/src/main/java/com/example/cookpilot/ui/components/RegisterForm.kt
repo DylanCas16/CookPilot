@@ -32,7 +32,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
-import com.example.cookpilot.viewmodel.UserUiState
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -75,7 +74,7 @@ fun UserRegistrationForm(
         )
         withStyle(
             style = SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
         ) {
@@ -178,7 +177,7 @@ fun UserRegistrationForm(
         )
     }
 
-    // ================== CALENDAR ==================
+    // ================== CALENDAR PICKER ==================
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
