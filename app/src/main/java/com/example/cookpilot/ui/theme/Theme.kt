@@ -17,8 +17,8 @@ private val DarkColorScheme = darkColorScheme(
     background = BackgroundDark,
     surface = SurfaceDark,
 
-    onPrimary = SurfaceDark,
-    onSecondary = Color.Black,
+    onPrimary = OnSurfaceDark,
+    onSecondary = OnSurfaceDark,
     onTertiary = Color.Black,
     onBackground = OnBackgroundDark,
     onSurface = OnSurfaceDark
@@ -31,9 +31,9 @@ private val LightColorScheme = lightColorScheme(
     background = BackgroundLight,
     surface = SurfaceLight,
 
-    onPrimary = SurfaceLight,
-    onSecondary = SurfaceDark,
-    onTertiary = SurfaceDark,
+    onPrimary = OnSurfaceLight,
+    onSecondary = OnSurfaceLight,
+    onTertiary = OnSurfaceLight,
     onBackground = OnBackgroundLight,
     onSurface = OnSurfaceLight
 )

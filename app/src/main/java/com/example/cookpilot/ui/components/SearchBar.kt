@@ -139,6 +139,7 @@ fun SearchBar(
                                         modifier = Modifier.size(AssistChipDefaults.IconSize)
                                     )
                                 },
+                                colors = CustomColors.customInputChipColors(),
                                 modifier = Modifier.height(32.dp)
                             )
                         }
@@ -148,7 +149,6 @@ fun SearchBar(
 
             // 6. SUGGESTS
             if (isInputFocused && showSuggestions && suggestions.isNotEmpty()) {
-                CustomDivider()
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 200.dp)
                 ) {
@@ -156,7 +156,6 @@ fun SearchBar(
                         ListItem(
                             headlineContent = { Text(suggestion) },
                             modifier = Modifier.clickable {
-                                // 💡 Uso del callback onSuggestionClick:
                                 onSuggestionClick(suggestion)
                                 showSuggestions = false
                             }

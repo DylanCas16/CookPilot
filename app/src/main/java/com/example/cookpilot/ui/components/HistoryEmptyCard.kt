@@ -15,19 +15,54 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
+
+private val BorderWidth = 5.dp
+private val DashLength = 30f
+private val GapLength = 30f
+private val CornerRadius = 12f
 
 @Composable
 fun HistoryEmptyCard(onClick: () -> Unit) {
+    val borderColor = MaterialTheme.colorScheme.tertiary
+    val density = androidx.compose.ui.platform.LocalDensity.current.density
+    val cornerRadiusPx = CornerRadius * density
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
-            .clickable { onClick() },
+            .aspectRatio(1f),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .drawBehind {
+                    val dashPathEffect = PathEffect.dashPathEffect(
+                        intervals = floatArrayOf(DashLength, GapLength),
+                        phase = 0f
+                    )
+                    drawRoundRect(
+                        color = borderColor,
+                        topLeft = Offset(BorderWidth.toPx() / 2, BorderWidth.toPx() / 2),
+                        size = Size(
+                            width = size.width - BorderWidth.toPx(),
+                            height = size.height - BorderWidth.toPx()
+                        ),
+                        style = Stroke(
+                            width = BorderWidth.toPx(),
+                            pathEffect = dashPathEffect
+                        ),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadiusPx, cornerRadiusPx)
+                    )
+                }
+                .clickable { onClick() },
             contentAlignment = Alignment.Center
         ) {
             Icon(

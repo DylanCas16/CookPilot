@@ -1,8 +1,10 @@
 package com.example.cookpilot.ui.theme
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.SelectableChipColors
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarColors
@@ -13,18 +15,19 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItemCo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
+
 object CustomColors {
     @Composable
     fun customTextFieldColors(): TextFieldColors {
         return TextFieldDefaults.colors(
             // BACKGROUND
-            focusedContainerColor = MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
             disabledContainerColor = Color.Gray,
 
             // TEXT
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
             cursorColor = MaterialTheme.colorScheme.primary
         )
     }
@@ -62,6 +65,17 @@ object CustomColors {
             scrolledContainerColor = Transparent,
             navigationIconContentColor = MaterialTheme.colorScheme.background,
             titleContentColor = MaterialTheme.colorScheme.background
+        )
+    }
+
+    @Composable
+    fun customInputChipColors(): SelectableChipColors {
+        return InputChipDefaults.inputChipColors(
+            selectedContainerColor = MaterialTheme.colorScheme.secondary,
+            selectedLabelColor = MaterialTheme.colorScheme.onSecondary,
+            selectedTrailingIconColor = MaterialTheme.colorScheme.onSecondary,
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            labelColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

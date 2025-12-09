@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CustomDivider(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.secondary,
+    color: Color = MaterialTheme.colorScheme.surface,
     strokeWidth: Dp = 2.dp,
     dashLength: Dp = 0.dp,
     gapLength: Dp = 0.dp
