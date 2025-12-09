@@ -28,7 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -47,6 +46,7 @@ import com.example.cookpilot.ui.pages.UserPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
 import com.example.cookpilot.ui.theme.CustomColors
 import com.example.cookpilot.ui.theme.CustomColors.customNavigationSuiteContainerColors
+import com.example.cookpilot.ui.theme.Transparent
 import com.example.cookpilot.viewmodel.HistoryViewModel
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
@@ -122,7 +122,7 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
             drawerState = drawerState,
         ) {
             NavigationSuiteScaffold(
-                containerColor = Color.Transparent,
+                containerColor = Transparent,
                 navigationSuiteColors = customNavigationSuiteContainerColors(),
                 navigationSuiteItems = {
                     AppDestinations.entries.forEach { destination ->
