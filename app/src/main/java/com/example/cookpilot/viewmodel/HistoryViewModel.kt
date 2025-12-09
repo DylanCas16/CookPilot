@@ -10,10 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HistoryViewModel(
-    application: Application,
-    private val historyRepository: HistoryRepository = HistoryRepository()
-) : AndroidViewModel(application) {
+class HistoryViewModel(application: Application) : AndroidViewModel(application) {
+    private val historyRepository = HistoryRepository()
+
     private val _historyRecipes = MutableStateFlow<List<Recipe>>(emptyList())
     val historyRecipes: StateFlow<List<Recipe>> = _historyRecipes.asStateFlow()
 

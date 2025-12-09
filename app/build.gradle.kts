@@ -64,16 +64,11 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-
+    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    testImplementation(libs.junit)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-    testImplementation("io.mockk:mockk:1.14.7")
 }

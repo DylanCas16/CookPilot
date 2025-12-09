@@ -10,10 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class RecipeViewModel(
-    application: Application,
-    private val repository: RecipeRepository = RecipeRepository(application)
-) : AndroidViewModel(application) {
+class RecipeViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = RecipeRepository(application)
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
     val recipes: StateFlow<List<Recipe>> = _recipes

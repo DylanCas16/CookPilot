@@ -27,16 +27,14 @@ data class UserUiState(
     val error: String? = null
 )
 
-class UserViewModel(
-    application: Application,
-    private val authRepository: AuthRepository = AuthRepository(),
-    private val userRepository: UserRepository = UserRepository(application),
-    private val preferencesManager: PreferencesManager = PreferencesManager(application),
-    private val notificationScheduler: NotificationScheduler = NotificationScheduler(application)
-) : AndroidViewModel(application) {
+class UserViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val authRepository = AuthRepository()
+    private val userRepository = UserRepository(application)
     private val _uiState = MutableStateFlow(UserUiState())
     val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
+    private val preferencesManager = PreferencesManager(application)
+    private val notificationScheduler = NotificationScheduler(application)
 
     fun checkSession() {
         viewModelScope.launch {
