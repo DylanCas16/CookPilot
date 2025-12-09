@@ -14,9 +14,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -47,6 +45,8 @@ import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.pages.SearchPage
 import com.example.cookpilot.ui.pages.UserPage
 import com.example.cookpilot.ui.theme.CookPilotTheme
+import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.ui.theme.CustomColors.customNavigationSuiteContainerColors
 import com.example.cookpilot.viewmodel.HistoryViewModel
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
@@ -62,10 +62,10 @@ class MainActivity : ComponentActivity() {
             val preferencesManager = remember { PreferencesManager(context) }
             val isDarkMode by preferencesManager.isDarkModeFlow.collectAsState(initial = false)
 
-            val fondoChefPainter = painterResource(id = R.drawable.background_image)
+            val chefPainterBackground = painterResource(id = R.drawable.background_image)
             Box(modifier = Modifier.fillMaxSize()) {
                 Image(
-                    painter = fondoChefPainter,
+                    painter = chefPainterBackground,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
@@ -100,17 +100,7 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
     }
 
         var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
-        val myItemColors = NavigationSuiteDefaults.itemColors(
-            navigationBarItemColors = NavigationBarItemDefaults.colors(
-                selectedIconColor = MaterialTheme.colorScheme.secondary,
-                selectedTextColor = MaterialTheme.colorScheme.secondary,
-
-                unselectedIconColor = MaterialTheme.colorScheme.primary,
-                unselectedTextColor = MaterialTheme.colorScheme.primary,
-
-                indicatorColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-            )
-        )
+        val myItemColors = CustomColors.customNavigationSuiteColors()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
 
@@ -133,17 +123,14 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
         ) {
             NavigationSuiteScaffold(
                 containerColor = Color.Transparent,
-                navigationSuiteColors = NavigationSuiteDefaults.colors(
-                    navigationBarContainerColor = Color.Transparent,
-                    navigationRailContainerColor = Color.Transparent,
-                    navigationDrawerContainerColor = Color.Transparent
-                ),
+                navigationSuiteColors = customNavigationSuiteContainerColors(),
                 navigationSuiteItems = {
                     AppDestinations.entries.forEach { destination ->
                         val isSelected = destination == currentDestination
                         item(
                             selected = isSelected,
                             onClick = { currentDestination = destination },
+                            colors = myItemColors,
                             icon = {
                                 Icon(
                                     painter = painterResource(id = destination.icon),
@@ -151,8 +138,7 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                     modifier = Modifier.size(30.dp)
                                 )
                             },
-                            label = { Text(destination.label) },
-                            colors = myItemColors
+                            label = { Text(destination.label) }
                         )
                     }
                 }
