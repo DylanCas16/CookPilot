@@ -3,6 +3,7 @@ package com.example.cookpilot.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -12,11 +13,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun DashedDivider(
+fun CustomDivider(
     modifier: Modifier = Modifier,
-    color: Color = Color.Red,
+    color: Color = MaterialTheme.colorScheme.secondary,
     strokeWidth: Dp = 2.dp,
-    dashLength: Dp = 3.dp,
+    dashLength: Dp = 0.dp,
     gapLength: Dp = 0.dp
 ) {
     Canvas(modifier.fillMaxWidth().height(strokeWidth)) {

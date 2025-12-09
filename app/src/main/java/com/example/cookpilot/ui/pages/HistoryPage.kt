@@ -57,11 +57,7 @@ fun HistoryPage(
             )
         }
 
-        items(emptySlots) {
-            HistoryEmptyCard(
-                onClick = onNavigateToCreate
-            )
-        }
+        if (emptySlots > 0) item { HistoryEmptyCard(onClick = onNavigateToCreate) }
     }
 
     selectedRecipe?.let { recipe ->

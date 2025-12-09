@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -35,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.ui.components.AuthMenu
-import com.example.cookpilot.ui.components.DashedDivider
+import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.components.HeaderApp
 import com.example.cookpilot.ui.components.LoginDialog
 import com.example.cookpilot.ui.components.Sidebar
@@ -201,11 +200,7 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                         }
                     }
 
-                    DashedDivider(
-                        color = MaterialTheme.colorScheme.tertiary,
-                        strokeWidth = 5.dp,
-                        modifier = Modifier
-                    )
+                    CustomDivider()
                 }
             }
         }

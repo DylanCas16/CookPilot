@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
@@ -149,7 +148,7 @@ fun SearchBar(
 
             // 6. SUGGESTS
             if (isInputFocused && showSuggestions && suggestions.isNotEmpty()) {
-                Divider()
+                CustomDivider()
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 200.dp)
                 ) {

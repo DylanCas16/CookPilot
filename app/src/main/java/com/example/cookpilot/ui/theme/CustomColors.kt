@@ -17,12 +17,12 @@ object CustomColors {
     @Composable
     fun customTextFieldColors(): TextFieldColors {
         return TextFieldDefaults.colors(
-            // FONDO
+            // BACKGROUND
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             disabledContainerColor = Color.Gray,
 
-            // TEXTO
+            // TEXT
             focusedTextColor = MaterialTheme.colorScheme.onSurface,
             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
             cursorColor = MaterialTheme.colorScheme.primary
@@ -34,8 +34,8 @@ object CustomColors {
         return NavigationSuiteDefaults.itemColors(
             navigationBarItemColors = NavigationBarItemDefaults.colors(
 
-                selectedIconColor = MaterialTheme.colorScheme.tertiary,
-                selectedTextColor = MaterialTheme.colorScheme.tertiary,
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
 
                 unselectedIconColor = MaterialTheme.colorScheme.background,
                 unselectedTextColor = MaterialTheme.colorScheme.background,

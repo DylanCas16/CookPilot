@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.model.Recipe
+import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.components.RecipeAction
 import com.example.cookpilot.ui.components.RecipeCard
 import com.example.cookpilot.ui.components.RecipeDetailDialog
@@ -96,7 +96,7 @@ fun SearchPage(
         )
 
         // --- PAGE CONTENT ---
-        Divider()
+        CustomDivider()
 
         Box(
             modifier = Modifier
