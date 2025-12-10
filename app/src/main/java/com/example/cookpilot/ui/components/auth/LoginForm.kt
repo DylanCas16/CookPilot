@@ -29,7 +29,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
-import com.example.cookpilot.ui.components.showMessage
+import com.example.cookpilot.ui.components.FormBase
+import com.example.cookpilot.ui.components.showCustomMessage
 
 data class LogUser(
     val email: String,
@@ -75,22 +76,16 @@ fun UserLoginForm(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    _root_ide_package_.com.example.cookpilot.ui.components.FormBase(
+    FormBase(
         formTitle = "LOG IN",
         buttonText = "LOG IN",
         modifier = modifier,
+        snackbarHostState = snackbarHostState,
         onConfirmClick = {
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 onLoggingUser(LogUser(email, password))
-                showMessage(
-                    scope = scope,
-                    snackbarHostState = snackbarHostState,
-                    message = "Welcome back! CP chef",
-                    actionLabel = "Start cooking",
-                    duration = SnackbarDuration.Long
-                )
             } else {
-                showMessage(
+                showCustomMessage(
                     scope = scope,
                     snackbarHostState = snackbarHostState,
                     message = "Something is not going well, fill in all fields",

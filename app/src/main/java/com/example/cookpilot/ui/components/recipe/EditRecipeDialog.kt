@@ -32,13 +32,13 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,7 +57,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.cookpilot.model.Recipe
-import com.example.cookpilot.ui.components.showMessage
+import com.example.cookpilot.ui.components.CustomDivider
+import com.example.cookpilot.ui.components.showCustomMessage
 
 @Composable
 fun EditRecipeDialog(
@@ -92,7 +93,7 @@ fun EditRecipeDialog(
     val scope = rememberCoroutineScope()
     val handleSaveClick: () -> Unit = {
         if (title.isBlank()) {
-            showMessage(
+            showCustomMessage(
                 scope = scope,
                 snackbarHostState = snackbarHostState,
                 message = "You might need a recipe name at least",
@@ -110,7 +111,7 @@ fun EditRecipeDialog(
                 selectedDietaryTags.toList(),
                 selectedImageUri
             )
-            showMessage(
+            showCustomMessage(
                 scope = scope,
                 snackbarHostState = snackbarHostState,
                 message = "Recipe updated correctly",
@@ -118,7 +119,6 @@ fun EditRecipeDialog(
                 duration = SnackbarDuration.Long
             )
         }
-        onDismiss()
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -151,7 +151,7 @@ fun EditRecipeDialog(
                     }
                 }
 
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
+                CustomDivider()
 
                 // Scrollable content
                 Column(
@@ -337,6 +337,12 @@ fun EditRecipeDialog(
 
                     Button(onClick = handleSaveClick) { Text("Save Recipe") }
                 }
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(bottom = 16.dp)
+                )
             }
         }
     }
