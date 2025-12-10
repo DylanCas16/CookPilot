@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberDrawerState
@@ -33,10 +36,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.data.PreferencesManager
-import com.example.cookpilot.ui.components.auth.AuthMenu
 import com.example.cookpilot.ui.components.CustomDivider
-import com.example.cookpilot.ui.components.header.HeaderApp
+import com.example.cookpilot.ui.components.auth.AuthMenu
 import com.example.cookpilot.ui.components.auth.LoginDialog
+import com.example.cookpilot.ui.components.header.HeaderApp
 import com.example.cookpilot.ui.components.header.Sidebar
 import com.example.cookpilot.ui.pages.CreatePage
 import com.example.cookpilot.ui.pages.HistoryPage
@@ -102,6 +105,7 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
         val myItemColors = CustomColors.customNavigationSuiteColors()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
+        val snackbarHostState = remember { SnackbarHostState() }
 
         ModalNavigationDrawer(
             drawerContent = {
@@ -120,87 +124,102 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
             },
             drawerState = drawerState,
         ) {
-            NavigationSuiteScaffold(
+            Scaffold(
                 containerColor = Transparent,
-                navigationSuiteColors = customNavigationSuiteContainerColors(),
-                navigationSuiteItems = {
-                    AppDestinations.entries.forEach { destination ->
-                        val isSelected = destination == currentDestination
-                        item(
-                            selected = isSelected,
-                            onClick = { currentDestination = destination },
-                            colors = myItemColors,
-                            icon = {
-                                Icon(
-                                    painter = painterResource(id = destination.icon),
-                                    contentDescription = destination.label,
-                                    modifier = Modifier.size(30.dp)
+                snackbarHost = { SnackbarHost(snackbarHostState) },
+            ) { _ ->
+                NavigationSuiteScaffold(
+                    containerColor = Transparent,
+                    navigationSuiteColors = customNavigationSuiteContainerColors(),
+                    navigationSuiteItems = {
+                        AppDestinations.entries.filter { it != AppDestinations.Profile }.forEach { destination ->
+                            val isSelected = destination == currentDestination
+                            item(
+                                selected = isSelected,
+                                onClick = { currentDestination = destination },
+                                colors = myItemColors,
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(id = destination.icon),
+                                        contentDescription = destination.label,
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                },
+                                label = { Text(destination.label) }
+                            )
+                        }
+                    }
+                ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        HeaderApp(
+                            onMenuClick = { scope.launch { drawerState.open() } },
+                            onGoToProfile = { currentDestination = AppDestinations.Profile },
+                            userViewModel = userViewModel
+                        )
+
+                        if (uiState.showLoginDialog) {
+                            LoginDialog(
+                                uiState = uiState,
+                                onLogin = { email, password ->
+                                    userViewModel.login(email, password)
+                                },
+                                onDismiss = { userViewModel.closeLoginDialog() },
+                                onRegisterClick = {
+                                    userViewModel.closeLoginDialog()
+                                    userViewModel.openRegisterDialog()
+                                }
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+
+                            when (currentDestination) {
+                                AppDestinations.History -> HistoryPage(
+                                    historyViewModel = historyViewModel,
+                                    userViewModel = userViewModel,
+                                    onNavigateToCreate = {
+                                        currentDestination = AppDestinations.Create
+                                    }
                                 )
-                            },
-                            label = { Text(destination.label) }
-                        )
-                    }
-                }
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    HeaderApp(
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onGoToProfile = { currentDestination = AppDestinations.Profile },
-                        userViewModel = userViewModel
-                    )
 
-                    if (uiState.showLoginDialog) {
-                    LoginDialog(
-                        uiState = uiState,
-                        onLogin = { email, password ->
-                            userViewModel.login(email, password)
-                        },
-                        onDismiss = { userViewModel.closeLoginDialog() },
-                        onRegisterClick = {
-                            userViewModel.closeLoginDialog()
-                            userViewModel.openRegisterDialog()
-                        }
-                    )}
+                                AppDestinations.Create -> CreatePage(
+                                    recipeViewModel = recipeViewModel,
+                                    userViewModel = userViewModel,
+                                    scope = scope,
+                                    snackbarHostState = snackbarHostState,
+                                    onGoToAuthMenu = {
+                                        showAuthMenu = true
+                                    }
+                                )
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
+                                AppDestinations.Search -> SearchPage(
+                                    recipeViewModel = recipeViewModel,
+                                    historyViewModel = historyViewModel,
+                                    userViewModel = userViewModel,
+                                )
 
-                        when (currentDestination) {
-                            AppDestinations.History -> HistoryPage(
-                            historyViewModel = historyViewModel,
-                            userViewModel = userViewModel,
-                            onNavigateToCreate = { currentDestination = AppDestinations.Create }
-                            )
-                            AppDestinations.Create -> CreatePage(
-                            recipeViewModel = recipeViewModel,
-                            userViewModel = userViewModel,
-                            onGoToAuthMenu = {
-                                showAuthMenu = true
+                                AppDestinations.Profile -> UserPage(
+                                    recipeViewModel = recipeViewModel,
+                                    userViewModel = userViewModel
+                                )
                             }
-                        )
-                        AppDestinations.Search -> SearchPage(
-                            recipeViewModel = recipeViewModel,
-                            historyViewModel = historyViewModel,
-                            userViewModel = userViewModel,
-                            )
-                            AppDestinations.Profile -> UserPage(
-                            recipeViewModel = recipeViewModel,
-                            userViewModel = userViewModel
-                            )
+                            if (showAuthMenu) {
+                                AuthMenu(
+                                    onDismiss = { showAuthMenu = false },
+                                    scope = scope,
+                                    snackbarHostState = snackbarHostState,
+                                    userViewModel = userViewModel
+                                )
+                            }
                         }
-                        if (showAuthMenu) {
-                            AuthMenu(
-                            onDismiss = { showAuthMenu = false },
-                            userViewModel = userViewModel
-                            )
-                        }
-                    }
 
-                    CustomDivider()
+                        CustomDivider()
+                    }
                 }
             }
         }

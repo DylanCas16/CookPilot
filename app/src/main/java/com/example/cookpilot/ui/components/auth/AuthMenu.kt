@@ -9,22 +9,29 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.ui.theme.CustomColors
 import com.example.cookpilot.viewmodel.UserViewModel
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun AuthMenu(
     onDismiss: () -> Unit,
+    scope: CoroutineScope = rememberCoroutineScope(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     userViewModel: UserViewModel
 ) {
     var currentView: String? by remember { mutableStateOf(null) }
@@ -63,7 +70,24 @@ fun AuthMenu(
             UserLoginForm(
                 onLoggingUser = {
                     userViewModel.login(it.email, it.password)
-                    currentView = null
+                    if (userViewModel.uiState.value.success) {
+                        currentView = null
+                        showCustomMessage(
+                            scope = scope,
+                            snackbarHostState = snackbarHostState,
+                            message = "Welcome back! CP chef",
+                            actionLabel = "Let me cook",
+                            duration = SnackbarDuration.Long
+                        )
+                    } else {
+                        showCustomMessage(
+                            scope = scope,
+                            snackbarHostState = snackbarHostState,
+                            message = "Something went wrong, try again (error: ${userViewModel.uiState.value.error})",
+                            actionLabel = "Alright",
+                            duration = SnackbarDuration.Long
+                        )
+                    }
                 },
                 onRegisterClick = {
                     currentView = "register"
@@ -78,7 +102,24 @@ fun AuthMenu(
                 onRegisterUser = {
                     try {
                         userViewModel.register(it)
-                        currentView = null
+                        if (userViewModel.uiState.value.success) {
+                            currentView = null
+                            showCustomMessage(
+                                scope = scope,
+                                snackbarHostState = snackbarHostState,
+                                message = "Welcome back! CP chef",
+                                actionLabel = "Let me cook",
+                                duration = SnackbarDuration.Long
+                            )
+                        } else {
+                            showCustomMessage(
+                                scope = scope,
+                                snackbarHostState = snackbarHostState,
+                                message = "Something went wrong, try again (error: ${userViewModel.uiState.value.error})",
+                                actionLabel = "Alright",
+                                duration = SnackbarDuration.Long
+                            )
+                        }
                     } catch (e: Exception) {
 
                     }

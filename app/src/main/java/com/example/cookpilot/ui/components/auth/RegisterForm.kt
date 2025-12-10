@@ -35,7 +35,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
-import com.example.cookpilot.ui.components.showMessage
+import com.example.cookpilot.ui.components.FormBase
+import com.example.cookpilot.ui.components.showCustomMessage
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -96,22 +97,16 @@ fun UserRegistrationForm(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    _root_ide_package_.com.example.cookpilot.ui.components.FormBase(
+    FormBase(
         formTitle = "SIGN UP",
         buttonText = "REGISTER",
         modifier = modifier,
+        snackbarHostState = snackbarHostState,
         onConfirmClick = {
             if (user.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword == password && birthdateMillis != null) {
                 onRegisterUser(RegisterUser(user, birthdateMillis!!, email, password))
-                showMessage(
-                    scope = scope,
-                    snackbarHostState = snackbarHostState,
-                    message = "Account created successfully!",
-                    actionLabel = "Start cooking",
-                    duration = SnackbarDuration.Long
-                )
             } else {
-                showMessage(
+                showCustomMessage(
                     scope = scope,
                     snackbarHostState = snackbarHostState,
                     message = "Something is not going well, fill in all fields",

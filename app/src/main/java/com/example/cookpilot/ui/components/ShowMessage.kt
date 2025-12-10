@@ -5,7 +5,7 @@ import androidx.compose.material3.SnackbarHostState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-fun showMessage (
+fun showCustomMessage (
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
     message: String,

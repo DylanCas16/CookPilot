@@ -53,7 +53,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.FormBase
-import com.example.cookpilot.ui.components.showMessage
+import com.example.cookpilot.ui.components.showCustomMessage
 
 
 @Composable
@@ -95,8 +95,8 @@ fun RecipeForm(
         formTitle = "New recipe",
         buttonText = "Create",
         onConfirmClick = {
-            if (title.isEmpty() || ingredients.isEmpty()) {
-                showMessage(
+            if (title.isBlank() || ingredients.isEmpty()) {
+                showCustomMessage(
                     scope = scope,
                     snackbarHostState = snackbarHostState,
                     message = "Please fill in all required fields.",
@@ -116,16 +116,10 @@ fun RecipeForm(
                     dietaryTags = selectedDietaryTags.toList()
                 )
                 onSaveRecipe(data, selectedImageUri)
-                showMessage(
-                    scope = scope,
-                    snackbarHostState = snackbarHostState,
-                    message = "Recipe created successfully!",
-                    actionLabel = "Perfect",
-                    duration = SnackbarDuration.Long
-                )
                 resetFormStates()
             }
         },
+        snackbarHostState = snackbarHostState,
         modifier = modifier
     ) {
 
