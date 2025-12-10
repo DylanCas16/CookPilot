@@ -233,7 +233,8 @@ fun RecipeForm(
             label = { Text("Required") },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         // ================== DESCRIPTION ==================
@@ -251,7 +252,8 @@ fun RecipeForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         // ================== INGREDIENTS ==================
@@ -347,7 +349,8 @@ fun RecipeForm(
                             style = MaterialTheme.typography.bodySmall
                         )
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    colors = CustomColors.customTextFieldColors()
                 )
 
                 if (index != ingredients.lastIndex || ingredient.isNotEmpty()) {
@@ -382,7 +385,8 @@ fun RecipeForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -420,7 +424,8 @@ fun RecipeForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
+                .padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         Spacer(modifier = Modifier.height(16.dp))

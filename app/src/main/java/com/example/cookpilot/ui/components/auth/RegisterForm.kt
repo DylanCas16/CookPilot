@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
 import com.example.cookpilot.ui.components.FormBase
 import com.example.cookpilot.ui.components.showCustomMessage
+import com.example.cookpilot.ui.theme.CustomColors
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -109,7 +110,7 @@ fun UserRegistrationForm(
                 showCustomMessage(
                     scope = scope,
                     snackbarHostState = snackbarHostState,
-                    message = "Something is not going well, fill in all fields",
+                    message = "Fill, all fields please",
                     actionLabel = "I got it",
                     duration = SnackbarDuration.Long
                 )
@@ -122,7 +123,8 @@ fun UserRegistrationForm(
             onValueChange = { user = it },
             label = { Text("Username") },
             trailingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         // ================== BIRTHDATE ==================
@@ -140,7 +142,8 @@ fun UserRegistrationForm(
                 IconButton(onClick = { showDatePicker = true }) {
                     Icon(Icons.Default.DateRange, contentDescription = "Open date picker")
                 }
-            }
+            },
+            colors = CustomColors.customTextFieldColors()
         )
 
         // ================== EMAIL ==================
@@ -149,7 +152,8 @@ fun UserRegistrationForm(
             onValueChange = { email = it },
             label = { Text("Email") },
             trailingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         // ================== PASSWORD ==================
@@ -173,7 +177,8 @@ fun UserRegistrationForm(
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         // ================== CONFIRM PASSWORD ==================
@@ -182,7 +187,8 @@ fun UserRegistrationForm(
             onValueChange = { confirmPassword = it },
             label = { Text("Confirm password") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         ClickableText(
@@ -208,13 +214,21 @@ fun UserRegistrationForm(
                 TextButton(onClick = {
                     birthdateMillis = datePickerState.selectedDateMillis
                     showDatePicker = false
-                }) { Text("Confirm") }
+                                     },
+                    colors = CustomColors.customSecondaryButtonColor()
+                    ) { Text("Confirm") }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(
+                    onClick = { showDatePicker = false },
+                    colors = CustomColors.customSecondaryButtonColor()
+                ) { Text("Cancel") }
             }
         ) {
-            DatePicker(state = datePickerState)
+            DatePicker(
+                state = datePickerState,
+                colors = CustomColors.customCalendarFieldsColors()
+            )
         }
     }
 }

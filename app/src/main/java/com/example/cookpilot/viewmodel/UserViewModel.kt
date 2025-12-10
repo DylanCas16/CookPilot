@@ -27,7 +27,7 @@ data class UserUiState(
     val error: String? = null
 )
 
-private const val USE_FAKE_LOGIN = true
+private const val USE_FAKE_LOGIN = false
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -219,6 +219,17 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     it.copy(error = "Failed to logout: ${e.message}")
                 }
             }
+        }
+    }
+
+    fun clearAuthStatus() {
+        _uiState.update {
+            it.copy(
+                success = false,
+                error = null,
+                isLoading = false
+                // Mantener userId, userName, etc. si el login/register fue exitoso
+            )
         }
     }
 }

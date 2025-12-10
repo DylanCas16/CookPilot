@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
 import com.example.cookpilot.ui.components.FormBase
 import com.example.cookpilot.ui.components.showCustomMessage
+import com.example.cookpilot.ui.theme.CustomColors
 
 data class LogUser(
     val email: String,
@@ -88,7 +89,7 @@ fun UserLoginForm(
                 showCustomMessage(
                     scope = scope,
                     snackbarHostState = snackbarHostState,
-                    message = "Something is not going well, fill in all fields",
+                    message = "Fill all fields, please",
                     actionLabel = "I got it",
                     duration = SnackbarDuration.Long
                 )
@@ -101,7 +102,8 @@ fun UserLoginForm(
             onValueChange = { email = it },
             label = { Text("Email") },
             trailingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         // ================== PASSWORD ==================
@@ -125,7 +127,8 @@ fun UserLoginForm(
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CustomColors.customTextFieldColors()
         )
 
         // ================== REGISTER LINK ==================

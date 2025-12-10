@@ -4,6 +4,8 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePickerColors
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +23,23 @@ import androidx.compose.ui.graphics.Color
 
 
 object CustomColors {
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun customCalendarFieldsColors() : DatePickerColors {
+        return DatePickerDefaults.colors(
+            todayContentColor = MaterialTheme.colorScheme.tertiary,
+            todayDateBorderColor = MaterialTheme.colorScheme.tertiary,
+
+            selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+            selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
+
+            selectedYearContainerColor = MaterialTheme.colorScheme.primary,
+            selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
+
+            containerColor = MaterialTheme.colorScheme.background
+        )
+    }
+
     @Composable
     fun customTextFieldColors(): TextFieldColors {
         return TextFieldDefaults.colors(
@@ -32,6 +51,10 @@ object CustomColors {
             // TEXT
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+
+            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onBackground,
+
             cursorColor = MaterialTheme.colorScheme.primary
         )
     }
