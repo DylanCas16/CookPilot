@@ -33,11 +33,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cookpilot.data.PreferencesManager
-import com.example.cookpilot.ui.components.AuthMenu
+import com.example.cookpilot.ui.components.auth.AuthMenu
 import com.example.cookpilot.ui.components.CustomDivider
-import com.example.cookpilot.ui.components.HeaderApp
-import com.example.cookpilot.ui.components.LoginDialog
-import com.example.cookpilot.ui.components.Sidebar
+import com.example.cookpilot.ui.components.header.HeaderApp
+import com.example.cookpilot.ui.components.auth.LoginDialog
+import com.example.cookpilot.ui.components.header.Sidebar
 import com.example.cookpilot.ui.pages.CreatePage
 import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.pages.SearchPage

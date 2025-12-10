@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.recipe
 
 import APPWRITE_BUCKET_ID
 import APPWRITE_PROJECT_ID

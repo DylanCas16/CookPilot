@@ -47,10 +47,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
-import com.example.cookpilot.ui.components.EditRecipeDialog
-import com.example.cookpilot.ui.components.RecipeAction
-import com.example.cookpilot.ui.components.RecipeDetailDialog
-import com.example.cookpilot.ui.components.RecipeList
+import com.example.cookpilot.ui.components.recipe.EditRecipeDialog
+import com.example.cookpilot.ui.components.recipe.RecipeAction
+import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
+import com.example.cookpilot.ui.components.recipe.RecipeList
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 

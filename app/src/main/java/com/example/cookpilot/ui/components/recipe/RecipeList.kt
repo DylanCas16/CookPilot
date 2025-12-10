@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.recipe
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

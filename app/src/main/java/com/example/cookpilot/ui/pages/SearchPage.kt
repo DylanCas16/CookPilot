@@ -27,9 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
-import com.example.cookpilot.ui.components.RecipeAction
-import com.example.cookpilot.ui.components.RecipeCard
-import com.example.cookpilot.ui.components.RecipeDetailDialog
+import com.example.cookpilot.ui.components.recipe.RecipeAction
+import com.example.cookpilot.ui.components.recipe.RecipeCard
+import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
 import com.example.cookpilot.ui.components.SearchBar
 import com.example.cookpilot.viewmodel.HistoryViewModel
 import com.example.cookpilot.viewmodel.RecipeViewModel

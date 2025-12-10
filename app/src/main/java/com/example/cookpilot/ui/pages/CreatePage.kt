@@ -20,7 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.cookpilot.ui.components.RecipeForm
+import com.example.cookpilot.ui.components.recipe.RecipeForm
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 
@@ -60,7 +60,6 @@ fun CreatePage(
                     .padding(paddingValues)
             ) {
                 RecipeForm(
-                    snackbarHostState = snackbarHostState,
                     onSaveRecipe = { recipe, imageUri ->
                         recipeViewModel.createRecipeFromForm(
                             title = recipe.title,

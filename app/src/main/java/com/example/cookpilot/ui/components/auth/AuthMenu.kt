@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.auth
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.example.cookpilot.ui.theme.CustomColors
 import com.example.cookpilot.viewmodel.UserViewModel
 
 @Composable
@@ -31,16 +32,25 @@ fun AuthMenu(
     Dialog(onDismissRequest = onDismiss) {
         Card(modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)) {
+            .padding(16.dp),
+            colors = CustomColors.customCardColors()) {
             Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Welcome to CookPilot", style = MaterialTheme.typography.headlineSmall)
                 Spacer(Modifier.height(24.dp))
 
-                Button(onClick = { currentView = "login" }, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = { currentView = "login" },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CustomColors.customPrimaryButtonColor()
+                ) {
                     Text("Log in")
                 }
                 Spacer(Modifier.height(12.dp))
-                OutlinedButton(onClick = { currentView = "register" }, modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = { currentView = "register" },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CustomColors.customSecondaryButtonColor()
+                    ) {
                     Text("Register")
                 }
                 Spacer(Modifier.height(16.dp))
@@ -64,14 +74,15 @@ fun AuthMenu(
 
     if (currentView == "register") {
         Dialog(onDismissRequest = { currentView = null }) {
-            UserRegistrationForm(onRegisterUser = {
-                try {
-                    userViewModel.register(it)
-                    currentView = null
-                } catch (e: Exception) {
+            UserRegistrationForm(
+                onRegisterUser = {
+                    try {
+                        userViewModel.register(it)
+                        currentView = null
+                    } catch (e: Exception) {
 
-                }
-            },
+                    }
+                },
                 onLoginClick = {
                     currentView = "login"
                 }

@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.header
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
+import com.example.cookpilot.ui.components.auth.AuthMenu
 import com.example.cookpilot.ui.theme.CustomColors
 import com.example.cookpilot.viewmodel.UserViewModel
 

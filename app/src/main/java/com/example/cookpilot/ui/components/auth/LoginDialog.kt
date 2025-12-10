@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.auth
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable

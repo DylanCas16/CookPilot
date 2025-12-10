@@ -8,7 +8,7 @@ import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.notifications.NotificationScheduler
 import com.example.cookpilot.repository.AuthRepository
 import com.example.cookpilot.repository.UserRepository
-import com.example.cookpilot.ui.components.RegisterUser
+import com.example.cookpilot.ui.components.auth.RegisterUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

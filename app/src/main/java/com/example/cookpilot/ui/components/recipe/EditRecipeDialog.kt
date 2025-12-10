@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.recipe
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -38,6 +38,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,6 +47,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +57,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.cookpilot.model.Recipe
+import com.example.cookpilot.ui.components.showMessage
 
 @Composable
 fun EditRecipeDialog(
@@ -83,6 +87,39 @@ fun EditRecipeDialog(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
     )
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val handleSaveClick: () -> Unit = {
+        if (title.isBlank()) {
+            showMessage(
+                scope = scope,
+                snackbarHostState = snackbarHostState,
+                message = "You might need a recipe name at least",
+                actionLabel = "Sorry",
+                duration = SnackbarDuration.Long
+            )
+        } else {
+            onSave(
+                title,
+                description,
+                steps,
+                difficulty,
+                ingredients.filter { it.isNotBlank() },
+                cookingTimeText.toIntOrNull() ?: 0,
+                selectedDietaryTags.toList(),
+                selectedImageUri
+            )
+            showMessage(
+                scope = scope,
+                snackbarHostState = snackbarHostState,
+                message = "Recipe updated correctly",
+                actionLabel = "Perfect",
+                duration = SnackbarDuration.Long
+            )
+        }
+        onDismiss()
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -298,25 +335,7 @@ fun EditRecipeDialog(
                         Text("Cancel")
                     }
 
-                    Button(
-                        onClick = {
-                            onSave(
-                                title,
-                                description,
-                                steps,
-                                difficulty,
-                                ingredients.filter { it.isNotBlank() },
-                                cookingTimeText.toIntOrNull() ?: 0,
-                                selectedDietaryTags.toList(),
-                                selectedImageUri
-                            )
-                            onDismiss()
-                        },
-                        modifier = Modifier.weight(1f),
-                        enabled = title.isNotBlank()
-                    ) {
-                        Text("Save Changes")
-                    }
+                    Button(onClick = handleSaveClick) { Text("Save Recipe") }
                 }
             }
         }

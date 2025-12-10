@@ -1,5 +1,9 @@
 package com.example.cookpilot.ui.theme
 
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +80,30 @@ object CustomColors {
             selectedTrailingIconColor = MaterialTheme.colorScheme.onSecondary,
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    @Composable
+    fun customPrimaryButtonColor(): ButtonColors {
+        return ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    }
+
+    @Composable
+    fun customSecondaryButtonColor(): ButtonColors {
+        return ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = MaterialTheme.colorScheme.onSecondary
+        )
+    }
+
+    @Composable
+    fun customCardColors(): CardColors {
+        return CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground
         )
     }
 }

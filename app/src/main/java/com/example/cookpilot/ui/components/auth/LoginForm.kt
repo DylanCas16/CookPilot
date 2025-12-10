@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.auth
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,11 +10,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -26,6 +29,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
+import com.example.cookpilot.ui.components.showMessage
 
 data class LogUser(
     val email: String,
@@ -45,7 +49,13 @@ fun UserLoginForm(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val registerText = buildAnnotatedString {
-        append("Don't have an account? ")
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            append("Don't have an account? ")
+        }
 
         pushStringAnnotation(
             tag = "register",
@@ -62,13 +72,31 @@ fun UserLoginForm(
         pop()
     }
 
-    FormBase(
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    _root_ide_package_.com.example.cookpilot.ui.components.FormBase(
         formTitle = "LOG IN",
         buttonText = "LOG IN",
         modifier = modifier,
         onConfirmClick = {
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 onLoggingUser(LogUser(email, password))
+                showMessage(
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    message = "Welcome back! CP chef",
+                    actionLabel = "Start cooking",
+                    duration = SnackbarDuration.Long
+                )
+            } else {
+                showMessage(
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    message = "Something is not going well, fill in all fields",
+                    actionLabel = "I got it",
+                    duration = SnackbarDuration.Long
+                )
             }
         }
     ) {

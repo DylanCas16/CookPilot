@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.cookpilot.ui.theme.CustomColors
 
 @Composable
 fun FormBase(
@@ -44,7 +45,8 @@ fun FormBase(
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = onConfirmClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = CustomColors.customSecondaryButtonColor()
             ) {
                 Text(buttonText)
             }

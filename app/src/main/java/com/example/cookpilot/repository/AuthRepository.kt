@@ -1,7 +1,7 @@
 package com.example.cookpilot.repository
 
 import com.example.cookpilot.AppwriteClient
-import com.example.cookpilot.ui.components.RegisterUser
+import com.example.cookpilot.ui.components.auth.RegisterUser
 import io.appwrite.ID
 import io.appwrite.Query
 import io.appwrite.services.Account

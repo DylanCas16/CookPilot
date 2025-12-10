@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.recipe
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -16,22 +16,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 
 private val BorderWidth = 5.dp
-private val DashLength = 30f
-private val GapLength = 30f
-private val CornerRadius = 12f
+private const val DashLength = 30f
+private const val GapLength = 30f
+private const val CardCornerRadius = 12f
 
 @Composable
 fun HistoryEmptyCard(onClick: () -> Unit) {
     val borderColor = MaterialTheme.colorScheme.tertiary
-    val density = androidx.compose.ui.platform.LocalDensity.current.density
-    val cornerRadiusPx = CornerRadius * density
+    val density = LocalDensity.current.density
+    val cornerRadiusPx = CardCornerRadius * density
 
     Card(
         modifier = Modifier
@@ -59,7 +61,7 @@ fun HistoryEmptyCard(onClick: () -> Unit) {
                             width = BorderWidth.toPx(),
                             pathEffect = dashPathEffect
                         ),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(cornerRadiusPx, cornerRadiusPx)
+                        cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
                     )
                 }
                 .clickable { onClick() },
