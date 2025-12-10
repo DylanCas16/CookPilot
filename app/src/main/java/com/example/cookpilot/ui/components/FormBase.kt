@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.theme.CustomColors
 
@@ -23,6 +24,7 @@ fun FormBase(
     formTitle: String,
     buttonText: String,
     onConfirmClick: () -> Unit,
+    color: Color = MaterialTheme.colorScheme.surface.copy(0.7f),
     snackbarHostState: SnackbarHostState? = null,
     content: @Composable () -> Unit
 ) {
@@ -32,7 +34,7 @@ fun FormBase(
             .padding(16.dp),
         shape = MaterialTheme.shapes.medium,
         shadowElevation = 4.dp,
-        color = MaterialTheme.colorScheme.surface.copy(0.7f)
+        color = color
     ) {
         Column(
             modifier = Modifier

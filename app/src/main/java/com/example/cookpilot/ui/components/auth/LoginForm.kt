@@ -81,6 +81,7 @@ fun UserLoginForm(
         formTitle = "LOG IN",
         buttonText = "LOG IN",
         modifier = modifier,
+        color = MaterialTheme.colorScheme.surface.copy(1f),
         snackbarHostState = snackbarHostState,
         onConfirmClick = {
             if (email.isNotEmpty() && password.isNotEmpty()) {

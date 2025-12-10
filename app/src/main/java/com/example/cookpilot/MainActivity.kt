@@ -15,6 +15,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -42,6 +43,7 @@ import com.example.cookpilot.ui.components.auth.AuthMenu
 import com.example.cookpilot.ui.components.auth.LoginDialog
 import com.example.cookpilot.ui.components.header.HeaderApp
 import com.example.cookpilot.ui.components.header.Sidebar
+import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.ui.pages.CreatePage
 import com.example.cookpilot.ui.pages.HistoryPage
 import com.example.cookpilot.ui.pages.SearchPage
@@ -108,6 +110,31 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
         val scope = rememberCoroutineScope()
         val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(uiState.success, uiState.error) {
+        if (showAuthMenu && !uiState.isLoading) {
+            if (uiState.success) {
+                showAuthMenu = false
+                showCustomMessage(
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    message = "Welcome back! CP chef",
+                    actionLabel = "Let me cook",
+                    duration = SnackbarDuration.Long
+                )
+
+            } else if (uiState.error != null) {
+                showCustomMessage(
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    message = "Error: ${uiState.error}",
+                    actionLabel = "Retry",
+                    duration = SnackbarDuration.Long
+                )
+            }
+            userViewModel.clearAuthStatus()
+        }
+    }
+
         ModalNavigationDrawer(
             drawerContent = {
                 Sidebar(
@@ -134,7 +161,9 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                     containerColor = Transparent,
                     navigationSuiteColors = customNavigationSuiteContainerColors(),
                     navigationSuiteItems = {
-                        AppDestinations.entries.filter { it != AppDestinations.Profile }.forEach { destination ->
+                        AppDestinations.entries
+                            .filter { it != AppDestinations.Profile }
+                            .forEach { destination ->
                             val isSelected = destination == currentDestination
                             item(
                                 selected = isSelected,
@@ -156,6 +185,7 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                         HeaderApp(
                             onMenuClick = { scope.launch { drawerState.open() } },
                             onGoToProfile = { currentDestination = AppDestinations.Profile },
+                            onGoToAuthMenu = { showAuthMenu = true },
                             userViewModel = userViewModel
                         )
 
@@ -194,9 +224,7 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                     userViewModel = userViewModel,
                                     scope = scope,
                                     snackbarHostState = snackbarHostState,
-                                    onGoToAuthMenu = {
-                                        showAuthMenu = true
-                                    }
+                                    onGoToAuthMenu = { showAuthMenu = true }
                                 )
 
                                 AppDestinations.Search -> SearchPage(
@@ -215,13 +243,10 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                             if (showAuthMenu) {
                                 AuthMenu(
                                     onDismiss = { showAuthMenu = false },
-                                    scope = scope,
-                                    snackbarHostState = snackbarHostState,
                                     userViewModel = userViewModel
                                 )
                             }
                         }
-
                         CustomDivider()
                     }
                 }

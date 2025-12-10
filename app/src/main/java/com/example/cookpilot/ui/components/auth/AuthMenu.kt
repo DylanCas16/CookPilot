@@ -32,38 +32,9 @@ import kotlinx.coroutines.CoroutineScope
 @Composable
 fun AuthMenu(
     onDismiss: () -> Unit,
-    scope: CoroutineScope = rememberCoroutineScope(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     userViewModel: UserViewModel
 ) {
     var currentView: String? by remember { mutableStateOf(null) }
-    val uiState by userViewModel.uiState.collectAsState()
-
-    LaunchedEffect(uiState.success, uiState.error, uiState.isLoading) {
-        if (currentView != null && !uiState.isLoading) {
-            if (uiState.success) {
-                currentView = null
-                onDismiss()
-                showCustomMessage(
-                    scope = scope,
-                    snackbarHostState = snackbarHostState,
-                    message = "Welcome back! CP chef",
-                    actionLabel = "Let me cook",
-                    duration = SnackbarDuration.Long
-                )
-                userViewModel.clearAuthStatus()
-            } else if (uiState.error != null) {
-                showCustomMessage(
-                    scope = scope,
-                    snackbarHostState = snackbarHostState,
-                    message = "Something went wrong, try again (error: ${uiState.error})",
-                    actionLabel = "Alright",
-                    duration = SnackbarDuration.Long
-                )
-                userViewModel.clearAuthStatus()
-            }
-        }
-    }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(modifier = Modifier
@@ -114,13 +85,6 @@ fun AuthMenu(
                     try {
                         userViewModel.register(it)
                     } catch (e: Exception) {
-                        showCustomMessage(
-                            scope = scope,
-                            snackbarHostState = snackbarHostState,
-                            message = "Client Error: ${e.message}",
-                            actionLabel = "Ouch",
-                            duration = SnackbarDuration.Long
-                        )
                     }
                 },
                 onLoginClick = {

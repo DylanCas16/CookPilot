@@ -103,6 +103,7 @@ fun UserRegistrationForm(
         buttonText = "REGISTER",
         modifier = modifier,
         snackbarHostState = snackbarHostState,
+        color = MaterialTheme.colorScheme.surface.copy(1f),
         onConfirmClick = {
             if (user.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword == password && birthdateMillis != null) {
                 onRegisterUser(RegisterUser(user, birthdateMillis!!, email, password))
