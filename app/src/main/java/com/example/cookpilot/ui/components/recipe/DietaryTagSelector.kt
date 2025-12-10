@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.recipe
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

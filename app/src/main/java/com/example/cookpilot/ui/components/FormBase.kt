@@ -7,17 +7,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost // 👈 Importado
+import androidx.compose.material3.SnackbarHostState // 👈 Importado
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.cookpilot.ui.theme.CustomColors
 
 @Composable
 fun FormBase(
     formTitle: String,
     buttonText: String,
     onConfirmClick: () -> Unit,
+    snackbarHostState: SnackbarHostState? = null,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -32,21 +37,30 @@ fun FormBase(
         Column(
             modifier = Modifier
                 .padding(24.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = formTitle,
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             content()
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = onConfirmClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = CustomColors.customSecondaryButtonColor()
             ) {
                 Text(buttonText)
+            }
+            snackbarHostState?.let { hostState ->
+                Spacer(modifier = Modifier.height(16.dp))
+                SnackbarHost(
+                    hostState = hostState,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
             }
         }
     }

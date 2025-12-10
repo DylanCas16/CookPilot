@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
@@ -32,9 +32,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.example.cookpilot.R
+import com.example.cookpilot.ui.theme.CustomColors
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -95,8 +98,25 @@ fun SearchBar(
                         isInputFocused = focusState.isFocused
                         if (focusState.isFocused) {
                             showSuggestions = textFieldValue.text.isNotBlank()
-                        }
-                    },
+                        } },
+                shape = RoundedCornerShape(20.dp),
+                colors = CustomColors.customTextFieldColors(),
+
+                // --- SEARCH ICON ---
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_pizza_search),
+                        contentDescription = "Search icon",
+                        modifier = modifier.size(24.dp)
+                    )
+                },
+
+                // --- PLACEHOLDER ---
+                placeholder = {
+                    if (activeTags.isEmpty() && currentInput.isBlank()) {
+                        Text("Search for ingredients...")
+                    }
+                },
 
                 // --- LABELS DESIGN ---
                 prefix = {
@@ -119,6 +139,7 @@ fun SearchBar(
                                         modifier = Modifier.size(AssistChipDefaults.IconSize)
                                     )
                                 },
+                                colors = CustomColors.customInputChipColors(),
                                 modifier = Modifier.height(32.dp)
                             )
                         }
@@ -128,7 +149,6 @@ fun SearchBar(
 
             // 6. SUGGESTS
             if (isInputFocused && showSuggestions && suggestions.isNotEmpty()) {
-                Divider()
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 200.dp)
                 ) {
@@ -136,7 +156,6 @@ fun SearchBar(
                         ListItem(
                             headlineContent = { Text(suggestion) },
                             modifier = Modifier.clickable {
-                                // 💡 Uso del callback onSuggestionClick:
                                 onSuggestionClick(suggestion)
                                 showSuggestions = false
                             }

@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.auth
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +14,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -21,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -32,7 +35,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
-import com.example.cookpilot.viewmodel.UserUiState
+import com.example.cookpilot.ui.components.FormBase
+import com.example.cookpilot.ui.components.showCustomMessage
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -67,7 +71,13 @@ fun UserRegistrationForm(
     val datePickerState = rememberDatePickerState()
 
     val loginText = buildAnnotatedString {
-        append("Already have an account? ")
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            append("Already have an account? ")
+        }
 
         pushStringAnnotation(
             tag = "login",
@@ -75,7 +85,7 @@ fun UserRegistrationForm(
         )
         withStyle(
             style = SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
         ) {
@@ -84,13 +94,25 @@ fun UserRegistrationForm(
         pop()
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     FormBase(
         formTitle = "SIGN UP",
         buttonText = "REGISTER",
         modifier = modifier,
+        snackbarHostState = snackbarHostState,
         onConfirmClick = {
             if (user.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword == password && birthdateMillis != null) {
                 onRegisterUser(RegisterUser(user, birthdateMillis!!, email, password))
+            } else {
+                showCustomMessage(
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    message = "Something is not going well, fill in all fields",
+                    actionLabel = "I got it",
+                    duration = SnackbarDuration.Long
+                )
             }
         }
     ) {
@@ -178,7 +200,7 @@ fun UserRegistrationForm(
         )
     }
 
-    // ================== CALENDAR ==================
+    // ================== CALENDAR PICKER ==================
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },

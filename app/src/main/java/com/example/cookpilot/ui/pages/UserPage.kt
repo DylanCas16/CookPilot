@@ -25,11 +25,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,10 +49,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.cookpilot.model.Recipe
-import com.example.cookpilot.ui.components.EditRecipeDialog
-import com.example.cookpilot.ui.components.RecipeAction
-import com.example.cookpilot.ui.components.RecipeDetailDialog
-import com.example.cookpilot.ui.components.RecipeList
+import com.example.cookpilot.ui.components.CustomDivider
+import com.example.cookpilot.ui.components.recipe.EditRecipeDialog
+import com.example.cookpilot.ui.components.recipe.RecipeAction
+import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
+import com.example.cookpilot.ui.components.recipe.RecipeList
+import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 
@@ -69,6 +73,8 @@ fun UserPage(
 ) {
     val uiState by userViewModel.uiState.collectAsState()
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
     var recipeToEdit by remember { mutableStateOf<Recipe?>(null) }
     var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
@@ -168,7 +174,7 @@ fun UserPage(
                     )
                 }
 
-                HorizontalDivider()
+                CustomDivider()
 
                 Text(
                     text = "My Recipes (${userRecipes.size})",
@@ -262,6 +268,13 @@ fun UserPage(
                             )
                         }
                         recipeToDelete = null
+                        showCustomMessage(
+                            scope = scope,
+                            snackbarHostState = snackbarHostState,
+                            message = "Recipe deleted correctly",
+                            actionLabel = "Understood",
+                            duration = SnackbarDuration.Long
+                        )
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
@@ -271,7 +284,18 @@ fun UserPage(
                 }
             },
             dismissButton = {
-                OutlinedButton(onClick = { recipeToDelete = null }) {
+                OutlinedButton(onClick = {
+                    recipeToDelete = null
+                    showCustomMessage(
+                        scope = scope,
+                        snackbarHostState = snackbarHostState,
+                        message = "Recipe NOT deleted correctly",
+                        actionLabel = "That was close",
+                        duration = SnackbarDuration.Long
+                    )
+                }
+
+                ) {
                     Text("Cancel")
                 }
             }

@@ -1,5 +1,6 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.recipe
 
+import android.R
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -51,12 +52,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.model.Recipe
-import kotlinx.coroutines.launch
+import com.example.cookpilot.ui.components.FormBase
+import com.example.cookpilot.ui.components.showCustomMessage
 
 
 @Composable
 fun RecipeForm(
-    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
     onSaveRecipe: (Recipe, Uri?) -> Unit = { _, _ -> }
 ) {
@@ -75,16 +76,8 @@ fun RecipeForm(
     val ingredients = remember { mutableStateListOf("") }
     if (ingredients.isEmpty()) ingredients.add("")
 
+    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val showSuccessMessage: () -> Unit = {
-        scope.launch {
-            snackbarHostState.showSnackbar(
-                message = "Recipe created successfully",
-                actionLabel = "OK",
-                duration = SnackbarDuration.Short
-            )
-        }
-    }
 
     val resetFormStates = {
         title = ""
@@ -102,21 +95,31 @@ fun RecipeForm(
         formTitle = "New recipe",
         buttonText = "Create",
         onConfirmClick = {
-            val data = Recipe(
-                title = title,
-                description = description,
-                steps = steps,
-                difficulty = difficulty,
-                ingredients = ingredients.filter { it.isNotBlank() },
-                cookingTime = cookingTimeText.toIntOrNull() ?: 0,
-                creator = "anon",
-                fileId = null,
-                dietaryTags = selectedDietaryTags.toList()
-            )
-            onSaveRecipe(data, selectedImageUri)
-            showSuccessMessage()
-            resetFormStates()
+            if (title.isBlank() || ingredients.isEmpty()) {
+                showCustomMessage(
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    message = "Please fill in all required fields.",
+                    actionLabel = "Sorry",
+                    duration = SnackbarDuration.Short
+                )
+            } else {
+                val data = Recipe(
+                    title = title,
+                    description = description,
+                    steps = steps,
+                    difficulty = difficulty,
+                    ingredients = ingredients.filter { it.isNotBlank() },
+                    cookingTime = cookingTimeText.toIntOrNull() ?: 0,
+                    creator = "anon",
+                    fileId = null,
+                    dietaryTags = selectedDietaryTags.toList()
+                )
+                onSaveRecipe(data, selectedImageUri)
+                resetFormStates()
+            }
         },
+        snackbarHostState = snackbarHostState,
         modifier = modifier
     ) {
 
@@ -146,7 +149,7 @@ fun RecipeForm(
             if (selectedImageUri != null) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_gallery),
+                        painter = painterResource(id = R.drawable.ic_menu_gallery),
                         contentDescription = null,
                         modifier = Modifier.size(60.dp),
                         tint = MaterialTheme.colorScheme.primary
@@ -264,7 +267,7 @@ fun RecipeForm(
         }
 
         Text(
-            text = "Use singular form (e.g., \"tomato\" not \"tomatoes\")",
+            text = "Required at least one, use singular form (e.g., \"tomato\" not \"tomatoes\")",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -349,7 +352,7 @@ fun RecipeForm(
 
         // ================== COOKING TIME ==================
         Text(
-            text = "Cooking time (minutes):",
+            text = "Cooking time:",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
         )
@@ -372,7 +375,7 @@ fun RecipeForm(
 
         // ================== DIFFICULTY ==================
         Text(
-            text = "Difficulty (Required):",
+            text = "Difficulty:",
             style = MaterialTheme.typography.titleMedium
         )
 

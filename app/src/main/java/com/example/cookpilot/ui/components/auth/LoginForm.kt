@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.auth
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,11 +10,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -26,6 +29,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.R
+import com.example.cookpilot.ui.components.FormBase
+import com.example.cookpilot.ui.components.showCustomMessage
 
 data class LogUser(
     val email: String,
@@ -45,7 +50,13 @@ fun UserLoginForm(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val registerText = buildAnnotatedString {
-        append("Don't have an account? ")
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            append("Don't have an account? ")
+        }
 
         pushStringAnnotation(
             tag = "register",
@@ -53,7 +64,7 @@ fun UserLoginForm(
         )
         withStyle(
             style = SpanStyle(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
         ) {
@@ -62,13 +73,25 @@ fun UserLoginForm(
         pop()
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     FormBase(
         formTitle = "LOG IN",
         buttonText = "LOG IN",
         modifier = modifier,
+        snackbarHostState = snackbarHostState,
         onConfirmClick = {
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 onLoggingUser(LogUser(email, password))
+            } else {
+                showCustomMessage(
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    message = "Something is not going well, fill in all fields",
+                    actionLabel = "I got it",
+                    duration = SnackbarDuration.Long
+                )
             }
         }
     ) {
