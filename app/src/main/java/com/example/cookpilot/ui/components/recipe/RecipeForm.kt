@@ -1,12 +1,11 @@
 package com.example.cookpilot.ui.components.recipe
 
 import android.R
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,20 +17,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,15 +44,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.FormBase
 import com.example.cookpilot.ui.components.showCustomMessage
+import com.example.cookpilot.ui.theme.CustomColors
+import java.io.File
 
 
 @Composable
@@ -69,10 +72,25 @@ fun RecipeForm(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var cookingTimeText by remember { mutableStateOf("") }
     val selectedDietaryTags = remember { mutableStateListOf<String>() }
+
+    val context = LocalContext.current
+
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
     )
+    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) {
+                selectedImageUri = tempPhotoUri
+            } else {
+                tempPhotoUri = null
+            }
+        }
+    )
+
     val ingredients = remember { mutableStateListOf("") }
     if (ingredients.isEmpty()) ingredients.add("")
 
@@ -92,8 +110,10 @@ fun RecipeForm(
     }
 
     FormBase(
+        modifier = modifier,
         formTitle = "New recipe",
         buttonText = "Create",
+        snackbarHostState = snackbarHostState,
         onConfirmClick = {
             if (title.isBlank() || ingredients.isEmpty()) {
                 showCustomMessage(
@@ -119,24 +139,16 @@ fun RecipeForm(
                 resetFormStates()
             }
         },
-        snackbarHostState = snackbarHostState,
-        modifier = modifier
     ) {
-
         // ================== 1. IMAGE SELECTOR ==================
         Text(
             text = "Recipe photo:",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
         )
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.LightGray.copy(alpha = 0.3f))
-                .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
                 .clickable {
                     singlePhotoPickerLauncher.launch(
                         PickVisualMediaRequest(
@@ -145,28 +157,65 @@ fun RecipeForm(
                     )
                 },
             contentAlignment = Alignment.Center
-        ) {
+        )  {
             if (selectedImageUri != null) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_menu_gallery),
                         contentDescription = null,
                         modifier = Modifier.size(60.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                     Text("Image selected", style = MaterialTheme.typography.bodySmall)
                 }
             } else {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Upload photo",
-                        modifier = Modifier.size(40.dp),
-                        tint = Color.Gray
-                    )
-                    Text("Select a photo", color = Color.Gray)
+                // ================== IMAGE ACTION BUTTONS ==================
+                Row(
+                    modifier = Modifier,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            singlePhotoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = CustomColors.customPrimaryButtonColor()
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_menu_gallery),
+                            contentDescription = "Gallery icon"
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text("Go Gallery")
+                    }
+
+                    Button(
+                        onClick = {
+                            val uri = context.createImageUri()
+                            tempPhotoUri = uri
+                            cameraLauncher.launch(uri)
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = CustomColors.customSecondaryButtonColor()
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_menu_camera),
+                            contentDescription = "Take Photo"
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text("Take Photo")
+                    }
                 }
             }
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -228,8 +277,8 @@ fun RecipeForm(
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = "Ingredients help",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(20.dp),
                 )
             }
 
@@ -258,7 +307,10 @@ fun RecipeForm(
                         }
                     },
                     confirmButton = {
-                        TextButton(onClick = { showInfoDialog = false }) {
+                        TextButton(
+                            onClick = { showInfoDialog = false },
+                            colors = CustomColors.customSecondaryButtonColor()
+                        ) {
                             Text("Understood")
                         }
                     }
@@ -392,7 +444,7 @@ fun RecipeForm(
                         .size(40.dp)
                         .clickable { difficulty = i }
                         .padding(4.dp),
-                    tint = if (i <= difficulty) MaterialTheme.colorScheme.primary else Color.Gray
+                    tint = if (i <= difficulty) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
                 )
             }
 
@@ -410,7 +462,7 @@ fun RecipeForm(
         Text(
             text = difficultyText(difficulty),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
@@ -429,7 +481,10 @@ fun RecipeForm(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showRubricDialog = false }) {
+                    TextButton(
+                        onClick = { showRubricDialog = false },
+                        colors = CustomColors.customSecondaryButtonColor()
+                    ) {
                         Text("Understood")
                     }
                 }
@@ -447,7 +502,6 @@ fun RubricItem(stars: Int, description: String) {
         Text(
             text = "★".repeat(stars),
             modifier = Modifier.width(60.dp),
-            color = MaterialTheme.colorScheme.primary
         )
         Text(
             text = description,
@@ -465,3 +519,14 @@ fun difficultyText(diff: Int): String =
         5 -> "CP master"
         else -> ""
     }
+
+fun Context.createImageUri(): Uri {
+    val tempImagesDir = File(cacheDir, "images")
+    tempImagesDir.mkdirs()
+    val file = File(tempImagesDir, "temp_photo_${System.currentTimeMillis()}.jpg")
+    return FileProvider.getUriForFile(
+        this,
+        "${packageName}.provider",
+        file
+    )
+}

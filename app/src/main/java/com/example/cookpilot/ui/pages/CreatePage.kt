@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.components.recipe.RecipeForm
 import com.example.cookpilot.ui.components.showCustomMessage
@@ -55,7 +56,8 @@ fun CreatePage(
         }
     } else {
         Scaffold(
-            snackbarHost = { SnackbarHost(snackbarHostState) }
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            containerColor = Color.Transparent.copy(alpha = 0.3f)
         ) { paddingValues ->
 
             Column(
@@ -75,14 +77,24 @@ fun CreatePage(
                             cookingTime = recipe.cookingTime,
                             creator = uiState.userId ?: "anon",
                             dietaryTags = recipe.dietaryTags,
-                            fileUri = imageUri
-                        )
-                        showCustomMessage(
-                            scope = scope,
-                            snackbarHostState = snackbarHostState,
-                            message = "Recipe created successfully!",
-                            actionLabel = "Perfect",
-                            duration = SnackbarDuration.Long
+                            fileUri = imageUri,
+
+                            onSuccess = {showCustomMessage(
+                                scope = scope,
+                                snackbarHostState = snackbarHostState,
+                                message = "Recipe created successfully!",
+                                actionLabel = "Perfect",
+                                duration = SnackbarDuration.Long
+                            ) },
+                            onError = { errorMessage ->
+                                showCustomMessage(
+                                    scope = scope,
+                                    snackbarHostState = snackbarHostState,
+                                    message = "Recipe creation failed: $errorMessage",
+                                    actionLabel = "Try again",
+                                    duration = SnackbarDuration.Long
+                                )
+                            }
                         )
                     }
                 )

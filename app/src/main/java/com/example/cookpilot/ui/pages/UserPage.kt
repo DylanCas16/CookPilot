@@ -57,6 +57,7 @@ import com.example.cookpilot.ui.components.recipe.RecipeList
 import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun buildProfileImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID): String? {
@@ -68,6 +69,8 @@ fun buildProfileImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID)
 
 @Composable
 fun UserPage(
+    scope: CoroutineScope = rememberCoroutineScope(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     recipeViewModel: RecipeViewModel,
     userViewModel: UserViewModel,
 ) {
@@ -230,6 +233,8 @@ fun UserPage(
 
     recipeToEdit?.let { recipe ->
         EditRecipeDialog(
+            scope = scope,
+            snackbarHostState = snackbarHostState,
             recipe = recipe,
             onDismiss = { recipeToEdit = null },
             onSave = { title, description, steps, difficulty, ingredients, cookingTime, dietaryTags, newImageUri ->

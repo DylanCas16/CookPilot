@@ -207,7 +207,9 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
 
                                 AppDestinations.Profile -> UserPage(
                                     recipeViewModel = recipeViewModel,
-                                    userViewModel = userViewModel
+                                    userViewModel = userViewModel,
+                                    scope = scope,
+                                    snackbarHostState = snackbarHostState
                                 )
                             }
                             if (showAuthMenu) {

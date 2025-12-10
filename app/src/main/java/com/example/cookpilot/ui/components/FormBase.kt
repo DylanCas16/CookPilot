@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost // 👈 Importado
-import androidx.compose.material3.SnackbarHostState // 👈 Importado
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,11 +19,11 @@ import com.example.cookpilot.ui.theme.CustomColors
 
 @Composable
 fun FormBase(
+    modifier: Modifier = Modifier,
     formTitle: String,
     buttonText: String,
     onConfirmClick: () -> Unit,
     snackbarHostState: SnackbarHostState? = null,
-    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     Surface(
@@ -32,7 +32,7 @@ fun FormBase(
             .padding(16.dp),
         shape = MaterialTheme.shapes.medium,
         shadowElevation = 4.dp,
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.surface.copy(0.7f)
     ) {
         Column(
             modifier = Modifier

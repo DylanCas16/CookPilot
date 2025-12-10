@@ -59,9 +59,12 @@ import androidx.compose.ui.window.Dialog
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.components.showCustomMessage
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun EditRecipeDialog(
+    scope: CoroutineScope = rememberCoroutineScope(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     recipe: Recipe,
     onDismiss: () -> Unit,
     onSave: (

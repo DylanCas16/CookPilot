@@ -42,7 +42,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         cookingTime: Int,
         creator: String,
         dietaryTags: List<String>,
-        fileUri: Uri?
+        fileUri: Uri?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
     ) {
         viewModelScope.launch {
             try {
@@ -53,8 +55,10 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
 
                 _recipes.value = repository.getAllRecipes()
                 loadUserRecipes(creator)
+                onSuccess()
             } catch (e: Exception) {
                 e.printStackTrace()
+                onError(e.message ?: "Unknown error creating recipe.")
             }
         }
     }
