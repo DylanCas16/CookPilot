@@ -3,6 +3,9 @@ package com.example.cookpilot.ui.pages
 import APPWRITE_BUCKET_ID
 import APPWRITE_PROJECT_ID
 import APPWRITE_PUBLIC_ENDPOINT
+import android.R
+import android.content.Context
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,8 +48,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
@@ -55,9 +60,11 @@ import com.example.cookpilot.ui.components.recipe.RecipeAction
 import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
 import com.example.cookpilot.ui.components.recipe.RecipeList
 import com.example.cookpilot.ui.components.showCustomMessage
+import com.example.cookpilot.ui.theme.CustomColors
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.CoroutineScope
+import java.io.File
 
 @Composable
 fun buildProfileImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID): String? {
@@ -65,6 +72,17 @@ fun buildProfileImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID)
     val endpoint = APPWRITE_PUBLIC_ENDPOINT
     val projectId = APPWRITE_PROJECT_ID
     return "$endpoint/storage/buckets/$bucketId/files/$fileId/view?project=$projectId"
+}
+
+fun Context.createImageUri(): Uri {
+    val tempImagesDir = File(cacheDir, "images")
+    tempImagesDir.mkdirs()
+    val file = File(tempImagesDir, "temp_photo_${System.currentTimeMillis()}.jpg")
+    return FileProvider.getUriForFile(
+        this,
+        "${packageName}.provider",
+        file
+    )
 }
 
 @Composable
@@ -78,9 +96,34 @@ fun UserPage(
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
     var recipeToEdit by remember { mutableStateOf<Recipe?>(null) }
     var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
+
+    val context = LocalContext.current
+    var showImageSourceDialog by remember { mutableStateOf(false) }
+    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success) {
+                tempPhotoUri?.let { userViewModel.uploadProfilePicture(it) }
+            }
+            tempPhotoUri = null
+        }
+    )
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            uri?.let {
+                println("🔵 Image selected: $uri")
+                userViewModel.uploadProfilePicture(it)
+            }
+        }
+    )
 
     LaunchedEffect(uiState.userId) {
         uiState.userId?.let { userId ->
@@ -99,18 +142,8 @@ fun UserPage(
         )
     }
 
-    val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            uri?.let {
-                println("🔵 Image selected: $uri")
-                userViewModel.uploadProfilePicture(it)
-            }
-        }
-    )
-
     // --- INTERFACE ---
-    Scaffold(containerColor = Color.Transparent.copy(alpha = 0.3f)) { paddingValues ->
+    Scaffold(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -137,12 +170,17 @@ fun UserPage(
                             .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                             .background(Color.LightGray)
                             .clickable {
-                                photoPickerLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
+                                showImageSourceDialog = true
                             },
                         contentAlignment = Alignment.Center
                     ) {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(40.dp),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+
                         val profileImageUrl = buildProfileImageUrl(uiState.profilePictureId)
 
                         if (profileImageUrl != null) {
@@ -157,14 +195,14 @@ fun UserPage(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = "Default profile picture",
                                 modifier = Modifier.size(60.dp),
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
 
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(40.dp),
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onPrimary
                             )
                         }
                     }
@@ -172,7 +210,7 @@ fun UserPage(
                     Text(
                         text = "Change profile picture",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
@@ -199,13 +237,13 @@ fun UserPage(
                         Text(
                             text = "You haven't created any recipes yet",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Go to Create tab to start!",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 } else {
@@ -221,6 +259,42 @@ fun UserPage(
                 }
             }
         }
+    }
+
+    if (showImageSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { showImageSourceDialog = false },
+            title = { Text("Select Image Source") },
+            text = { Text("How would you like to set your profile picture?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        // 1. CÁMARA
+                        showImageSourceDialog = false
+                        val uri = context.createImageUri()
+                        tempPhotoUri = uri
+                        cameraLauncher.launch(uri)
+                    },
+                    colors = CustomColors.customPrimaryButtonColor()
+                ) {
+                    Text("Take Photo")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        // 1. GALERÍA
+                        showImageSourceDialog = false
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    colors = CustomColors.customSecondaryButtonColor()
+                ) {
+                    Text("Select from Gallery")
+                }
+            }
+        )
     }
 
     selectedRecipe?.let { recipe ->
