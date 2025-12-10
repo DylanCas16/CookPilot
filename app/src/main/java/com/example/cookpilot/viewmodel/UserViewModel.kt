@@ -27,6 +27,8 @@ data class UserUiState(
     val error: String? = null
 )
 
+private const val USE_FAKE_LOGIN = true
+
 class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     private val authRepository = AuthRepository()
@@ -37,6 +39,18 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val notificationScheduler = NotificationScheduler(application)
 
     fun checkSession() {
+        if (USE_FAKE_LOGIN) {
+            _uiState.update {
+                it.copy(
+                    isLoggedIn = true,
+                    userId = "dev-user-id",
+                    userName = "Developer User",
+                    profilePictureId = null,
+                    error = null
+                )
+            }
+            return
+        }
         viewModelScope.launch {
             val loggedIn = authRepository.hasActiveSession()
             if (loggedIn) {
@@ -57,6 +71,21 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun login(email: String, password: String) {
+        if (USE_FAKE_LOGIN) {
+            _uiState.update {
+                it.copy(
+                    isLoggedIn = true,
+                    isLoading = false,
+                    success = true,
+                    userId = "dev-user-id",
+                    userName = "Developer User",
+                    profilePictureId = null,
+                    showLoginDialog = false,
+                    error = null
+                )
+            }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
