@@ -59,6 +59,7 @@ import coil.compose.AsyncImage
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
+import com.example.cookpilot.ui.components.auth.unloggedMessage
 import com.example.cookpilot.ui.components.recipe.EditRecipeDialog
 import com.example.cookpilot.ui.components.recipe.RecipeAction
 import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
@@ -96,11 +97,13 @@ fun UserPage(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     recipeViewModel: RecipeViewModel,
     userViewModel: UserViewModel,
+    onGoToAuthMenu: () -> Unit
 ) {
     val uiState by userViewModel.uiState.collectAsState()
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
     var recipeToEdit by remember { mutableStateOf<Recipe?>(null) }
     var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
@@ -163,162 +166,164 @@ fun UserPage(
             }
         )
     }
-
-    Scaffold(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
-                ) {
-                    Text(
-                        text = uiState.userName ?: "Chef CookPilot",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                            .background(Color.LightGray)
-                            .clickable {
-                                showImageSourceDialog = true
-                            },
-                        contentAlignment = Alignment.Center
+    if (!uiState.isLoggedIn) {
+        unloggedMessage(
+            onGoToAuthMenu = onGoToAuthMenu,
+            text = "You must be Logged in to view your profile"
+        )
+    } else {
+        Scaffold(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                item {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
                     ) {
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(40.dp),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
+                        Text(
+                            text = uiState.userName ?: "Chef CookPilot",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                .background(Color.LightGray)
+                                .clickable {
+                                    showImageSourceDialog = true
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (uiState.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+
+                            val profileImageUrl = buildProfileImageUrl(uiState.profilePictureId)
+
+                            if (profileImageUrl != null) {
+                                AsyncImage(
+                                    model = profileImageUrl,
+                                    contentDescription = "Profile picture",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Default profile picture",
+                                    modifier = Modifier.size(60.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+
+                            if (uiState.isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
                         }
 
-                        val profileImageUrl = buildProfileImageUrl(uiState.profilePictureId)
-                        if (profileImageUrl != null) {
-                            AsyncImage(
-                                model = profileImageUrl,
-                                contentDescription = "Profile picture",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Default profile picture",
-                                modifier = Modifier.size(60.dp),
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(40.dp),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
+                        Text(
+                            text = "Change profile picture",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
 
+                    CustomDivider()
+
                     Text(
-                        text = "Change profile picture",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(top = 8.dp)
+                        text = "My Recipes (${userRecipes.size})",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp)
                     )
                 }
 
-                CustomDivider()
-                Text(
-                    text = "My Recipes (${userRecipes.size})",
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp)
-                )
-            }
-
-            item {
-                if (userRecipes.isEmpty()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "You haven't created any recipes yet",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Go to Create tab to start!",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimary
+                item {
+                    if (userRecipes.isEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "You haven't created any recipes yet",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Go to Create tab to start!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    } else {
+                        RecipeList(
+                            recipes = userRecipes,
+                            onRecipeClick = { recipe ->
+                                selectedRecipe = recipe
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
                         )
                     }
-                } else {
-                    RecipeList(
-                        recipes = userRecipes,
-                        onRecipeClick = { recipe ->
-                            selectedRecipe = recipe
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                    )
                 }
             }
         }
-    }
 
-    if (showImageSourceDialog) {
-        AlertDialog(
-            onDismissRequest = { showImageSourceDialog = false },
-            title = { Text("Select Image Source") },
-            text = { Text("How would you like to set your profile picture?") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showImageSourceDialog = false
-                        if (!isCameraEnabled) {
-                            showCameraDisabledDialog = true
-                        } else if (PermissionUtils.hasCameraPermission(context)) {
+        if (showImageSourceDialog) {
+            AlertDialog(
+                onDismissRequest = { showImageSourceDialog = false },
+                title = { Text("Select Image Source") },
+                text = { Text("How would you like to set your profile picture?") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showImageSourceDialog = false
                             val uri = context.createImageUri()
                             tempPhotoUri = uri
                             cameraLauncher.launch(uri)
-                        } else {
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
-                    },
-                    colors = CustomColors.customPrimaryButtonColor()
-                ) {
-                    Text("Take Photo")
+                        },
+                        colors = CustomColors.customPrimaryButtonColor()
+                    ) {
+                        Text("Take Photo")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = {
+                            // 1. GALERÍA
+                            showImageSourceDialog = false
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        colors = CustomColors.customSecondaryButtonColor()
+                    ) {
+                        Text("Select from Gallery")
+                    }
                 }
-            },
-            dismissButton = {
-                OutlinedButton(
-                    onClick = {
-                        showImageSourceDialog = false
-                        photoPickerLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    },
-                    colors = CustomColors.customSecondaryButtonColor()
-                ) {
-                    Text("Select from Gallery")
-                }
-            }
-        )
-    }
+            )
+        }
 
     if (showPermissionDialog) {
         AlertDialog(
@@ -468,4 +473,5 @@ fun UserPage(
             }
         )
     }
+}
 }

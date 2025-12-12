@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.MealPreferences
 import com.example.cookpilot.notifications.NotificationScheduler
+import com.example.cookpilot.ui.components.CustomDivider
+import com.example.cookpilot.ui.theme.CustomColors
 import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -78,7 +80,8 @@ fun Sidebar(
                             scope.launch {
                                 preferencesManager.setDarkMode(enabled)
                             }
-                        }
+                        },
+                        colors = CustomColors.customSwitchColors()
                     )
                 }
             },
@@ -97,7 +100,7 @@ fun Sidebar(
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        CustomDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         NavigationDrawerItem(
             label = { Text("Settings") },
@@ -138,7 +141,7 @@ fun Sidebar(
                             style = MaterialTheme.typography.bodyMedium
                         )
 
-                        HorizontalDivider()
+                        CustomDivider()
 
                         Text(
                             text = "Developed by:",

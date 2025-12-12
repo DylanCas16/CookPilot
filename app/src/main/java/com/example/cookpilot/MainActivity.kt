@@ -162,7 +162,6 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                     navigationSuiteColors = customNavigationSuiteContainerColors(),
                     navigationSuiteItems = {
                         AppDestinations.entries
-                            .filter { it != AppDestinations.Profile }
                             .forEach { destination ->
                             val isSelected = destination == currentDestination
                             item(
@@ -214,8 +213,8 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                 AppDestinations.History -> HistoryPage(
                                     historyViewModel = historyViewModel,
                                     userViewModel = userViewModel,
-                                    onNavigateToCreate = {
-                                        currentDestination = AppDestinations.Create
+                                    onNavigateToSearch = {
+                                        currentDestination = AppDestinations.Search
                                     }
                                 )
 
@@ -237,7 +236,8 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                     recipeViewModel = recipeViewModel,
                                     userViewModel = userViewModel,
                                     scope = scope,
-                                    snackbarHostState = snackbarHostState
+                                    snackbarHostState = snackbarHostState,
+                                    onGoToAuthMenu = { showAuthMenu = true }
                                 )
                             }
                             if (showAuthMenu) {

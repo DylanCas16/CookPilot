@@ -48,6 +48,8 @@ import androidx.core.content.ContextCompat
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.MealPreferences
 import kotlinx.coroutines.launch
+import com.example.cookpilot.ui.components.CustomDivider
+import com.example.cookpilot.ui.theme.CustomColors
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -111,27 +113,35 @@ fun SettingsDialog(
                                     context,
                                     Manifest.permission.POST_NOTIFICATIONS
                                 ) == PackageManager.PERMISSION_GRANTED
+
                                 if (hasPermission) notificationsEnabled = true
                                 else notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else notificationsEnabled = enabled
-                        }
+                        },
+                        colors = CustomColors.customSwitchColors()
                     )
                 }
 
                 if (notificationsEnabled) {
-                    HorizontalDivider()
+                    CustomDivider()
+
+                    // Breakfast
                     MealTimeRow(
                         icon = Icons.Default.WbSunny,
                         label = "Breakfast",
                         time = breakfastTime.format(timeFormatter),
                         onClick = { showBreakfastPicker = true }
                     )
+
+                    // Lunch
                     MealTimeRow(
                         icon = Icons.Default.LunchDining,
                         label = "Lunch",
                         time = lunchTime.format(timeFormatter),
                         onClick = { showLunchPicker = true }
                     )
+
+                    // Dinner
                     MealTimeRow(
                         icon = Icons.Default.DinnerDining,
                         label = "Dinner",
@@ -178,7 +188,7 @@ fun SettingsDialog(
             }
         },
         confirmButton = {
-            Button(
+            OutlinedButton(
                 onClick = {
                     val newPreferences = MealPreferences(
                         breakfastTime = breakfastTime,
@@ -188,15 +198,16 @@ fun SettingsDialog(
                     )
                     onSave(newPreferences)
                     onDismiss()
-                }
+                },
+                colors = CustomColors.customSecondaryButtonColor()
             ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            Button(onClick = onDismiss,
+                colors = CustomColors.customPrimaryButtonColor())
+            { Text("Cancel") }
         }
     )
 
@@ -252,10 +263,11 @@ private fun MealTimeRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
             Text(label, style = MaterialTheme.typography.bodyLarge)
         }
-        OutlinedButton(onClick = onClick) {
+
+        OutlinedButton(onClick = onClick, colors = CustomColors.customPrimaryButtonColor()) {
             Text(time)
             Spacer(modifier = Modifier.width(4.dp))
             Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -280,7 +292,7 @@ fun TimePickerDialog(
         onDismissRequest = onDismiss,
         title = { Text("Select Time") },
         text = {
-            TimePicker(state = timePickerState)
+            TimePicker(state = timePickerState, colors = CustomColors.customTimePickerColors())
         },
         confirmButton = {
             TextButton(onClick = {
@@ -288,15 +300,16 @@ fun TimePickerDialog(
                     timePickerState.hour,
                     timePickerState.minute
                 )
-                onConfirm(selectedTime)
-            }) {
+                onConfirm(selectedTime) },
+                colors = CustomColors.customSecondaryButtonColor()
+            ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            TextButton(onClick = onDismiss,
+                colors = CustomColors.customPrimaryButtonColor()
+            ) { Text("Cancel") }
         }
     )
 }

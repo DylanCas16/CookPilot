@@ -27,7 +27,7 @@ import com.example.cookpilot.viewmodel.UserViewModel
 fun HistoryPage(
     historyViewModel: HistoryViewModel,
     userViewModel: UserViewModel,
-    onNavigateToCreate: () -> Unit
+    onNavigateToSearch: () -> Unit
 ) {
     val historyRecipes by historyViewModel.historyRecipes.collectAsState()
     val uiState by userViewModel.uiState.collectAsState()
@@ -57,7 +57,7 @@ fun HistoryPage(
             )
         }
 
-        if (emptySlots > 0) item { HistoryEmptyCard(onClick = onNavigateToCreate) }
+        if (emptySlots > 0) item { HistoryEmptyCard(onClick = onNavigateToSearch) }
     }
 
     selectedRecipe?.let { recipe ->
