@@ -3,8 +3,11 @@ package com.example.cookpilot.ui.pages
 import APPWRITE_BUCKET_ID
 import APPWRITE_PROJECT_ID
 import APPWRITE_PUBLIC_ENDPOINT
+import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,6 +37,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
+import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.components.recipe.EditRecipeDialog
@@ -60,6 +65,7 @@ import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
 import com.example.cookpilot.ui.components.recipe.RecipeList
 import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.utils.PermissionUtils
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -95,13 +101,17 @@ fun UserPage(
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-
     var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
     var recipeToEdit by remember { mutableStateOf<Recipe?>(null) }
     var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
 
     val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
+    val isCameraEnabled by preferencesManager.isCameraEnabledFlow.collectAsState(initial = true)
+
     var showImageSourceDialog by remember { mutableStateOf(false) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var showCameraDisabledDialog by remember { mutableStateOf(false) }
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -111,6 +121,19 @@ fun UserPage(
                 tempPhotoUri?.let { userViewModel.uploadProfilePicture(it) }
             }
             tempPhotoUri = null
+        }
+    )
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                val uri = context.createImageUri()
+                tempPhotoUri = uri
+                cameraLauncher.launch(uri)
+            } else {
+                showPermissionDialog = true
+            }
         }
     )
 
@@ -180,7 +203,6 @@ fun UserPage(
                         }
 
                         val profileImageUrl = buildProfileImageUrl(uiState.profilePictureId)
-
                         if (profileImageUrl != null) {
                             AsyncImage(
                                 model = profileImageUrl,
@@ -214,7 +236,6 @@ fun UserPage(
                 }
 
                 CustomDivider()
-
                 Text(
                     text = "My Recipes (${userRecipes.size})",
                     style = MaterialTheme.typography.titleLarge,
@@ -268,9 +289,15 @@ fun UserPage(
                 Button(
                     onClick = {
                         showImageSourceDialog = false
-                        val uri = context.createImageUri()
-                        tempPhotoUri = uri
-                        cameraLauncher.launch(uri)
+                        if (!isCameraEnabled) {
+                            showCameraDisabledDialog = true
+                        } else if (PermissionUtils.hasCameraPermission(context)) {
+                            val uri = context.createImageUri()
+                            tempPhotoUri = uri
+                            cameraLauncher.launch(uri)
+                        } else {
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
                     },
                     colors = CustomColors.customPrimaryButtonColor()
                 ) {
@@ -288,6 +315,49 @@ fun UserPage(
                     colors = CustomColors.customSecondaryButtonColor()
                 ) {
                     Text("Select from Gallery")
+                }
+            }
+        )
+    }
+
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("Camera Permission Required") },
+            text = {
+                Text("Camera access is needed to take photos. Please grant permission in app settings.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showPermissionDialog = false
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text("Open Settings")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showCameraDisabledDialog) {
+        AlertDialog(
+            onDismissRequest = { showCameraDisabledDialog = false },
+            title = { Text("Camera Disabled") },
+            text = {
+                Text("Camera access is disabled in settings. Enable it to take photos.")
+            },
+            confirmButton = {
+                TextButton(onClick = { showCameraDisabledDialog = false }) {
+                    Text("OK")
                 }
             }
         )
@@ -340,7 +410,6 @@ fun UserPage(
                             )
                         }
                     )
-
                 }
             }
         )
@@ -381,7 +450,6 @@ fun UserPage(
                                     )
                                 }
                             )
-
                         }
                     },
                     colors = ButtonDefaults.buttonColors(

@@ -22,6 +22,7 @@ class PreferencesManager(private val context: Context) {
         private val DINNER_MINUTE = intPreferencesKey("dinner_minute")
         private val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
         private val DARK_MODE_ENABLED = booleanPreferencesKey("dark_mode_enabled")
+        private val CAMERA_ENABLED = booleanPreferencesKey("camera_enabled")
     }
 
     val isDarkModeFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -44,6 +45,16 @@ class PreferencesManager(private val context: Context) {
             ),
             notificationsEnabled = preferences[NOTIFICATIONS_ENABLED] ?: false
         )
+    }
+
+    val isCameraEnabledFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[CAMERA_ENABLED] ?: true  // Default enabled
+    }
+
+    suspend fun setCameraEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[CAMERA_ENABLED] = enabled
+        }
     }
 
     suspend fun saveMealPreferences(mealPreferences: MealPreferences) {
