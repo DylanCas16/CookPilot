@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,6 +43,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.cookpilot.model.MealPreferences
+import com.example.cookpilot.ui.components.CustomDivider
+import com.example.cookpilot.ui.theme.CustomColors
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -109,12 +110,13 @@ fun SettingsDialog(
                                 else
                                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else notificationsEnabled = enabled
-                        }
+                        },
+                        colors = CustomColors.customSwitchColors()
                     )
                 }
 
                 if (notificationsEnabled) {
-                    HorizontalDivider()
+                    CustomDivider()
 
                     // Breakfast
                     MealTimeRow(
@@ -143,7 +145,7 @@ fun SettingsDialog(
             }
         },
         confirmButton = {
-            Button(
+            OutlinedButton(
                 onClick = {
                     val newPreferences = MealPreferences(
                         breakfastTime = breakfastTime,
@@ -153,15 +155,16 @@ fun SettingsDialog(
                     )
                     onSave(newPreferences)
                     onDismiss()
-                }
+                },
+                colors = CustomColors.customSecondaryButtonColor()
             ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            Button(onClick = onDismiss,
+                colors = CustomColors.customPrimaryButtonColor())
+            { Text("Cancel") }
         }
     )
 
@@ -218,11 +221,11 @@ private fun MealTimeRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
             Text(label, style = MaterialTheme.typography.bodyLarge)
         }
 
-        OutlinedButton(onClick = onClick) {
+        OutlinedButton(onClick = onClick, colors = CustomColors.customPrimaryButtonColor()) {
             Text(time)
             Spacer(modifier = Modifier.width(4.dp))
             Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -247,7 +250,7 @@ fun TimePickerDialog(
         onDismissRequest = onDismiss,
         title = { Text("Select Time") },
         text = {
-            TimePicker(state = timePickerState)
+            TimePicker(state = timePickerState, colors = CustomColors.customTimePickerColors())
         },
         confirmButton = {
             TextButton(onClick = {
@@ -256,14 +259,16 @@ fun TimePickerDialog(
                     timePickerState.minute
                 )
                 onConfirm(selectedTime)
-            }) {
+                                 },
+                colors = CustomColors.customSecondaryButtonColor()
+            ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            TextButton(onClick = onDismiss,
+                colors = CustomColors.customPrimaryButtonColor()
+            ) { Text("Cancel") }
         }
     )
 }

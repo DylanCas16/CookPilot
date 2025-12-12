@@ -214,8 +214,8 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                 AppDestinations.History -> HistoryPage(
                                     historyViewModel = historyViewModel,
                                     userViewModel = userViewModel,
-                                    onNavigateToCreate = {
-                                        currentDestination = AppDestinations.Create
+                                    onNavigateToSearch = {
+                                        currentDestination = AppDestinations.Search
                                     }
                                 )
 
