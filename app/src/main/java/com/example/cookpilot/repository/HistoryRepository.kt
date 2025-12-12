@@ -7,9 +7,9 @@ import kotlinx.coroutines.withContext
 import java.time.Instant
 
 class HistoryRepository {
-    private val databaseId = "691f3585001c7edb5dd2"
-    private val historyCollectionId = "history"
-    private val recipesCollectionId = "recipes"
+    private val databaseId = APPWRITE_DATABASE_ID
+    private val historyCollectionId = APPWRITE_HISTORY_COLLECTION_ID
+    private val recipesCollectionId = APPWRITE_RECIPE_COLLECTION_ID
 
     suspend fun saveRecipeView(userId: String, recipeId: String) = withContext(Dispatchers.IO) {
         try {

@@ -3,7 +3,6 @@ package com.example.cookpilot.ui.pages
 import APPWRITE_BUCKET_ID
 import APPWRITE_PROJECT_ID
 import APPWRITE_PUBLIC_ENDPOINT
-import android.R
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -142,7 +141,6 @@ fun UserPage(
         )
     }
 
-    // --- INTERFACE ---
     Scaffold(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -269,7 +267,6 @@ fun UserPage(
             confirmButton = {
                 Button(
                     onClick = {
-                        // 1. CÁMARA
                         showImageSourceDialog = false
                         val uri = context.createImageUri()
                         tempPhotoUri = uri
@@ -283,7 +280,6 @@ fun UserPage(
             dismissButton = {
                 OutlinedButton(
                     onClick = {
-                        // 1. GALERÍA
                         showImageSourceDialog = false
                         photoPickerLauncher.launch(
                             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -323,8 +319,28 @@ fun UserPage(
                         cookingTime = cookingTime,
                         creator = userId,
                         dietaryTags = dietaryTags,
-                        newImageUri = newImageUri
+                        newImageUri = newImageUri,
+                        onSuccess = {
+                            recipeToEdit = null
+                            showCustomMessage(
+                                scope = scope,
+                                snackbarHostState = snackbarHostState,
+                                message = "Recipe updated successfully!",
+                                actionLabel = "Great",
+                                duration = SnackbarDuration.Long
+                            )
+                        },
+                        onError = { errorMessage ->
+                            showCustomMessage(
+                                scope = scope,
+                                snackbarHostState = snackbarHostState,
+                                message = "Update failed: $errorMessage",
+                                actionLabel = "Try again",
+                                duration = SnackbarDuration.Long
+                            )
+                        }
                     )
+
                 }
             }
         )
@@ -343,17 +359,30 @@ fun UserPage(
                         uiState.userId?.let { userId ->
                             recipeViewModel.deleteRecipe(
                                 recipeId = recipe.id ?: return@let,
-                                creator = userId
+                                creator = userId,
+                                onSuccess = {
+                                    recipeToDelete = null
+                                    showCustomMessage(
+                                        scope = scope,
+                                        snackbarHostState = snackbarHostState,
+                                        message = "Recipe deleted correctly",
+                                        actionLabel = "Understood",
+                                        duration = SnackbarDuration.Long
+                                    )
+                                },
+                                onError = { errorMessage ->
+                                    recipeToDelete = null
+                                    showCustomMessage(
+                                        scope = scope,
+                                        snackbarHostState = snackbarHostState,
+                                        message = "Delete failed: $errorMessage",
+                                        actionLabel = "Try again",
+                                        duration = SnackbarDuration.Long
+                                    )
+                                }
                             )
+
                         }
-                        recipeToDelete = null
-                        showCustomMessage(
-                            scope = scope,
-                            snackbarHostState = snackbarHostState,
-                            message = "Recipe deleted correctly",
-                            actionLabel = "Understood",
-                            duration = SnackbarDuration.Long
-                        )
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
@@ -365,16 +394,7 @@ fun UserPage(
             dismissButton = {
                 OutlinedButton(onClick = {
                     recipeToDelete = null
-                    showCustomMessage(
-                        scope = scope,
-                        snackbarHostState = snackbarHostState,
-                        message = "Recipe NOT deleted correctly",
-                        actionLabel = "That was close",
-                        duration = SnackbarDuration.Long
-                    )
-                }
-
-                ) {
+                }) {
                     Text("Cancel")
                 }
             }

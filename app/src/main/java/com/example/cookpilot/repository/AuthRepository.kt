@@ -1,5 +1,7 @@
 package com.example.cookpilot.repository
 
+import APPWRITE_DATABASE_ID
+import APPWRITE_USER_COLLECTION_ID
 import com.example.cookpilot.AppwriteClient
 import com.example.cookpilot.ui.components.auth.RegisterUser
 import io.appwrite.ID
@@ -14,8 +16,8 @@ import java.time.ZoneOffset
 class AuthRepository {
     private val account by lazy { Account(AppwriteClient.client) }
     private val databases by lazy { AppwriteClient.databases }
-    private val databaseId = "691f3585001c7edb5dd2"
-    private val usersCollectionId = "users"
+    private val databaseId = APPWRITE_DATABASE_ID
+    private val usersCollectionId = APPWRITE_USER_COLLECTION_ID
 
     suspend fun hasActiveSession(): Boolean = withContext(Dispatchers.IO) {
         return@withContext try {
