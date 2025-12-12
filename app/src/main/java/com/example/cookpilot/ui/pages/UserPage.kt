@@ -325,153 +325,154 @@ fun UserPage(
             )
         }
 
-    if (showPermissionDialog) {
-        AlertDialog(
-            onDismissRequest = { showPermissionDialog = false },
-            title = { Text("Camera Permission Required") },
-            text = {
-                Text("Camera access is needed to take photos. Please grant permission in app settings.")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showPermissionDialog = false
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", context.packageName, null)
-                        }
-                        context.startActivity(intent)
-                    }
-                ) {
-                    Text("Open Settings")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showPermissionDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-
-    if (showCameraDisabledDialog) {
-        AlertDialog(
-            onDismissRequest = { showCameraDisabledDialog = false },
-            title = { Text("Camera Disabled") },
-            text = {
-                Text("Camera access is disabled in settings. Enable it to take photos.")
-            },
-            confirmButton = {
-                TextButton(onClick = { showCameraDisabledDialog = false }) {
-                    Text("OK")
-                }
-            }
-        )
-    }
-
-    selectedRecipe?.let { recipe ->
-        RecipeDetailDialog(
-            recipe = recipe,
-            actions = userRecipeActions(recipe),
-            onDismiss = { selectedRecipe = null }
-        )
-    }
-
-    recipeToEdit?.let { recipe ->
-        EditRecipeDialog(
-            scope = scope,
-            snackbarHostState = snackbarHostState,
-            recipe = recipe,
-            onDismiss = { recipeToEdit = null },
-            onSave = { title, description, steps, difficulty, ingredients, cookingTime, dietaryTags, newImageUri ->
-                uiState.userId?.let { userId ->
-                    recipeViewModel.updateRecipe(
-                        recipeId = recipe.id ?: return@let,
-                        title = title,
-                        description = description,
-                        steps = steps,
-                        difficulty = difficulty,
-                        ingredients = ingredients,
-                        cookingTime = cookingTime,
-                        creator = userId,
-                        dietaryTags = dietaryTags,
-                        newImageUri = newImageUri,
-                        onSuccess = {
-                            recipeToEdit = null
-                            showCustomMessage(
-                                scope = scope,
-                                snackbarHostState = snackbarHostState,
-                                message = "Recipe updated successfully!",
-                                actionLabel = "Great",
-                                duration = SnackbarDuration.Long
-                            )
-                        },
-                        onError = { errorMessage ->
-                            showCustomMessage(
-                                scope = scope,
-                                snackbarHostState = snackbarHostState,
-                                message = "Update failed: $errorMessage",
-                                actionLabel = "Try again",
-                                duration = SnackbarDuration.Long
-                            )
-                        }
-                    )
-                }
-            }
-        )
-    }
-
-    recipeToDelete?.let { recipe ->
-        AlertDialog(
-            onDismissRequest = { recipeToDelete = null },
-            title = { Text("Delete Recipe") },
-            text = {
-                Text("Are you sure you want to delete \"${recipe.title}\"? This action cannot be undone.")
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        uiState.userId?.let { userId ->
-                            recipeViewModel.deleteRecipe(
-                                recipeId = recipe.id ?: return@let,
-                                creator = userId,
-                                onSuccess = {
-                                    recipeToDelete = null
-                                    showCustomMessage(
-                                        scope = scope,
-                                        snackbarHostState = snackbarHostState,
-                                        message = "Recipe deleted correctly",
-                                        actionLabel = "Understood",
-                                        duration = SnackbarDuration.Long
-                                    )
-                                },
-                                onError = { errorMessage ->
-                                    recipeToDelete = null
-                                    showCustomMessage(
-                                        scope = scope,
-                                        snackbarHostState = snackbarHostState,
-                                        message = "Delete failed: $errorMessage",
-                                        actionLabel = "Try again",
-                                        duration = SnackbarDuration.Long
-                                    )
+        if (showPermissionDialog) {
+            AlertDialog(
+                onDismissRequest = { showPermissionDialog = false },
+                title = { Text("Camera Permission Required") },
+                text = {
+                    Text("Camera access is needed to take photos. Please grant permission in app settings.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showPermissionDialog = false
+                            val intent =
+                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.fromParts("package", context.packageName, null)
                                 }
-                            )
+                            context.startActivity(intent)
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Delete")
+                    ) {
+                        Text("Open Settings")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showPermissionDialog = false }) {
+                        Text("Cancel")
+                    }
                 }
-            },
-            dismissButton = {
-                OutlinedButton(onClick = {
-                    recipeToDelete = null
-                }) {
-                    Text("Cancel")
+            )
+        }
+
+        if (showCameraDisabledDialog) {
+            AlertDialog(
+                onDismissRequest = { showCameraDisabledDialog = false },
+                title = { Text("Camera Disabled") },
+                text = {
+                    Text("Camera access is disabled in settings. Enable it to take photos.")
+                },
+                confirmButton = {
+                    TextButton(onClick = { showCameraDisabledDialog = false }) {
+                        Text("OK")
+                    }
                 }
-            }
-        )
+            )
+        }
+
+        selectedRecipe?.let { recipe ->
+            RecipeDetailDialog(
+                recipe = recipe,
+                actions = userRecipeActions(recipe),
+                onDismiss = { selectedRecipe = null }
+            )
+        }
+
+        recipeToEdit?.let { recipe ->
+            EditRecipeDialog(
+                scope = scope,
+                snackbarHostState = snackbarHostState,
+                recipe = recipe,
+                onDismiss = { recipeToEdit = null },
+                onSave = { title, description, steps, difficulty, ingredients, cookingTime, dietaryTags, newImageUri ->
+                    uiState.userId?.let { userId ->
+                        recipeViewModel.updateRecipe(
+                            recipeId = recipe.id ?: return@let,
+                            title = title,
+                            description = description,
+                            steps = steps,
+                            difficulty = difficulty,
+                            ingredients = ingredients,
+                            cookingTime = cookingTime,
+                            creator = userId,
+                            dietaryTags = dietaryTags,
+                            newImageUri = newImageUri,
+                            onSuccess = {
+                                recipeToEdit = null
+                                showCustomMessage(
+                                    scope = scope,
+                                    snackbarHostState = snackbarHostState,
+                                    message = "Recipe updated successfully!",
+                                    actionLabel = "Great",
+                                    duration = SnackbarDuration.Long
+                                )
+                            },
+                            onError = { errorMessage ->
+                                showCustomMessage(
+                                    scope = scope,
+                                    snackbarHostState = snackbarHostState,
+                                    message = "Update failed: $errorMessage",
+                                    actionLabel = "Try again",
+                                    duration = SnackbarDuration.Long
+                                )
+                            }
+                        )
+                    }
+                }
+            )
+        }
+
+        recipeToDelete?.let { recipe ->
+            AlertDialog(
+                onDismissRequest = { recipeToDelete = null },
+                title = { Text("Delete Recipe") },
+                text = {
+                    Text("Are you sure you want to delete \"${recipe.title}\"? This action cannot be undone.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            uiState.userId?.let { userId ->
+                                recipeViewModel.deleteRecipe(
+                                    recipeId = recipe.id ?: return@let,
+                                    creator = userId,
+                                    onSuccess = {
+                                        recipeToDelete = null
+                                        showCustomMessage(
+                                            scope = scope,
+                                            snackbarHostState = snackbarHostState,
+                                            message = "Recipe deleted correctly",
+                                            actionLabel = "Understood",
+                                            duration = SnackbarDuration.Long
+                                        )
+                                    },
+                                    onError = { errorMessage ->
+                                        recipeToDelete = null
+                                        showCustomMessage(
+                                            scope = scope,
+                                            snackbarHostState = snackbarHostState,
+                                            message = "Delete failed: $errorMessage",
+                                            actionLabel = "Try again",
+                                            duration = SnackbarDuration.Long
+                                        )
+                                    }
+                                )
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = {
+                        recipeToDelete = null
+                    }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
     }
-}
 }
