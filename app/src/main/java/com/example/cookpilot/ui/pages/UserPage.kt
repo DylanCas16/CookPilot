@@ -3,7 +3,6 @@ package com.example.cookpilot.ui.pages
 import APPWRITE_BUCKET_ID
 import APPWRITE_PROJECT_ID
 import APPWRITE_PUBLIC_ENDPOINT
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -66,7 +65,6 @@ import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
 import com.example.cookpilot.ui.components.recipe.RecipeList
 import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.ui.theme.CustomColors
-import com.example.cookpilot.utils.PermissionUtils
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 import kotlinx.coroutines.CoroutineScope
