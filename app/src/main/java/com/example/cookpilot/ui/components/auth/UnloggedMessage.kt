@@ -25,7 +25,7 @@ fun unloggedMessage(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape)
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), CircleShape)
             .clip(CircleShape)
             .border(2.dp, MaterialTheme.colorScheme.secondary, CircleShape)
             .padding(30.dp, 40.dp),

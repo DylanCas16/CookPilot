@@ -145,7 +145,7 @@ fun UserPage(
     if (!uiState.isLoggedIn) {
         unloggedMessage(
             onGoToAuthMenu = onGoToAuthMenu,
-            text = "Log in to view your profile"
+            text = "You must be Logged in to view your profile"
         )
     } else {
         // --- INTERFACE ---
