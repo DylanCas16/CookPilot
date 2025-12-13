@@ -331,7 +331,7 @@ fun EditRecipeDialog(
                                     .size(40.dp)
                                     .clickable { difficulty = i }
                                     .padding(4.dp),
-                                tint = if (i <= difficulty) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+                                tint = if (i <= difficulty) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
                             )
                         }
                     }
