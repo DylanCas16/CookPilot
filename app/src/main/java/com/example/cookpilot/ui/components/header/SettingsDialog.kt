@@ -182,7 +182,8 @@ fun SettingsDialog(
                             scope.launch {
                                 preferencesManager.setCameraEnabled(enabled)
                             }
-                        }
+                        },
+                        colors = CustomColors.customSwitchColors()
                     )
                 }
             }
