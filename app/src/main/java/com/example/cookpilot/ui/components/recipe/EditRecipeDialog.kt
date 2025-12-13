@@ -59,6 +59,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.components.showCustomMessage
+import com.example.cookpilot.ui.theme.CustomColors
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -150,7 +151,10 @@ fun EditRecipeDialog(
                         style = MaterialTheme.typography.headlineSmall
                     )
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, "Close")
+                        Icon(Icons.Default.Close,
+                            "Close",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
                     }
                 }
 
@@ -204,7 +208,8 @@ fun EditRecipeDialog(
                         value = title,
                         onValueChange = { title = it },
                         label = { Text("Recipe name") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CustomColors.customTextFieldColors()
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -217,7 +222,8 @@ fun EditRecipeDialog(
                         maxLines = 3,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(100.dp)
+                            .height(100.dp),
+                        colors = CustomColors.customTextFieldColors()
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -242,7 +248,8 @@ fun EditRecipeDialog(
                                     }
                                 },
                                 label = { Text("Ingredient ${index + 1}") },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                colors = CustomColors.customTextFieldColors()
                             )
 
                             if (index != ingredients.lastIndex || ingredient.isNotEmpty()) {
@@ -250,7 +257,11 @@ fun EditRecipeDialog(
                                     ingredients.removeAt(index)
                                     if (ingredients.isEmpty()) ingredients.add("")
                                 }) {
-                                    Icon(Icons.Default.Clear, "Delete", tint = Color.Gray)
+                                    Icon(
+                                        Icons.Default.Clear,
+                                        "Delete",
+                                        tint = MaterialTheme.colorScheme.tertiary
+                                    )
                                 }
                             }
                         }
@@ -266,7 +277,8 @@ fun EditRecipeDialog(
                         minLines = 5,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(150.dp)
+                            .height(150.dp),
+                        colors = CustomColors.customTextFieldColors()
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -281,7 +293,8 @@ fun EditRecipeDialog(
                         },
                         label = { Text("Cooking time (minutes)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CustomColors.customTextFieldColors()
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -318,7 +331,7 @@ fun EditRecipeDialog(
                                     .size(40.dp)
                                     .clickable { difficulty = i }
                                     .padding(4.dp),
-                                tint = if (i <= difficulty) MaterialTheme.colorScheme.primary else Color.Gray
+                                tint = if (i <= difficulty) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -333,12 +346,16 @@ fun EditRecipeDialog(
                 ) {
                     OutlinedButton(
                         onClick = onDismiss,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = CustomColors.customPrimaryButtonColor()
                     ) {
                         Text("Cancel")
                     }
 
-                    Button(onClick = handleSaveClick) { Text("Save Recipe") }
+                    Button(
+                        onClick = handleSaveClick,
+                        colors = CustomColors.customSecondaryButtonColor()
+                    ) { Text("Save Recipe") }
                 }
                 SnackbarHost(
                     hostState = snackbarHostState,

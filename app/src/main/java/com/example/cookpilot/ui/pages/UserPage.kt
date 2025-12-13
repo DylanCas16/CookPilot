@@ -355,9 +355,7 @@ fun UserPage(
                             duration = SnackbarDuration.Long
                         )
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
+                    colors = CustomColors.customSecondaryButtonColor()
                 ) {
                     Text("Delete")
                 }
@@ -372,8 +370,8 @@ fun UserPage(
                         actionLabel = "That was close",
                         duration = SnackbarDuration.Long
                     )
-                }
-
+                },
+                colors = CustomColors.customPrimaryButtonColor()
                 ) {
                     Text("Cancel")
                 }
