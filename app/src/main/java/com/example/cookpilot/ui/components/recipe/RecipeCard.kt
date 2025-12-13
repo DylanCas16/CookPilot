@@ -33,6 +33,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,6 +49,8 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.cookpilot.R
 import com.example.cookpilot.model.Recipe
+import com.example.cookpilot.ui.components.CustomDivider
+import com.example.cookpilot.ui.theme.CustomColors
 
 
 data class RecipeAction(
@@ -243,17 +246,17 @@ fun RecipeDetailDialog(
                                         modifier = Modifier
                                             .size(30.dp)
                                             .padding(4.dp),
-                                        tint = if (i <= recipe.difficulty) MaterialTheme.colorScheme.primary else Color.Gray
+                                        tint = if (i <= recipe.difficulty) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
                                     )
                                 }
                             }
 
-                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+                            CustomDivider(modifier = Modifier.padding(vertical = 16.dp))
                         }
                     }
                     if (recipe.dietaryTags.isNotEmpty()) {
                         item {
-                            Divider(modifier = Modifier.padding(vertical = 16.dp))
+                            CustomDivider(modifier = Modifier.padding(vertical = 16.dp))
 
                             Text(
                                 text = "Dietary Information:",
@@ -286,7 +289,7 @@ fun RecipeDetailDialog(
 
                     // === STEPS ===
                     item {
-                        Divider(modifier = Modifier.padding(vertical = 16.dp))
+                        CustomDivider(modifier = Modifier.padding(vertical = 16.dp))
                         Text(
                             text = "Steps:",
                             style = MaterialTheme.typography.titleLarge,
@@ -310,13 +313,14 @@ fun RecipeDetailDialog(
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     actions.forEach { action ->
-                        Button(
+                        OutlinedButton(
                             onClick = {
                                 action.onClick()
                                 onDismiss()
                             },
                             modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
-                            shape = MaterialTheme.shapes.medium
+                            shape = MaterialTheme.shapes.medium,
+                            colors = CustomColors.customPrimaryButtonColor()
                         ) {
                             Text(action.label)
                         }
