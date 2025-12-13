@@ -1,27 +1,41 @@
 package com.example.cookpilot.repository
 
+import android.content.Context
+import android.net.Uri
 import APPWRITE_BUCKET_ID
 import APPWRITE_DATABASE_ID
 import APPWRITE_RECIPE_COLLECTION_ID
-import android.content.Context
-import android.net.Uri
-import com.example.cookpilot.AppwriteClient
 import com.example.cookpilot.model.Recipe
 import io.appwrite.ID
 import io.appwrite.Query
 import io.appwrite.models.InputFile
+import io.appwrite.services.Databases
 import io.appwrite.services.Storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class RecipeRepository(
-    private val appContext: Context
+    private val appContext: Context,
+    private val databases: Databases,
+    private val storage: Storage
 ) {
     private val databaseId = APPWRITE_DATABASE_ID
     private val collectionId = APPWRITE_RECIPE_COLLECTION_ID
     private val bucketId = APPWRITE_BUCKET_ID
 
-    private val storage by lazy { Storage(AppwriteClient.client) }
+    suspend fun getAllRecipes(): List<Recipe> = withContext(Dispatchers.IO) {
+        val result = databases.listDocuments(databaseId, collectionId)
+        result.documents.map { Recipe.fromMap(it.id, it.data) }
+    }
+
+    suspend fun getRecipesByCreator(userId: String): List<Recipe> = withContext(Dispatchers.IO) {
+        val result = databases.listDocuments(
+            databaseId,
+            collectionId,
+            queries = listOf(Query.equal("creator", userId), Query.orderDesc("\$createdAt"))
+        )
+        result.documents.map { Recipe.fromMap(it.id, it.data) }
+    }
 
     suspend fun createRecipeFromForm(
         title: String,
@@ -33,9 +47,8 @@ class RecipeRepository(
         creator: String,
         dietaryTags: List<String>,
         fileUri: Uri?
-    ): Recipe = withContext(Dispatchers.IO) {
+    ) = withContext(Dispatchers.IO) {
         val fileId = uploadImageAndGetFileId(fileUri)
-
         val data = mapOf(
             "title" to title,
             "description" to description,
@@ -48,41 +61,13 @@ class RecipeRepository(
             "fileId" to fileId
         )
 
-        val doc = AppwriteClient.databases.createDocument(
+        databases.createDocument(
             databaseId = databaseId,
             collectionId = collectionId,
             documentId = ID.unique(),
             data = data
         )
-
-        Recipe.fromMap(doc.id, doc.data)
     }
-
-    private suspend fun uploadImageAndGetFileId(fileUri: Uri?): String? =
-        withContext(Dispatchers.IO) {
-            if (fileUri == null) return@withContext null
-
-            val inputStream = appContext.contentResolver.openInputStream(fileUri)
-                ?: return@withContext null
-            val bytes = inputStream.readBytes()
-            inputStream.close()
-
-            val mimeType = appContext.contentResolver.getType(fileUri) ?: "image/jpeg"
-
-            val inputFile = InputFile.fromBytes(
-                bytes,
-                "recipe_${System.currentTimeMillis()}.jpg",
-                mimeType
-            )
-
-            val file = storage.createFile(
-                bucketId = bucketId,
-                fileId = ID.unique(),
-                file = inputFile
-            )
-
-            file.id
-        }
 
     suspend fun updateRecipe(
         recipeId: String,
@@ -94,101 +79,52 @@ class RecipeRepository(
         cookingTime: Int,
         dietaryTags: List<String>,
         newImageUri: Uri?
-    ): Recipe = withContext(Dispatchers.IO) {
-        try {
-            val currentDoc = AppwriteClient.databases.getDocument(
-                databaseId = databaseId,
-                collectionId = collectionId,
-                documentId = recipeId
-            )
-            val oldFileId = currentDoc.data["fileId"] as? String
-            val fileId = if (newImageUri != null) {
-                val newFileId = uploadImageAndGetFileId(newImageUri)
-                if (oldFileId != null && newFileId != null) {
-                    try {
-                        storage.deleteFile(bucketId = bucketId, fileId = oldFileId)
-                    } catch (_: Exception) {}
-                }
-                newFileId
-            } else oldFileId
+    ) = withContext(Dispatchers.IO) {
+        val currentDoc = databases.getDocument(databaseId, collectionId, recipeId)
+        val oldFileId = currentDoc.data["fileId"] as? String
+        val fileId = if (newImageUri != null) {
+            val newFileId = uploadImageAndGetFileId(newImageUri)
+            oldFileId?.let {
+                try { storage.deleteFile(bucketId, it) } catch (_: Exception) {}
+            }
+            newFileId
+        } else oldFileId
 
-            val data = mapOf(
-                "title" to title,
-                "description" to description,
-                "steps" to steps,
-                "difficulty" to difficulty,
-                "ingredients" to ingredients,
-                "cooking_time" to cookingTime,
-                "dietaryTags" to dietaryTags,
-                "fileId" to fileId
-            )
+        val data = mapOf(
+            "title" to title,
+            "description" to description,
+            "steps" to steps,
+            "difficulty" to difficulty,
+            "ingredients" to ingredients,
+            "cooking_time" to cookingTime,
+            "dietaryTags" to dietaryTags,
+            "fileId" to fileId
+        )
 
-            val doc = AppwriteClient.databases.updateDocument(
-                databaseId = databaseId,
-                collectionId = collectionId,
-                documentId = recipeId,
-                data = data
-            )
-
-            Recipe.fromMap(doc.id, doc.data)
-        } catch (e: Exception) {
-            throw e
-        }
+        databases.updateDocument(databaseId, collectionId, recipeId, data)
     }
 
     suspend fun deleteRecipe(recipeId: String): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val doc = AppwriteClient.databases.getDocument(
-                databaseId = databaseId,
-                collectionId = collectionId,
-                documentId = recipeId
-            )
+        val doc = databases.getDocument(databaseId, collectionId, recipeId)
+        val fileId = doc.data["fileId"] as? String
 
-            val fileId = doc.data["fileId"] as? String
-
-            if (fileId != null) {
-                try {
-                    storage.deleteFile(bucketId = bucketId, fileId = fileId)
-                } catch (_: Exception) { }
-            }
-
-            AppwriteClient.databases.deleteDocument(
-                databaseId = databaseId,
-                collectionId = collectionId,
-                documentId = recipeId
-            )
-
-            true
-        } catch (_: Exception) {
-            false
+        fileId?.let {
+            try { storage.deleteFile(bucketId = bucketId, fileId = it) }
+            catch (_: Exception) { }
         }
+
+        databases.deleteDocument(databaseId, collectionId, recipeId)
+        true
     }
 
-    suspend fun getAllRecipes(): List<Recipe> = withContext(Dispatchers.IO) {
-        try {
-            val result = AppwriteClient.databases.listDocuments(
-                databaseId = databaseId,
-                collectionId = collectionId
-            )
-            result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
-        } catch (e: Exception) {
-            throw e
-        }
-    }
-
-    suspend fun getRecipesByCreator(userId: String): List<Recipe> = withContext(Dispatchers.IO) {
-        try {
-            val result = AppwriteClient.databases.listDocuments(
-                databaseId = databaseId,
-                collectionId = collectionId,
-                queries = listOf(
-                    Query.equal("creator", userId),
-                    Query.orderDesc("\$createdAt")
-                )
-            )
-            result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
-        } catch (e: Exception) {
-            throw e
-        }
+    private suspend fun uploadImageAndGetFileId(fileUri: Uri?): String? = withContext(Dispatchers.IO) {
+        if (fileUri == null) return@withContext null
+        val inputStream = appContext.contentResolver.openInputStream(fileUri) ?: return@withContext null
+        val bytes = inputStream.readBytes()
+        inputStream.close()
+        val mimeType = appContext.contentResolver.getType(fileUri) ?: "image/jpeg"
+        val inputFile = InputFile.fromBytes(bytes, "recipe_${System.currentTimeMillis()}.jpg", mimeType)
+        val file = storage.createFile(bucketId, ID.unique(), inputFile)
+        file.id
     }
 }

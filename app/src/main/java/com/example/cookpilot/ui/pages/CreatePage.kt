@@ -34,7 +34,7 @@ fun CreatePage(
     if (!uiState.isLoggedIn) {
         LogInMessage(
             onGoToAuthMenu = onGoToAuthMenu,
-            text = "You must be logged in to create a recipe"
+            text = "You must be logged in to create a recipe."
         )
         return
     }

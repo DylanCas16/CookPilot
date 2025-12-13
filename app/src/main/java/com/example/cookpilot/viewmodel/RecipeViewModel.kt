@@ -71,9 +71,6 @@ class RecipeViewModel(
         }
     }
 
-    fun clearLoadAllRecipesState() { _loadAllRecipesState.value = UiState.Idle }
-    fun clearLoadUserRecipesState() { _loadUserRecipesState.value = UiState.Idle }
-
     fun createRecipeFromForm(
         title: String,
         description: String,

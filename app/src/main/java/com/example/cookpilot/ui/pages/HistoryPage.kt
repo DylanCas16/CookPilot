@@ -37,7 +37,7 @@ fun HistoryPage(
     if (!uiState.isLoggedIn) {
         LogInMessage(
             onGoToAuthMenu = onGoToAuthMenu,
-            text = "You must be logged in to have a history"
+            text = "You must be logged in to have a history."
         )
         return
     }

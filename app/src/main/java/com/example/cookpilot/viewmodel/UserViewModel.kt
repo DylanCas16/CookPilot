@@ -12,6 +12,7 @@ import com.example.cookpilot.notifications.NotificationScheduler
 import com.example.cookpilot.repository.AuthRepository
 import com.example.cookpilot.repository.UserRepository
 import com.example.cookpilot.ui.components.auth.RegisterUser
+import com.example.cookpilot.utils.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,14 +59,22 @@ class UserViewModel(
             if (loggedIn) {
                 val user = authRepository.getCurrentUser()
                 user?.id?.let { userId ->
-                    val userData = authRepository.getUserData(userId)
-                    _uiState.update {
-                        it.copy(
-                            isLoggedIn = true,
-                            userId = userId,
-                            userName = userData?.get("username") as? String,
-                            profilePictureId = userData?.get("profilePictureId") as? String
-                        )
+                    when (val result = authRepository.getUserData(userId)) {
+                        is UiState.Success -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoggedIn = true,
+                                    userId = userId,
+                                    userName = result.data?.get("username") as? String,
+                                    profilePictureId = result.data?.get("profilePictureId") as? String
+                                )
+                            }
+                        }
+                        is UiState.Error -> {
+                            _uiState.update { it.copy(error = result.message) }
+                        }
+                        UiState.Idle -> {}
+                        UiState.Loading -> {}
                     }
                 }
             }
@@ -78,28 +87,33 @@ class UserViewModel(
             try {
                 authRepository.loginUser(email, password)
                 val user = authRepository.getCurrentUser()
-
                 user?.id?.let { userId ->
-                    val userData = authRepository.getUserData(userId)
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isLoggedIn = true,
-                            userId = userId,
-                            userName = userData?.get("username") as? String,
-                            profilePictureId = userData?.get("profilePictureId") as? String,
-                            success = true,
-                            error = null,
-                        )
+                    when (val result = authRepository.getUserData(userId)) {
+                        is UiState.Success -> {
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    isLoggedIn = true,
+                                    userId = userId,
+                                    userName = result.data?.get("username") as? String,
+                                    profilePictureId = result.data?.get("profilePictureId") as? String,
+                                    success = true,
+                                    error = null
+                                )
+                            }
+                        }
+                        is UiState.Error -> {
+                            _uiState.update {
+                                it.copy(isLoading = false, success = false, error = result.message)
+                            }
+                        }
+                        UiState.Idle -> {}
+                        UiState.Loading -> {}
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        success = false,
-                        error = e.message ?: "Unknown error"
-                    )
+                    it.copy(isLoading = false, success = false, error = e.message ?: "Unknown error")
                 }
             }
         }
@@ -108,33 +122,41 @@ class UserViewModel(
     fun uploadProfilePicture(imageUri: Uri) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                val userId = _uiState.value.userId
-                if (userId == null) {
-                    _uiState.update { it.copy(isLoading = false, error = "No user logged in") }
-                    return@launch
-                }
+            val userId = _uiState.value.userId
+            if (userId == null) {
+                _uiState.update { it.copy(isLoading = false, error = "No user logged in") }
+                return@launch
+            }
 
-                val fileId = userRepository.uploadProfilePicture(imageUri)
-                val oldFileId = _uiState.value.profilePictureId
+            when (val uploadResult = userRepository.uploadProfilePicture(imageUri)) {
+                is UiState.Success -> {
+                    val fileId = uploadResult.data
+                    val oldFileId = _uiState.value.profilePictureId
 
-                if (oldFileId != null) {
-                    userRepository.deleteProfilePicture(oldFileId)
-                }
+                    oldFileId?.let { userRepository.deleteProfilePicture(it) }
 
-                userRepository.updateProfilePicture(userId, fileId)
-
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        profilePictureId = fileId,
-                        error = null
-                    )
+                    when (val updateResult = userRepository.updateProfilePicture(userId, fileId)) {
+                        is UiState.Success -> {
+                            _uiState.update {
+                                it.copy(isLoading = false, profilePictureId = fileId, error = null)
+                            }
+                        }
+                        is UiState.Error -> {
+                            _uiState.update {
+                                it.copy(isLoading = false, error = updateResult.message)
+                            }
+                        }
+                        UiState.Idle -> {}
+                        UiState.Loading -> {}
+                    }
                 }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, error = e.message ?: "Failed to upload profile picture")
+                is UiState.Error -> {
+                    _uiState.update {
+                        it.copy(isLoading = false, error = uploadResult.message)
+                    }
                 }
+                UiState.Idle -> {}
+                UiState.Loading -> {}
             }
         }
     }
@@ -168,7 +190,7 @@ class UserViewModel(
                     userId = null,
                     userName = null,
                     profilePictureId = null
-                    )
+                )
                 onLogoutComplete()
             } catch (e: Exception) {
                 _uiState.update {
@@ -180,41 +202,33 @@ class UserViewModel(
 
     fun clearAuthStatus() {
         _uiState.update {
-            it.copy(
-                success = false,
-                error = null,
-                isLoading = false
-            )
+            it.copy(success = false, error = null, isLoading = false)
         }
     }
 
     fun updateUsername(newUsername: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                val userId = _uiState.value.userId
-                if (userId == null) {
-                    _uiState.update { it.copy(isLoading = false, error = "No user logged in") }
-                    return@launch
-                }
+            val userId = _uiState.value.userId
+            if (userId == null) {
+                _uiState.update { it.copy(isLoading = false, error = "No user logged in") }
+                return@launch
+            }
 
-                userRepository.updateUsername(userId, newUsername)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        userName = newUsername,
-                        error = null
-                    )
+            when (val result = userRepository.updateUsername(userId, newUsername)) {
+                is UiState.Success -> {
+                    _uiState.update {
+                        it.copy(isLoading = false, userName = newUsername, error = null)
+                    }
                 }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message ?: "Failed to update username"
-                    )
+                is UiState.Error -> {
+                    _uiState.update {
+                        it.copy(isLoading = false, error = result.message)
+                    }
                 }
+                UiState.Idle -> {}
+                UiState.Loading -> {}
             }
         }
     }
-
 }

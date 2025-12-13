@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.theme.CustomColors
 
@@ -25,10 +26,10 @@ fun LogInMessage(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), CircleShape)
-            .clip(CircleShape)
-            .border(2.dp, MaterialTheme.colorScheme.secondary, CircleShape)
-            .padding(30.dp, 40.dp),
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RectangleShape)
+            .clip(RectangleShape)
+            .border(3.dp, MaterialTheme.colorScheme.secondary, RectangleShape)
+            .padding(30.dp, 25.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

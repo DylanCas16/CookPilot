@@ -1,6 +1,6 @@
 package com.example.cookpilot.viewmodel
 
-import HistoryRepository
+import com.example.cookpilot.repository.HistoryRepository
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.cookpilot.data.AppContainer
 import com.example.cookpilot.model.Recipe
+import com.example.cookpilot.utils.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,10 +28,24 @@ class HistoryViewModel(
     private val _historyRecipes = MutableStateFlow<List<Recipe>>(emptyList())
     val historyRecipes: StateFlow<List<Recipe>> = _historyRecipes.asStateFlow()
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
     fun loadUserHistory(userId: String) {
         viewModelScope.launch {
-            val recipes = historyRepository.getUserHistory(userId)
-            _historyRecipes.value = recipes
+            val result = historyRepository.getUserHistory(userId)
+            when (result) {
+                is UiState.Success -> {
+                    _historyRecipes.value = result.data
+                    _error.value = null
+                }
+                is UiState.Error -> {
+                    _error.value = result.message
+                }
+
+                UiState.Idle -> {}
+                UiState.Loading -> {}
+            }
         }
     }
 
@@ -45,5 +60,9 @@ class HistoryViewModel(
             historyRepository.clearUserHistory(userId)
             _historyRecipes.value = emptyList()
         }
+    }
+
+    fun clearError() {
+        _error.value = null
     }
 }
