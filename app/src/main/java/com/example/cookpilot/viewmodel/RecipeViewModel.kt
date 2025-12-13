@@ -19,18 +19,50 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
     private val _userRecipes = MutableStateFlow<List<Recipe>>(emptyList())
     val userRecipes: StateFlow<List<Recipe>> = _userRecipes
 
+    private val _loadAllRecipesState = MutableStateFlow<UiState<List<Recipe>>>(UiState.Idle)
+    val loadAllRecipesState: StateFlow<UiState<List<Recipe>>> = _loadAllRecipesState
+
+    private val _loadUserRecipesState = MutableStateFlow<UiState<List<Recipe>>>(UiState.Idle)
+    val loadUserRecipesState: StateFlow<UiState<List<Recipe>>> = _loadUserRecipesState
+
     fun loadAllRecipes() {
         viewModelScope.launch {
-            val recipes = repository.getAllRecipes()
-            _recipes.value = recipes
+            _loadAllRecipesState.value = UiState.Loading
+            try {
+                val recipes = repository.getAllRecipes()
+                _recipes.value = recipes
+                _loadAllRecipesState.value = UiState.Success(recipes)
+            } catch (e: Exception) {
+                val errorType = determineErrorType(e)
+                val errorMessage = getErrorMessage(e, errorType)
+                _loadAllRecipesState.value = UiState.Error(errorMessage, errorType)
+                e.printStackTrace()
+            }
         }
     }
 
     fun loadUserRecipes(userId: String) {
         viewModelScope.launch {
-            val userRecipes = repository.getRecipesByCreator(userId)
-            _userRecipes.value = userRecipes
+            _loadUserRecipesState.value = UiState.Loading
+            try {
+                val userRecipes = repository.getRecipesByCreator(userId)
+                _userRecipes.value = userRecipes
+                _loadUserRecipesState.value = UiState.Success(userRecipes)
+            } catch (e: Exception) {
+                val errorType = determineErrorType(e)
+                val errorMessage = getErrorMessage(e, errorType)
+                _loadUserRecipesState.value = UiState.Error(errorMessage, errorType)
+                e.printStackTrace()
+            }
         }
+    }
+
+    fun clearLoadAllRecipesState() {
+        _loadAllRecipesState.value = UiState.Idle
+    }
+
+    fun clearLoadUserRecipesState() {
+        _loadUserRecipesState.value = UiState.Idle
     }
 
     fun createRecipeFromForm(
@@ -58,7 +90,9 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                 onSuccess()
             } catch (e: Exception) {
                 e.printStackTrace()
-                onError(e.message ?: "Unknown error creating recipe.")
+                val errorType = determineErrorType(e)
+                val errorMessage = getErrorMessage(e, errorType)
+                onError(errorMessage)
             }
         }
     }
@@ -73,46 +107,77 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         cookingTime: Int,
         creator: String,
         dietaryTags: List<String>,
-        newImageUri: Uri?
+        newImageUri: Uri?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
     ) {
         viewModelScope.launch {
             try {
-                println("🔵 Updating recipe from ViewModel")
                 repository.updateRecipe(
                     recipeId, title, description, steps,
                     difficulty, ingredients, cookingTime, dietaryTags, newImageUri
                 )
-
-                // Recargar listas
                 _recipes.value = repository.getAllRecipes()
                 loadUserRecipes(creator)
-
-                println("✅ Recipe updated and lists refreshed")
+                onSuccess()
             } catch (e: Exception) {
-                println("❌ Error in updateRecipe: ${e.message}")
                 e.printStackTrace()
+                val errorType = determineErrorType(e)
+                val errorMessage = getErrorMessage(e, errorType, "updating")
+                onError(errorMessage)
             }
         }
     }
 
-    fun deleteRecipe(recipeId: String, creator: String) {
+    fun deleteRecipe(
+        recipeId: String,
+        creator: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
         viewModelScope.launch {
             try {
-                println("🔵 Deleting recipe from ViewModel")
                 val success = repository.deleteRecipe(recipeId)
-
                 if (success) {
-                    // Recargar listas
                     _recipes.value = repository.getAllRecipes()
                     loadUserRecipes(creator)
-                    println("✅ Recipe deleted and lists refreshed")
+                    onSuccess()
                 } else {
-                    println("❌ Failed to delete recipe")
+                    onError("Failed to delete recipe.")
                 }
             } catch (e: Exception) {
-                println("❌ Error in deleteRecipe: ${e.message}")
                 e.printStackTrace()
+                val errorType = determineErrorType(e)
+                val errorMessage = getErrorMessage(e, errorType, "deleting")
+                onError(errorMessage)
             }
         }
     }
+
+
+    private fun determineErrorType(exception: Exception): ErrorType {
+        return when {
+            exception is java.net.UnknownHostException ||
+                    exception is java.net.SocketTimeoutException ||
+                    exception is java.io.IOException -> ErrorType.NETWORK
+
+            exception.message?.contains("401", ignoreCase = true) == true ||
+                    exception.message?.contains("unauthorized", ignoreCase = true) == true -> ErrorType.AUTHENTICATION
+
+            exception.message?.contains("500", ignoreCase = true) == true ||
+                    exception.message?.contains("503", ignoreCase = true) == true -> ErrorType.SERVER
+
+            else -> ErrorType.GENERIC
+        }
+    }
+
+    private fun getErrorMessage(exception: Exception, errorType: ErrorType, operation: String = "performing operation"): String {
+        return when (errorType) {
+            ErrorType.NETWORK -> "Unable to connect to the database. Check your internet connection."
+            ErrorType.SERVER -> "Server is unavailable. Please try again later."
+            ErrorType.AUTHENTICATION -> "Authentication error. Please log in again."
+            ErrorType.GENERIC -> exception.message ?: "Unknown error while $operation."
+        }
+    }
+
 }

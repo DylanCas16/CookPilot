@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
@@ -31,7 +32,7 @@ private const val CardCornerRadius = 12f
 
 @Composable
 fun HistoryEmptyCard(onClick: () -> Unit) {
-    val borderColor = MaterialTheme.colorScheme.tertiary
+    val borderColor = Color.Red
     val density = LocalDensity.current.density
     val cornerRadiusPx = CardCornerRadius * density
 

@@ -1,6 +1,8 @@
 package com.example.cookpilot.repository
 
 import APPWRITE_BUCKET_ID
+import APPWRITE_DATABASE_ID
+import APPWRITE_RECIPE_COLLECTION_ID
 import android.content.Context
 import android.net.Uri
 import com.example.cookpilot.AppwriteClient
@@ -15,8 +17,8 @@ import kotlinx.coroutines.withContext
 class RecipeRepository(
     private val appContext: Context
 ) {
-    private val databaseId = "691f3585001c7edb5dd2"
-    private val collectionId = "recipes"
+    private val databaseId = APPWRITE_DATABASE_ID
+    private val collectionId = APPWRITE_RECIPE_COLLECTION_ID
     private val bucketId = APPWRITE_BUCKET_ID
 
     private val storage by lazy { Storage(AppwriteClient.client) }
@@ -157,8 +159,20 @@ class RecipeRepository(
             )
 
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
+        }
+    }
+
+    suspend fun getAllRecipes(): List<Recipe> = withContext(Dispatchers.IO) {
+        try {
+            val result = AppwriteClient.databases.listDocuments(
+                databaseId = databaseId,
+                collectionId = collectionId
+            )
+            result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
+        } catch (e: Exception) {
+            throw e
         }
     }
 
@@ -173,20 +187,8 @@ class RecipeRepository(
                 )
             )
             result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
-        } catch (_: Exception) {
-            emptyList()
-        }
-    }
-
-    suspend fun getAllRecipes(): List<Recipe> = withContext(Dispatchers.IO) {
-        try {
-            val result = AppwriteClient.databases.listDocuments(
-                databaseId = databaseId,
-                collectionId = collectionId
-            )
-            result.documents.map { doc -> Recipe.fromMap(doc.id, doc.data) }
-        } catch (_: Exception) {
-            emptyList()
+        } catch (e: Exception) {
+            throw e
         }
     }
 }

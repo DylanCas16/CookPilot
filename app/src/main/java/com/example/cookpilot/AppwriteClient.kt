@@ -18,8 +18,6 @@ object AppwriteClient {
             .setEndpoint(APPWRITE_PUBLIC_ENDPOINT)
             .setProject(APPWRITE_PROJECT_ID)
 
-        println("DEBUG Appwrite: endpoint=$APPWRITE_PUBLIC_ENDPOINT, projectId=$APPWRITE_PROJECT_ID")
-
         databases = Databases(client)
     }
 }

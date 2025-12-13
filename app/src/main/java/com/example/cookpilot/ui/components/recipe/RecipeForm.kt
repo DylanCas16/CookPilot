@@ -1,8 +1,10 @@
 package com.example.cookpilot.ui.components.recipe
 
-import android.R
+import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,6 +37,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -46,24 +49,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.FormBase
 import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.utils.PermissionUtils
 import java.io.File
-
 
 @Composable
 fun RecipeForm(
     modifier: Modifier = Modifier,
     onSaveRecipe: (Recipe, Uri?) -> Unit = { _, _ -> }
 ) {
+    val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
+    val isCameraEnabled by preferencesManager.isCameraEnabledFlow.collectAsState(initial = true)
+
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var steps by remember { mutableStateOf("") }
@@ -73,20 +80,31 @@ fun RecipeForm(
     var cookingTimeText by remember { mutableStateOf("") }
     val selectedDietaryTags = remember { mutableStateListOf<String>() }
 
-    val context = LocalContext.current
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var showCameraDisabledDialog by remember { mutableStateOf(false) }
 
     val singlePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri -> selectedImageUri = uri }
     )
+
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
-            if (success) {
-                selectedImageUri = tempPhotoUri
+            if (success) selectedImageUri = tempPhotoUri else tempPhotoUri = null
+        }
+    )
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                val uri = context.createImageUri()
+                tempPhotoUri = uri
+                cameraLauncher.launch(uri)
             } else {
-                tempPhotoUri = null
+                showPermissionDialog = true
             }
         }
     )
@@ -140,12 +158,12 @@ fun RecipeForm(
             }
         },
     ) {
-        // ================== 1. IMAGE SELECTOR ==================
         Text(
             text = "Recipe photo:",
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
         )
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -157,70 +175,73 @@ fun RecipeForm(
                     )
                 },
             contentAlignment = Alignment.Center
-        )  {
+        ) {
             if (selectedImageUri != null) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_menu_gallery),
+                        painter = painterResource(id = android.R.drawable.ic_menu_gallery),
                         contentDescription = null,
                         modifier = Modifier.size(60.dp),
                         tint = MaterialTheme.colorScheme.tertiary
                     )
                     Text("Image selected", style = MaterialTheme.typography.bodySmall)
                 }
-            } else {
-                // ================== IMAGE ACTION BUTTONS ==================
-                Row(
-                    modifier = Modifier,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            singlePhotoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = CustomColors.customPrimaryButtonColor()
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_menu_gallery),
-                            contentDescription = "Gallery icon"
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Go Gallery")
-                    }
+            }
+        }
 
-                    Button(
-                        onClick = {
-                            val uri = context.createImageUri()
-                            tempPhotoUri = uri
-                            cameraLauncher.launch(uri)
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = CustomColors.customSecondaryButtonColor()
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_menu_camera),
-                            contentDescription = "Take Photo"
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Take Photo")
-                    }
-                }
+        Row(
+            modifier = Modifier,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {
+                    singlePhotoPickerLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
+                modifier = Modifier.weight(1f),
+                colors = CustomColors.customPrimaryButtonColor()
+            ) {
+                Icon(
+                    painter = painterResource(android.R.drawable.ic_menu_gallery),
+                    contentDescription = "Gallery icon"
+                )
+                Spacer(Modifier.width(4.dp))
+                Text("Go Gallery")
             }
 
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-            )
+            Button(
+                onClick = {
+                    if (!isCameraEnabled) {
+                        showCameraDisabledDialog = true
+                    } else if (PermissionUtils.hasCameraPermission(context)) {
+                        val uri = context.createImageUri()
+                        tempPhotoUri = uri
+                        cameraLauncher.launch(uri)
+                    } else {
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                },
+                modifier = Modifier.weight(1f),
+                colors = CustomColors.customSecondaryButtonColor()
+            ) {
+                Icon(
+                    painter = painterResource(android.R.drawable.ic_menu_camera),
+                    contentDescription = "Take Photo"
+                )
+                Spacer(Modifier.width(4.dp))
+                Text("Take Photo")
+            }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ================== TITLE ==================
         Text(
             text = "Recipe name:",
             style = MaterialTheme.typography.titleMedium,
@@ -237,7 +258,6 @@ fun RecipeForm(
             colors = CustomColors.customTextFieldColors()
         )
 
-        // ================== DESCRIPTION ==================
         Text(
             text = "Description:",
             style = MaterialTheme.typography.titleMedium,
@@ -256,7 +276,6 @@ fun RecipeForm(
             colors = CustomColors.customTextFieldColors()
         )
 
-        // ================== INGREDIENTS ==================
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -267,11 +286,8 @@ fun RecipeForm(
                 text = "Ingredients:",
                 style = MaterialTheme.typography.titleMedium
             )
-
             Spacer(modifier = Modifier.width(8.dp))
-
             var showInfoDialog by remember { mutableStateOf(false) }
-
             IconButton(
                 onClick = { showInfoDialog = true },
                 modifier = Modifier.size(24.dp)
@@ -328,7 +344,6 @@ fun RecipeForm(
         )
 
         val exampleIngredients = listOf("tomato", "onion", "egg", "garlic", "chicken")
-
         ingredients.forEachIndexed { index, ingredient ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -370,7 +385,6 @@ fun RecipeForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ================== STEPS ==================
         Text(
             text = "Steps:",
             style = MaterialTheme.typography.titleMedium,
@@ -391,7 +405,6 @@ fun RecipeForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ================== DIETARY TAGS ==================
         DietaryTagSelector(
             selectedTags = selectedDietaryTags,
             onTagToggle = { tag ->
@@ -406,7 +419,6 @@ fun RecipeForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ================== COOKING TIME ==================
         Text(
             text = "Cooking time:",
             style = MaterialTheme.typography.titleMedium,
@@ -430,7 +442,6 @@ fun RecipeForm(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ================== DIFFICULTY ==================
         Text(
             text = "Difficulty:",
             style = MaterialTheme.typography.titleMedium
@@ -452,9 +463,7 @@ fun RecipeForm(
                     tint = if (i <= difficulty) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.tertiary
                 )
             }
-
             Spacer(modifier = Modifier.width(16.dp))
-
             IconButton(onClick = { showRubricDialog = true }) {
                 Icon(
                     imageVector = Icons.Default.Info,
@@ -471,7 +480,6 @@ fun RecipeForm(
             modifier = Modifier.padding(vertical = 4.dp)
         )
 
-        // ================== RUBRIC DIALOGUE ==================
         if (showRubricDialog) {
             AlertDialog(
                 onDismissRequest = { showRubricDialog = false },
@@ -495,6 +503,49 @@ fun RecipeForm(
                 }
             )
         }
+    }
+
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("Camera Permission Required") },
+            text = {
+                Text("Camera access is needed to take photos. Please grant permission in app settings.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showPermissionDialog = false
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text("Open Settings")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showCameraDisabledDialog) {
+        AlertDialog(
+            onDismissRequest = { showCameraDisabledDialog = false },
+            title = { Text("Camera Disabled") },
+            text = {
+                Text("Camera access is disabled in settings. Enable it to take photos.")
+            },
+            confirmButton = {
+                TextButton(onClick = { showCameraDisabledDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 

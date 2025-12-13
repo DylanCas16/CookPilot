@@ -11,8 +11,12 @@ import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.SelectableChipColors
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimePickerColors
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteColors
@@ -37,6 +41,18 @@ object CustomColors {
             selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
 
             containerColor = MaterialTheme.colorScheme.background
+        )
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    fun customTimePickerColors(): TimePickerColors {
+        return TimePickerDefaults.colors(
+            selectorColor = MaterialTheme.colorScheme.secondary,
+            containerColor = MaterialTheme.colorScheme.onBackground,
+            timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.primary,
+            timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+            timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.primary
         )
     }
 
@@ -72,6 +88,17 @@ object CustomColors {
 
                 indicatorColor = MaterialTheme.colorScheme.secondary
             )
+        )
+    }
+
+    @Composable
+    fun customSwitchColors(): SwitchColors {
+        return SwitchDefaults.colors(
+            checkedThumbColor = MaterialTheme.colorScheme.primary,
+            checkedTrackColor = MaterialTheme.colorScheme.onPrimary,
+
+            uncheckedThumbColor = MaterialTheme.colorScheme.primary,
+            uncheckedTrackColor = MaterialTheme.colorScheme.onPrimary
         )
     }
 

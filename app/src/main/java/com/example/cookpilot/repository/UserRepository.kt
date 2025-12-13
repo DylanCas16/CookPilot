@@ -1,6 +1,8 @@
 package com.example.cookpilot.repository
 
 import APPWRITE_BUCKET_ID
+import APPWRITE_DATABASE_ID
+import APPWRITE_USER_COLLECTION_ID
 import android.content.Context
 import android.net.Uri
 import com.example.cookpilot.AppwriteClient
@@ -14,78 +16,57 @@ import kotlinx.coroutines.withContext
 class UserRepository(private val appContext: Context) {
     private val databases by lazy { AppwriteClient.databases }
     private val storage by lazy { Storage(AppwriteClient.client) }
-    private val databaseId = "691f3585001c7edb5dd2"
-    private val usersCollectionId = "users"
+    private val databaseId = APPWRITE_DATABASE_ID
+    private val usersCollectionId = APPWRITE_USER_COLLECTION_ID
     private val bucketId = APPWRITE_BUCKET_ID
 
-    // Subir imagen de perfil y devolver el fileId
-    suspend fun uploadProfilePicture(imageUri: Uri): String? = withContext(Dispatchers.IO) {
-        try {
-            val inputStream = appContext.contentResolver.openInputStream(imageUri)
-                ?: return@withContext null
+    suspend fun uploadProfilePicture(imageUri: Uri): String = withContext(Dispatchers.IO) {
+        val inputStream = appContext.contentResolver.openInputStream(imageUri)
+            ?: throw Exception("Cannot open image file")
 
-            val bytes = inputStream.readBytes()
-            inputStream.close()
+        val bytes = inputStream.readBytes()
+        inputStream.close()
 
-            val mimeType = appContext.contentResolver.getType(imageUri) ?: "image/jpeg"
-            val inputFile = InputFile.fromBytes(
-                bytes,
-                "profile_${System.currentTimeMillis()}.jpg",
-                mimeType
-            )
+        val mimeType = appContext.contentResolver.getType(imageUri) ?: "image/jpeg"
+        val inputFile = InputFile.fromBytes(
+            bytes,
+            "profile_${System.currentTimeMillis()}.jpg",
+            mimeType
+        )
 
-            val file = storage.createFile(
-                bucketId = bucketId,
-                fileId = ID.unique(),
-                file = inputFile
-            )
+        val file = storage.createFile(
+            bucketId = bucketId,
+            fileId = ID.unique(),
+            file = inputFile
+        )
 
-            println("✅ Profile picture uploaded: ${file.id}")
-            file.id
-        } catch (e: Exception) {
-            println("❌ Error uploading profile picture: ${e.message}")
-            null
-        }
+        file.id
     }
 
-    // Actualizar el profilePictureId en la colección users
     suspend fun updateProfilePicture(userId: String, fileId: String): Boolean =
         withContext(Dispatchers.IO) {
-            try {
-                // Buscar el documento del usuario por userId
-                val userDocs = databases.listDocuments(
-                    databaseId = databaseId,
-                    collectionId = usersCollectionId,
-                    queries = listOf(
-                        Query.equal("userId", userId),
-                        Query.limit(1)
-                    )
+            val userDocs = databases.listDocuments(
+                databaseId = databaseId,
+                collectionId = usersCollectionId,
+                queries = listOf(
+                    Query.equal("userId", userId),
+                    Query.limit(1)
                 )
+            )
 
-                if (userDocs.documents.isEmpty()) {
-                    println("❌ User document not found")
-                    return@withContext false
-                }
+            if (userDocs.documents.isEmpty()) throw Exception("User not found")
 
-                val documentId = userDocs.documents[0].id
+            val documentId = userDocs.documents[0].id
+            databases.updateDocument(
+                databaseId = databaseId,
+                collectionId = usersCollectionId,
+                documentId = documentId,
+                data = mapOf("profilePictureId" to fileId)
+            )
 
-                // Actualizar con el nuevo fileId
-                databases.updateDocument(
-                    databaseId = databaseId,
-                    collectionId = usersCollectionId,
-                    documentId = documentId,
-                    data = mapOf("profilePictureId" to fileId)
-                )
-
-                println("✅ Profile picture updated in DB")
-                true
-            } catch (e: Exception) {
-                println("❌ Error updating profile picture: ${e.message}")
-                false
-            }
+            true
         }
 
-    // Obtener profilePictureId del usuario
     suspend fun getProfilePictureId(userId: String): String? = withContext(Dispatchers.IO) {
         try {
             val userDocs = databases.listDocuments(
@@ -98,26 +79,17 @@ class UserRepository(private val appContext: Context) {
             )
 
             if (userDocs.documents.isEmpty()) return@withContext null
-
             userDocs.documents[0].data["profilePictureId"] as? String
-        } catch (e: Exception) {
-            println("❌ Error getting profile picture: ${e.message}")
+        } catch (_: Exception) {
             null
         }
     }
 
-    // Eliminar imagen anterior de Storage (opcional pero recomendado)
     suspend fun deleteProfilePicture(fileId: String): Boolean = withContext(Dispatchers.IO) {
-        try {
-            storage.deleteFile(
-                bucketId = bucketId,
-                fileId = fileId
-            )
-            println("✅ Old profile picture deleted")
-            true
-        } catch (e: Exception) {
-            println("⚠️ Error deleting old picture: ${e.message}")
-            false
-        }
+        storage.deleteFile(
+            bucketId = bucketId,
+            fileId = fileId
+        )
+        true
     }
 }

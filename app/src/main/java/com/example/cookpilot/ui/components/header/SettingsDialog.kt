@@ -32,9 +32,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +45,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.MealPreferences
+import kotlinx.coroutines.launch
+import com.example.cookpilot.ui.components.CustomDivider
+import com.example.cookpilot.ui.theme.CustomColors
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -55,11 +61,14 @@ fun SettingsDialog(
     onSave: (MealPreferences) -> Unit
 ) {
     val context = LocalContext.current
+    val preferencesManager = remember { PreferencesManager(context) }
+    val isCameraEnabled by preferencesManager.isCameraEnabledFlow.collectAsState(initial = true)
+    val scope = rememberCoroutineScope()
+
     var notificationsEnabled by remember { mutableStateOf(currentPreferences.notificationsEnabled) }
     var breakfastTime by remember { mutableStateOf(currentPreferences.breakfastTime) }
     var lunchTime by remember { mutableStateOf(currentPreferences.lunchTime) }
     var dinnerTime by remember { mutableStateOf(currentPreferences.dinnerTime) }
-
     var showBreakfastPicker by remember { mutableStateOf(false) }
     var showLunchPicker by remember { mutableStateOf(false) }
     var showDinnerPicker by remember { mutableStateOf(false) }
@@ -106,15 +115,15 @@ fun SettingsDialog(
                                 ) == PackageManager.PERMISSION_GRANTED
 
                                 if (hasPermission) notificationsEnabled = true
-                                else
-                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                else notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else notificationsEnabled = enabled
-                        }
+                        },
+                        colors = CustomColors.customSwitchColors()
                     )
                 }
 
                 if (notificationsEnabled) {
-                    HorizontalDivider()
+                    CustomDivider()
 
                     // Breakfast
                     MealTimeRow(
@@ -140,10 +149,46 @@ fun SettingsDialog(
                         onClick = { showDinnerPicker = true }
                     )
                 }
+
+                HorizontalDivider()
+
+                Text(
+                    text = "Privacy",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Camera Access",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Allow app to use camera for recipe photos",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = isCameraEnabled,
+                        onCheckedChange = { enabled ->
+                            scope.launch {
+                                preferencesManager.setCameraEnabled(enabled)
+                            }
+                        }
+                    )
+                }
             }
         },
         confirmButton = {
-            Button(
+            OutlinedButton(
                 onClick = {
                     val newPreferences = MealPreferences(
                         breakfastTime = breakfastTime,
@@ -153,19 +198,19 @@ fun SettingsDialog(
                     )
                     onSave(newPreferences)
                     onDismiss()
-                }
+                },
+                colors = CustomColors.customSecondaryButtonColor()
             ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            Button(onClick = onDismiss,
+                colors = CustomColors.customPrimaryButtonColor())
+            { Text("Cancel") }
         }
     )
 
-    // Time Pickers
     if (showBreakfastPicker) {
         TimePickerDialog(
             initialTime = breakfastTime,
@@ -218,11 +263,11 @@ private fun MealTimeRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
             Text(label, style = MaterialTheme.typography.bodyLarge)
         }
 
-        OutlinedButton(onClick = onClick) {
+        OutlinedButton(onClick = onClick, colors = CustomColors.customPrimaryButtonColor()) {
             Text(time)
             Spacer(modifier = Modifier.width(4.dp))
             Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -247,7 +292,7 @@ fun TimePickerDialog(
         onDismissRequest = onDismiss,
         title = { Text("Select Time") },
         text = {
-            TimePicker(state = timePickerState)
+            TimePicker(state = timePickerState, colors = CustomColors.customTimePickerColors())
         },
         confirmButton = {
             TextButton(onClick = {
@@ -255,15 +300,16 @@ fun TimePickerDialog(
                     timePickerState.hour,
                     timePickerState.minute
                 )
-                onConfirm(selectedTime)
-            }) {
+                onConfirm(selectedTime) },
+                colors = CustomColors.customSecondaryButtonColor()
+            ) {
                 Text("OK")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
+            TextButton(onClick = onDismiss,
+                colors = CustomColors.customPrimaryButtonColor()
+            ) { Text("Cancel") }
         }
     )
 }

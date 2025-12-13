@@ -122,7 +122,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     fun uploadProfilePicture(imageUri: Uri) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-
             try {
                 val userId = _uiState.value.userId
                 if (userId == null) {
@@ -130,38 +129,25 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-
                 val fileId = userRepository.uploadProfilePicture(imageUri)
-                if (fileId == null) {
-                    _uiState.update {
-                        it.copy(isLoading = false, error = "Failed to upload image")
-                    }
-                    return@launch
-                }
-
                 val oldFileId = _uiState.value.profilePictureId
+
                 if (oldFileId != null) {
                     userRepository.deleteProfilePicture(oldFileId)
                 }
 
-                val success = userRepository.updateProfilePicture(userId, fileId)
+                userRepository.updateProfilePicture(userId, fileId)
 
-                if (success) {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            profilePictureId = fileId,
-                            error = null
-                        )
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(isLoading = false, error = "Failed to update profile")
-                    }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        profilePictureId = fileId,
+                        error = null
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isLoading = false, error = e.message)
+                    it.copy(isLoading = false, error = e.message ?: "Failed to upload profile picture")
                 }
             }
         }
