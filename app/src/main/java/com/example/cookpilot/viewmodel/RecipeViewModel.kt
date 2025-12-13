@@ -1,29 +1,41 @@
 package com.example.cookpilot.viewmodel
 
-import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.cookpilot.data.AppContainer
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.repository.RecipeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class RecipeViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = RecipeRepository(application)
+class RecipeViewModel(
+    private val repository: RecipeRepository
+) : ViewModel() {
+
+    companion object {
+        fun factory(container: AppContainer): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer { RecipeViewModel(container.recipeRepository) }
+            }
+    }
 
     private val _recipes = MutableStateFlow<List<Recipe>>(emptyList())
-    val recipes: StateFlow<List<Recipe>> = _recipes
+    val recipes: StateFlow<List<Recipe>> = _recipes.asStateFlow()
 
     private val _userRecipes = MutableStateFlow<List<Recipe>>(emptyList())
-    val userRecipes: StateFlow<List<Recipe>> = _userRecipes
+    val userRecipes: StateFlow<List<Recipe>> = _userRecipes.asStateFlow()
 
     private val _loadAllRecipesState = MutableStateFlow<UiState<List<Recipe>>>(UiState.Idle)
-    val loadAllRecipesState: StateFlow<UiState<List<Recipe>>> = _loadAllRecipesState
+    val loadAllRecipesState: StateFlow<UiState<List<Recipe>>> = _loadAllRecipesState.asStateFlow()
 
     private val _loadUserRecipesState = MutableStateFlow<UiState<List<Recipe>>>(UiState.Idle)
-    val loadUserRecipesState: StateFlow<UiState<List<Recipe>>> = _loadUserRecipesState
+    val loadUserRecipesState: StateFlow<UiState<List<Recipe>>> = _loadUserRecipesState.asStateFlow()
 
     fun loadAllRecipes() {
         viewModelScope.launch {
@@ -57,13 +69,8 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun clearLoadAllRecipesState() {
-        _loadAllRecipesState.value = UiState.Idle
-    }
-
-    fun clearLoadUserRecipesState() {
-        _loadUserRecipesState.value = UiState.Idle
-    }
+    fun clearLoadAllRecipesState() { _loadAllRecipesState.value = UiState.Idle }
+    fun clearLoadUserRecipesState() { _loadUserRecipesState.value = UiState.Idle }
 
     fun createRecipeFromForm(
         title: String,
@@ -84,7 +91,6 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
                     title, description, steps, difficulty,
                     ingredients, cookingTime, creator, dietaryTags, fileUri
                 )
-
                 _recipes.value = repository.getAllRecipes()
                 loadUserRecipes(creator)
                 onSuccess()
@@ -154,24 +160,24 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-
     private fun determineErrorType(exception: Exception): ErrorType {
         return when {
             exception is java.net.UnknownHostException ||
                     exception is java.net.SocketTimeoutException ||
                     exception is java.io.IOException -> ErrorType.NETWORK
-
             exception.message?.contains("401", ignoreCase = true) == true ||
                     exception.message?.contains("unauthorized", ignoreCase = true) == true -> ErrorType.AUTHENTICATION
-
             exception.message?.contains("500", ignoreCase = true) == true ||
                     exception.message?.contains("503", ignoreCase = true) == true -> ErrorType.SERVER
-
             else -> ErrorType.GENERIC
         }
     }
 
-    private fun getErrorMessage(exception: Exception, errorType: ErrorType, operation: String = "performing operation"): String {
+    private fun getErrorMessage(
+        exception: Exception,
+        errorType: ErrorType,
+        operation: String = "performing operation"
+    ): String {
         return when (errorType) {
             ErrorType.NETWORK -> "Unable to connect to the database. Check your internet connection."
             ErrorType.SERVER -> "Server is unavailable. Please try again later."
@@ -179,5 +185,4 @@ class RecipeViewModel(application: Application) : AndroidViewModel(application) 
             ErrorType.GENERIC -> exception.message ?: "Unknown error while $operation."
         }
     }
-
 }

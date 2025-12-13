@@ -1,41 +1,22 @@
 package com.example.cookpilot.ui.pages
 
-import APPWRITE_BUCKET_ID
-import APPWRITE_PROJECT_ID
-import APPWRITE_PUBLIC_ENDPOINT
-import android.content.Context
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,82 +30,57 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
-import coil.compose.AsyncImage
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
-import com.example.cookpilot.ui.components.auth.EditUsernameDialog
 import com.example.cookpilot.ui.components.auth.LogInMessage
+import com.example.cookpilot.ui.components.profile.ProfilePictureSection
+import com.example.cookpilot.ui.components.profile.UserRecipesSection
+import com.example.cookpilot.ui.components.profile.UsernameHeader
 import com.example.cookpilot.ui.components.recipe.EditRecipeDialog
 import com.example.cookpilot.ui.components.recipe.RecipeAction
 import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
-import com.example.cookpilot.ui.components.recipe.RecipeList
 import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.ui.utils.createImageUri
 import com.example.cookpilot.viewmodel.RecipeViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
-import kotlinx.coroutines.CoroutineScope
-import java.io.File
-
-@Composable
-fun buildProfileImageUrl(fileId: String?, bucketId: String = APPWRITE_BUCKET_ID): String? {
-    if (fileId == null) return null
-    val endpoint = APPWRITE_PUBLIC_ENDPOINT
-    val projectId = APPWRITE_PROJECT_ID
-    return "$endpoint/storage/buckets/$bucketId/files/$fileId/view?project=$projectId"
-}
-
-fun Context.createImageUri(): Uri {
-    val tempImagesDir = File(cacheDir, "images")
-    tempImagesDir.mkdirs()
-    val file = File(tempImagesDir, "temp_photo_${System.currentTimeMillis()}.jpg")
-    return FileProvider.getUriForFile(
-        this,
-        "${packageName}.provider",
-        file
-    )
-}
 
 @Composable
 fun UserPage(
-    scope: CoroutineScope = rememberCoroutineScope(),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     recipeViewModel: RecipeViewModel,
     userViewModel: UserViewModel,
     onGoToAuthMenu: () -> Unit
 ) {
     val uiState by userViewModel.uiState.collectAsState()
     val userRecipes by recipeViewModel.userRecipes.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
-    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
-    var recipeToEdit by remember { mutableStateOf<Recipe?>(null) }
-    var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
 
     val context = LocalContext.current
     val preferencesManager = remember { PreferencesManager(context) }
     val isCameraEnabled by preferencesManager.isCameraEnabledFlow.collectAsState(initial = true)
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // UI state (screen orchestration)
+    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
+    var recipeToEdit by remember { mutableStateOf<Recipe?>(null) }
+    var recipeToDelete by remember { mutableStateOf<Recipe?>(null) }
+
+    var showEditUsernameDialog by remember { mutableStateOf(false) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
     var showCameraDisabledDialog by remember { mutableStateOf(false) }
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
-    var showEditUsernameDialog by remember { mutableStateOf(false) }
-
+    // Launchers
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
-                tempPhotoUri?.let { userViewModel.uploadProfilePicture(it) }
+                tempPhotoUri?.let(userViewModel::uploadProfilePicture)
             }
             tempPhotoUri = null
         }
@@ -146,352 +102,229 @@ fun UserPage(
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            uri?.let {
-                println("🔵 Image selected: $uri")
-                userViewModel.uploadProfilePicture(it)
-            }
+            uri?.let(userViewModel::uploadProfilePicture)
         }
     )
 
     LaunchedEffect(uiState.userId) {
-        uiState.userId?.let { userId ->
-            recipeViewModel.loadUserRecipes(userId)
-        }
+        uiState.userId?.let(recipeViewModel::loadUserRecipes)
     }
 
     val userRecipeActions: (Recipe) -> List<RecipeAction> = { recipe ->
         listOf(
-            RecipeAction("Edit") {
-                recipeToEdit = recipe
-            },
-            RecipeAction("Delete") {
-                recipeToDelete = recipe
-            }
+            RecipeAction("Edit") { recipeToEdit = recipe },
+            RecipeAction("Delete") { recipeToDelete = recipe }
         )
     }
+
     if (!uiState.isLoggedIn) {
         LogInMessage(
             onGoToAuthMenu = onGoToAuthMenu,
             text = "You must be Logged in to view your profile"
         )
-    } else {
-        Scaffold(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 10.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(end = 10.dp)
-                    ) {
-                        Text(
-                            text = uiState.userName ?: "Chef CookPilot",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                        )
-                        IconButton(onClick = { showEditUsernameDialog = true }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit username")
-                        }
+        return
+    }
 
-                        if (showEditUsernameDialog) {
-                            EditUsernameDialog(
-                                currentUsername = uiState.userName ?: "",
-                                onDismiss = { showEditUsernameDialog = false },
-                                onConfirm = { newUsername ->
-                                    userViewModel.updateUsername(newUsername)
-                                    showEditUsernameDialog = false
-                                }
-                            )
-                        }
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                UsernameHeader(
+                    userName = uiState.userName,
+                    showDialog = showEditUsernameDialog,
+                    onEditClick = { showEditUsernameDialog = true },
+                    onDismiss = { showEditUsernameDialog = false },
+                    onConfirm = { newUsername ->
+                        userViewModel.updateUsername(newUsername)
+                        showEditUsernameDialog = false
                     }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(CircleShape)
-                                .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                                .background(Color.LightGray)
-                                .clickable {
-                                    showImageSourceDialog = true
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (uiState.isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(40.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
+                )
 
-                            val profileImageUrl = buildProfileImageUrl(uiState.profilePictureId)
+                ProfilePictureSection(
+                    isLoading = uiState.isLoading,
+                    profilePictureId = uiState.profilePictureId,
+                    onClick = { showImageSourceDialog = true }
+                )
 
-                            if (profileImageUrl != null) {
-                                AsyncImage(
-                                    model = profileImageUrl,
-                                    contentDescription = "Profile picture",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "Default profile picture",
-                                    modifier = Modifier.size(60.dp),
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
+                CustomDivider()
 
-                            if (uiState.isLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(40.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                        }
-
-                        Text(
-                            text = "Change profile picture",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-
-                    CustomDivider()
-
-                    Text(
-                        text = "My Recipes (${userRecipes.size})",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp)
-                    )
-                }
-
-                item {
-                    if (userRecipes.isEmpty()) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "You haven't created any recipes yet",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Go to Create tab to start!",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    } else {
-                        RecipeList(
-                            recipes = userRecipes,
-                            onRecipeClick = { recipe ->
-                                selectedRecipe = recipe
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp)
-                        )
-                    }
-                }
+                UserRecipesSection(
+                    recipes = userRecipes,
+                    onRecipeClick = { selectedRecipe = it }
+                )
             }
         }
+    }
 
-        if (showImageSourceDialog) {
-            AlertDialog(
-                onDismissRequest = { showImageSourceDialog = false },
-                title = { Text("Select Image Source") },
-                text = { Text("How would you like to set your profile picture?") },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showImageSourceDialog = false
-                            val uri = context.createImageUri()
-                            tempPhotoUri = uri
-                            cameraLauncher.launch(uri)
-                        },
-                        colors = CustomColors.customPrimaryButtonColor()
-                    ) {
-                        Text("Take Photo")
-                    }
-                },
-                dismissButton = {
-                    OutlinedButton(
-                        onClick = {
-                            showImageSourceDialog = false
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        },
-                        colors = CustomColors.customSecondaryButtonColor()
-                    ) {
-                        Text("Select from Gallery")
-                    }
-                }
-            )
-        }
-
-        if (showPermissionDialog) {
-            AlertDialog(
-                onDismissRequest = { showPermissionDialog = false },
-                title = { Text("Camera Permission Required") },
-                text = {
-                    Text("Camera access is needed to take photos. Please grant permission in app settings.")
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showPermissionDialog = false
-                            val intent =
-                                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                    data = Uri.fromParts("package", context.packageName, null)
-                                }
-                            context.startActivity(intent)
+    if (showImageSourceDialog) {
+        AlertDialog(
+            onDismissRequest = { showImageSourceDialog = false },
+            title = { Text("Select Image Source") },
+            text = { Text("How would you like to set your profile picture?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showImageSourceDialog = false
+                        if (!isCameraEnabled) {
+                            showCameraDisabledDialog = true
+                            return@Button
                         }
-                    ) {
-                        Text("Open Settings")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showPermissionDialog = false }) {
-                        Text("Cancel")
-                    }
-                }
-            )
-        }
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
+                    },
+                    colors = CustomColors.customPrimaryButtonColor()
+                ) { Text("Take Photo") }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        showImageSourceDialog = false
+                        photoPickerLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    colors = CustomColors.customSecondaryButtonColor()
+                ) { Text("Select from Gallery") }
+            }
+        )
+    }
 
-        if (showCameraDisabledDialog) {
-            AlertDialog(
-                onDismissRequest = { showCameraDisabledDialog = false },
-                title = { Text("Camera Disabled") },
-                text = {
-                    Text("Camera access is disabled in settings. Enable it to take photos.")
-                },
-                confirmButton = {
-                    TextButton(onClick = { showCameraDisabledDialog = false }) {
-                        Text("OK")
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text("Camera Permission Required") },
+            text = { Text("Camera access is needed to take photos. Please grant permission in app settings.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showPermissionDialog = false
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
                     }
-                }
-            )
-        }
+                    context.startActivity(intent)
+                }) { Text("Open Settings") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
 
-        selectedRecipe?.let { recipe ->
-            RecipeDetailDialog(
-                recipe = recipe,
-                actions = userRecipeActions(recipe),
-                onDismiss = { selectedRecipe = null }
-            )
-        }
+    if (showCameraDisabledDialog) {
+        AlertDialog(
+            onDismissRequest = { showCameraDisabledDialog = false },
+            title = { Text("Camera Disabled") },
+            text = { Text("Camera access is disabled in settings. Enable it to take photos.") },
+            confirmButton = {
+                TextButton(onClick = { showCameraDisabledDialog = false }) { Text("OK") }
+            }
+        )
+    }
 
-        recipeToEdit?.let { recipe ->
-            EditRecipeDialog(
-                scope = scope,
-                snackbarHostState = snackbarHostState,
-                recipe = recipe,
-                onDismiss = { recipeToEdit = null },
-                onSave = { title, description, steps, difficulty, ingredients, cookingTime, dietaryTags, newImageUri ->
-                    uiState.userId?.let { userId ->
-                        recipeViewModel.updateRecipe(
-                            recipeId = recipe.id ?: return@let,
-                            title = title,
-                            description = description,
-                            steps = steps,
-                            difficulty = difficulty,
-                            ingredients = ingredients,
-                            cookingTime = cookingTime,
+    selectedRecipe?.let { recipe ->
+        RecipeDetailDialog(
+            recipe = recipe,
+            actions = userRecipeActions(recipe),
+            onDismiss = { selectedRecipe = null }
+        )
+    }
+
+    recipeToEdit?.let { recipe ->
+        EditRecipeDialog(
+            scope = scope,
+            snackbarHostState = snackbarHostState,
+            recipe = recipe,
+            onDismiss = { recipeToEdit = null },
+            onSave = { title, description, steps, difficulty, ingredients, cookingTime, dietaryTags, newImageUri ->
+                val userId = uiState.userId ?: return@EditRecipeDialog
+                val recipeId = recipe.id ?: return@EditRecipeDialog
+
+                recipeViewModel.updateRecipe(
+                    recipeId = recipeId,
+                    title = title,
+                    description = description,
+                    steps = steps,
+                    difficulty = difficulty,
+                    ingredients = ingredients,
+                    cookingTime = cookingTime,
+                    creator = userId,
+                    dietaryTags = dietaryTags,
+                    newImageUri = newImageUri,
+                    onSuccess = {
+                        recipeToEdit = null
+                        showCustomMessage(
+                            scope = scope,
+                            snackbarHostState = snackbarHostState,
+                            message = "Recipe updated successfully!",
+                            actionLabel = "Great",
+                            duration = SnackbarDuration.Long
+                        )
+                    },
+                    onError = { errorMessage ->
+                        showCustomMessage(
+                            scope = scope,
+                            snackbarHostState = snackbarHostState,
+                            message = "Update failed: $errorMessage",
+                            actionLabel = "Try again",
+                            duration = SnackbarDuration.Long
+                        )
+                    }
+                )
+            }
+        )
+    }
+
+    recipeToDelete?.let { recipe ->
+        AlertDialog(
+            onDismissRequest = { recipeToDelete = null },
+            title = { Text("Delete Recipe") },
+            text = { Text("Are you sure you want to delete \"${recipe.title}\"? This action cannot be undone.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val userId = uiState.userId ?: return@Button
+                        val recipeId = recipe.id ?: return@Button
+
+                        recipeViewModel.deleteRecipe(
+                            recipeId = recipeId,
                             creator = userId,
-                            dietaryTags = dietaryTags,
-                            newImageUri = newImageUri,
                             onSuccess = {
-                                recipeToEdit = null
+                                recipeToDelete = null
                                 showCustomMessage(
                                     scope = scope,
                                     snackbarHostState = snackbarHostState,
-                                    message = "Recipe updated successfully!",
-                                    actionLabel = "Great",
+                                    message = "Recipe deleted correctly",
+                                    actionLabel = "Understood",
                                     duration = SnackbarDuration.Long
                                 )
                             },
                             onError = { errorMessage ->
+                                recipeToDelete = null
                                 showCustomMessage(
                                     scope = scope,
                                     snackbarHostState = snackbarHostState,
-                                    message = "Update failed: $errorMessage",
+                                    message = "Delete failed: $errorMessage",
                                     actionLabel = "Try again",
                                     duration = SnackbarDuration.Long
                                 )
                             }
                         )
-                    }
-                }
-            )
-        }
-
-        recipeToDelete?.let { recipe ->
-            AlertDialog(
-                onDismissRequest = { recipeToDelete = null },
-                title = { Text("Delete Recipe") },
-                text = {
-                    Text("Are you sure you want to delete \"${recipe.title}\"? This action cannot be undone.")
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            uiState.userId?.let { userId ->
-                                recipeViewModel.deleteRecipe(
-                                    recipeId = recipe.id ?: return@let,
-                                    creator = userId,
-                                    onSuccess = {
-                                        recipeToDelete = null
-                                        showCustomMessage(
-                                            scope = scope,
-                                            snackbarHostState = snackbarHostState,
-                                            message = "Recipe deleted correctly",
-                                            actionLabel = "Understood",
-                                            duration = SnackbarDuration.Long
-                                        )
-                                    },
-                                    onError = { errorMessage ->
-                                        recipeToDelete = null
-                                        showCustomMessage(
-                                            scope = scope,
-                                            snackbarHostState = snackbarHostState,
-                                            message = "Delete failed: $errorMessage",
-                                            actionLabel = "Try again",
-                                            duration = SnackbarDuration.Long
-                                        )
-                                    }
-                                )
-                            }
-                        },
-                        colors = CustomColors.customSecondaryButtonColor()
-                    ) {
-                        Text("Delete")
-                    }
-                },
-                dismissButton = {
-                    OutlinedButton(onClick = {
-                        recipeToDelete = null
                     },
-                        colors = CustomColors.customPrimaryButtonColor()
-                        ) {
-                        Text("Cancel")
-                    }
-                }
-            )
-        }
+                    colors = CustomColors.customSecondaryButtonColor()
+                ) { Text("Delete") }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { recipeToDelete = null },
+                    colors = CustomColors.customPrimaryButtonColor()
+                ) { Text("Cancel") }
+            }
+        )
     }
 }

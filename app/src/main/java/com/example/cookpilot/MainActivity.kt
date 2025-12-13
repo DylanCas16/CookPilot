@@ -37,6 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cookpilot.data.AppContainer
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.components.auth.AuthMenu
@@ -94,21 +95,25 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CookPilotApp(onRestartApp: () -> Unit = {}) {
-    val userViewModel: UserViewModel = viewModel()
-    val recipeViewModel: RecipeViewModel = viewModel()
-    val historyViewModel: HistoryViewModel = viewModel()
+    val context = LocalContext.current
+    val container = remember { AppContainer(context.applicationContext) }
+
+    val userViewModel: UserViewModel = viewModel(factory = UserViewModel.factory(container))
+    val recipeViewModel: RecipeViewModel = viewModel(factory = RecipeViewModel.factory(container))
+    val historyViewModel: HistoryViewModel = viewModel(factory = HistoryViewModel.factory(container))
+
     val uiState by userViewModel.uiState.collectAsState()
     var showAuthMenu by remember { mutableStateOf(false) }
+
+    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
+    val myItemColors = CustomColors.customNavigationSuiteColors()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         userViewModel.checkSession()
     }
-
-        var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.History) }
-        val myItemColors = CustomColors.customNavigationSuiteColors()
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        val scope = rememberCoroutineScope()
-        val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.success, uiState.error) {
         if (showAuthMenu && !uiState.isLoading) {
@@ -213,9 +218,8 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                 AppDestinations.History -> HistoryPage(
                                     historyViewModel = historyViewModel,
                                     userViewModel = userViewModel,
-                                    onNavigateToSearch = {
-                                        currentDestination = AppDestinations.Search
-                                    }
+                                    onNavigateToSearch = { currentDestination = AppDestinations.Search },
+                                    onGoToAuthMenu = { showAuthMenu = true }
                                 )
 
                                 AppDestinations.Create -> CreatePage(
@@ -235,8 +239,6 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                 AppDestinations.Profile -> UserPage(
                                     recipeViewModel = recipeViewModel,
                                     userViewModel = userViewModel,
-                                    scope = scope,
-                                    snackbarHostState = snackbarHostState,
                                     onGoToAuthMenu = { showAuthMenu = true }
                                 )
                             }

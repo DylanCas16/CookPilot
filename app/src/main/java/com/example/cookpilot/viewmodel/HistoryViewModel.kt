@@ -1,17 +1,28 @@
 package com.example.cookpilot.viewmodel
 
 import HistoryRepository
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.cookpilot.data.AppContainer
 import com.example.cookpilot.model.Recipe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class HistoryViewModel(application: Application) : AndroidViewModel(application) {
-    private val historyRepository = HistoryRepository()
+class HistoryViewModel(
+    private val historyRepository: HistoryRepository
+) : ViewModel() {
+
+    companion object {
+        fun factory(container: AppContainer): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer { HistoryViewModel(container.historyRepository) }
+            }
+    }
 
     private val _historyRecipes = MutableStateFlow<List<Recipe>>(emptyList())
     val historyRecipes: StateFlow<List<Recipe>> = _historyRecipes.asStateFlow()

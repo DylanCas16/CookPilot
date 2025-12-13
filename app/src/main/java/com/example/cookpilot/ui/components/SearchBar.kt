@@ -59,11 +59,11 @@ fun SearchBar(
 
     val addTag: (String) -> Unit = { tag ->
         val trimmedTag = tag.trim().lowercase()
-        if (trimmedTag.isNotBlank() && !activeTags.contains(trimmedTag)) {
+        if (trimmedTag.isNotBlank() && !activeTags.contains(trimmedTag))
             onTagsChange(activeTags + trimmedTag)
-        }
         onInputChange("")
         textFieldValue = TextFieldValue("")
+        showSuggestions = false
     }
 
     val removeTag: (String) -> Unit = { tagToRemove ->
@@ -96,29 +96,22 @@ fun SearchBar(
                     .fillMaxWidth()
                     .onFocusChanged { focusState ->
                         isInputFocused = focusState.isFocused
-                        if (focusState.isFocused) {
+                        if (focusState.isFocused)
                             showSuggestions = textFieldValue.text.isNotBlank()
-                        } },
+                    },
                 shape = RoundedCornerShape(20.dp),
                 colors = CustomColors.customTextFieldColors(),
-
-                // --- SEARCH ICON ---
                 trailingIcon = {
                     Icon(
                         painter = painterResource(R.drawable.ic_pizza_search),
                         contentDescription = "Search icon",
-                        modifier = modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
-
-                // --- PLACEHOLDER ---
                 placeholder = {
-                    if (activeTags.isEmpty() && currentInput.isBlank()) {
+                    if (activeTags.isEmpty() && currentInput.isBlank())
                         Text("Search for ingredients...")
-                    }
                 },
-
-                // --- LABELS DESIGN ---
                 prefix = {
                     FlowRow(
                         modifier = Modifier
@@ -144,10 +137,9 @@ fun SearchBar(
                             )
                         }
                     }
-                },
+                }
             )
 
-            // 6. SUGGESTS
             if (isInputFocused && showSuggestions && suggestions.isNotEmpty()) {
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 200.dp)

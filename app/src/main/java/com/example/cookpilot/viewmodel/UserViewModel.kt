@@ -1,9 +1,12 @@
 package com.example.cookpilot.viewmodel
 
-import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.cookpilot.data.AppContainer
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.notifications.NotificationScheduler
 import com.example.cookpilot.repository.AuthRepository
@@ -29,14 +32,29 @@ data class UserUiState(
 
 private const val USE_FAKE_LOGIN = false
 
-class UserViewModel(application: Application) : AndroidViewModel(application) {
+class UserViewModel(
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository,
+    private val preferencesManager: PreferencesManager,
+    private val notificationScheduler: NotificationScheduler,
+) : ViewModel() {
 
-    private val authRepository = AuthRepository()
-    private val userRepository = UserRepository(application)
+    companion object {
+        fun factory(container: AppContainer): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    UserViewModel(
+                        authRepository = container.authRepository,
+                        userRepository = container.userRepository,
+                        preferencesManager = container.preferencesManager,
+                        notificationScheduler = container.notificationScheduler
+                    )
+                }
+            }
+    }
+
     private val _uiState = MutableStateFlow(UserUiState())
     val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
-    private val preferencesManager = PreferencesManager(application)
-    private val notificationScheduler = NotificationScheduler(application)
 
     fun checkSession() {
         if (USE_FAKE_LOGIN) {
