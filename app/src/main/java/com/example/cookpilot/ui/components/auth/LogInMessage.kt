@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.theme.CustomColors
 
 @Composable
-fun unloggedMessage(
+fun LogInMessage(
     onGoToAuthMenu: () -> Unit,
     text: String
 ) {
