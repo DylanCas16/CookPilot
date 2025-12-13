@@ -1,4 +1,3 @@
-// Recipe.kt - ACTUALIZADO
 package com.example.cookpilot.model
 
 data class Recipe(

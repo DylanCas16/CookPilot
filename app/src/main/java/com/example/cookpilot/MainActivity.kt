@@ -41,7 +41,6 @@ import com.example.cookpilot.data.AppContainer
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.components.auth.AuthMenu
-import com.example.cookpilot.ui.components.auth.LoginDialog
 import com.example.cookpilot.ui.components.header.HeaderApp
 import com.example.cookpilot.ui.components.header.Sidebar
 import com.example.cookpilot.ui.components.showCustomMessage
@@ -193,27 +192,12 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                             userViewModel = userViewModel
                         )
 
-                        if (uiState.showLoginDialog) {
-                            LoginDialog(
-                                uiState = uiState,
-                                onLogin = { email, password ->
-                                    userViewModel.login(email, password)
-                                },
-                                onDismiss = { userViewModel.closeLoginDialog() },
-                                onRegisterClick = {
-                                    userViewModel.closeLoginDialog()
-                                    userViewModel.openRegisterDialog()
-                                }
-                            )
-                        }
-
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
-
                             when (currentDestination) {
                                 AppDestinations.History -> HistoryPage(
                                     historyViewModel = historyViewModel,
@@ -221,7 +205,6 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                     onNavigateToSearch = { currentDestination = AppDestinations.Search },
                                     onGoToAuthMenu = { showAuthMenu = true }
                                 )
-
                                 AppDestinations.Create -> CreatePage(
                                     recipeViewModel = recipeViewModel,
                                     userViewModel = userViewModel,
@@ -229,28 +212,27 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                                     snackbarHostState = snackbarHostState,
                                     onGoToAuthMenu = { showAuthMenu = true }
                                 )
-
                                 AppDestinations.Search -> SearchPage(
                                     recipeViewModel = recipeViewModel,
                                     historyViewModel = historyViewModel,
                                     userViewModel = userViewModel,
                                 )
-
                                 AppDestinations.Profile -> UserPage(
                                     recipeViewModel = recipeViewModel,
                                     userViewModel = userViewModel,
                                     onGoToAuthMenu = { showAuthMenu = true }
                                 )
                             }
-                            if (showAuthMenu) {
-                                AuthMenu(
-                                    onDismiss = { showAuthMenu = false },
-                                    userViewModel = userViewModel
-                                )
-                            }
+                        }
+                        if (showAuthMenu) {
+                            AuthMenu(
+                                onDismiss = { showAuthMenu = false },
+                                userViewModel = userViewModel
+                            )
                         }
                         CustomDivider()
                     }
+
                 }
             }
         }

@@ -26,24 +26,25 @@ fun HistoryPage(
 ) {
     val historyRecipes by historyViewModel.historyRecipes.collectAsState()
     val uiState by userViewModel.uiState.collectAsState()
+    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
+    var showClearDialog by remember { mutableStateOf(false) }
+
+
+    val totalSlots = 10
+    val filledSlots: List<Recipe> = historyRecipes.take(totalSlots)
+    val emptySlots = (totalSlots - filledSlots.size).coerceAtLeast(0)
 
     if (!uiState.isLoggedIn) {
         LogInMessage(
             onGoToAuthMenu = onGoToAuthMenu,
             text = "You must be logged in to have a history"
         )
+        return
     }
-
-    var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
-    var showClearDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.userId) {
         uiState.userId?.let(historyViewModel::loadUserHistory)
     }
-
-    val totalSlots = 10
-    val filledSlots: List<Recipe> = historyRecipes.take(totalSlots)
-    val emptySlots = (totalSlots - filledSlots.size).coerceAtLeast(0)
 
     Box(modifier = Modifier.fillMaxSize()) {
         HistoryGrid(

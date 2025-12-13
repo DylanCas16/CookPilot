@@ -25,10 +25,7 @@ class NotificationScheduler(private val context: Context) {
         val now = LocalDateTime.now()
         var scheduledTime = now.toLocalDate().atTime(mealTime)
 
-        // Si la hora ya pasó hoy, programar para mañana
-        if (scheduledTime.isBefore(now)) {
-            scheduledTime = scheduledTime.plusDays(1)
-        }
+        if (scheduledTime.isBefore(now)) scheduledTime = scheduledTime.plusDays(1)
 
         val delay = Duration.between(now, scheduledTime).toMinutes()
 
@@ -37,7 +34,7 @@ class NotificationScheduler(private val context: Context) {
             .build()
 
         val workRequest = PeriodicWorkRequestBuilder<MealNotificationWorker>(
-            1, TimeUnit.DAYS  // Repetir cada día
+            1, TimeUnit.DAYS
         )
             .setInitialDelay(delay, TimeUnit.MINUTES)
             .setInputData(data)
@@ -50,13 +47,11 @@ class NotificationScheduler(private val context: Context) {
             workRequest
         )
 
-        println("✅ Scheduled $mealType notification for $scheduledTime")
     }
 
     fun cancelAllNotifications() {
         WorkManager.getInstance(context).cancelAllWorkByTag("meal_notification_Breakfast")
         WorkManager.getInstance(context).cancelAllWorkByTag("meal_notification_Lunch")
         WorkManager.getInstance(context).cancelAllWorkByTag("meal_notification_Dinner")
-        println("❌ All meal notifications canceled")
     }
 }

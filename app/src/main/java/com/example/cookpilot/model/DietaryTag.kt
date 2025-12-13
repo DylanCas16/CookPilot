@@ -23,9 +23,5 @@ enum class DietaryTag(
         fun fromString(tag: String): DietaryTag? {
             return entries.find { it.name == tag }
         }
-
-        fun fromDisplayName(name: String): DietaryTag? {
-            return entries.find { it.displayName == name }
-        }
     }
 }

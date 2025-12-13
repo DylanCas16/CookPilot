@@ -1,4 +1,4 @@
-package com.example.cookpilot.ui.components
+package com.example.cookpilot.ui.components.search
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

@@ -48,7 +48,7 @@ class PreferencesManager(private val context: Context) {
     }
 
     val isCameraEnabledFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[CAMERA_ENABLED] ?: true  // Default enabled
+        preferences[CAMERA_ENABLED] ?: true
     }
 
     suspend fun setCameraEnabled(enabled: Boolean) {

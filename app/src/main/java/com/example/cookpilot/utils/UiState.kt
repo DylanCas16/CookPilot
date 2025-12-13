@@ -1,4 +1,4 @@
-package com.example.cookpilot.viewmodel
+package com.example.cookpilot.utils
 
 sealed class UiState<out T> {
     object Idle : UiState<Nothing>()

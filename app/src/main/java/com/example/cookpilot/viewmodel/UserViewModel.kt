@@ -19,9 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class UserUiState(
-    val showRegisterDialog: Boolean = false,
     val profilePictureId: String? = null,
-    val showLoginDialog: Boolean = false,
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
     val userName: String? = null,
@@ -29,8 +27,6 @@ data class UserUiState(
     val userId: String? = null,
     val error: String? = null
 )
-
-private const val USE_FAKE_LOGIN = false
 
 class UserViewModel(
     private val authRepository: AuthRepository,
@@ -57,18 +53,6 @@ class UserViewModel(
     val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
 
     fun checkSession() {
-        if (USE_FAKE_LOGIN) {
-            _uiState.update {
-                it.copy(
-                    isLoggedIn = true,
-                    userId = "dev-user-id",
-                    userName = "Developer User",
-                    profilePictureId = null,
-                    error = null
-                )
-            }
-            return
-        }
         viewModelScope.launch {
             val loggedIn = authRepository.hasActiveSession()
             if (loggedIn) {
@@ -89,21 +73,6 @@ class UserViewModel(
     }
 
     fun login(email: String, password: String) {
-        if (USE_FAKE_LOGIN) {
-            _uiState.update {
-                it.copy(
-                    isLoggedIn = true,
-                    isLoading = false,
-                    success = true,
-                    userId = "dev-user-id",
-                    userName = "Developer User",
-                    profilePictureId = null,
-                    showLoginDialog = false,
-                    error = null
-                )
-            }
-            return
-        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
@@ -121,7 +90,6 @@ class UserViewModel(
                             profilePictureId = userData?.get("profilePictureId") as? String,
                             success = true,
                             error = null,
-                            showLoginDialog = false
                         )
                     }
                 }
@@ -169,22 +137,6 @@ class UserViewModel(
                 }
             }
         }
-    }
-
-    fun openLoginDialog() {
-        _uiState.update { it.copy(showLoginDialog = true) }
-    }
-
-    fun closeLoginDialog() {
-        _uiState.update { it.copy(showLoginDialog = false) }
-    }
-
-    fun openRegisterDialog() {
-        _uiState.update { it.copy(showRegisterDialog = true) }
-    }
-
-    fun closeRegisterDialog() {
-        _uiState.update { it.copy(showRegisterDialog = false) }
     }
 
     fun register(user: RegisterUser) {

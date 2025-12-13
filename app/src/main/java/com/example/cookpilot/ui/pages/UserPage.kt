@@ -120,7 +120,7 @@ fun UserPage(
     if (!uiState.isLoggedIn) {
         LogInMessage(
             onGoToAuthMenu = onGoToAuthMenu,
-            text = "You must be Logged in to view your profile"
+            text = "You must be logged in to view your profile"
         )
         return
     }
