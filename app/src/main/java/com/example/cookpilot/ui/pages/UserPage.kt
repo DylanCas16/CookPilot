@@ -15,6 +15,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,12 +25,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -58,7 +60,8 @@ import coil.compose.AsyncImage
 import com.example.cookpilot.data.PreferencesManager
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
-import com.example.cookpilot.ui.components.auth.unloggedMessage
+import com.example.cookpilot.ui.components.auth.EditUsernameDialog
+import com.example.cookpilot.ui.components.auth.LogInMessage
 import com.example.cookpilot.ui.components.recipe.EditRecipeDialog
 import com.example.cookpilot.ui.components.recipe.RecipeAction
 import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
@@ -115,6 +118,8 @@ fun UserPage(
     var showCameraDisabledDialog by remember { mutableStateOf(false) }
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
+    var showEditUsernameDialog by remember { mutableStateOf(false) }
+
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
@@ -165,7 +170,7 @@ fun UserPage(
         )
     }
     if (!uiState.isLoggedIn) {
-        unloggedMessage(
+        LogInMessage(
             onGoToAuthMenu = onGoToAuthMenu,
             text = "You must be Logged in to view your profile"
         )
@@ -179,17 +184,34 @@ fun UserPage(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(end = 10.dp)
                     ) {
                         Text(
                             text = uiState.userName ?: "Chef CookPilot",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 16.dp)
                         )
+                        IconButton(onClick = { showEditUsernameDialog = true }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit username")
+                        }
 
+                        if (showEditUsernameDialog) {
+                            EditUsernameDialog(
+                                currentUsername = uiState.userName ?: "",
+                                onDismiss = { showEditUsernameDialog = false },
+                                onConfirm = { newUsername ->
+                                    userViewModel.updateUsername(newUsername)
+                                    showEditUsernameDialog = false
+                                }
+                            )
+                        }
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(bottom = 24.dp, top = 16.dp)
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(120.dp)
@@ -309,7 +331,6 @@ fun UserPage(
                 dismissButton = {
                     OutlinedButton(
                         onClick = {
-                            // 1. GALERÍA
                             showImageSourceDialog = false
                             photoPickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)

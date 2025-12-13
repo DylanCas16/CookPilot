@@ -214,8 +214,37 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 success = false,
                 error = null,
                 isLoading = false
-                // Mantener userId, userName, etc. si el login/register fue exitoso
             )
         }
     }
+
+    fun updateUsername(newUsername: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val userId = _uiState.value.userId
+                if (userId == null) {
+                    _uiState.update { it.copy(isLoading = false, error = "No user logged in") }
+                    return@launch
+                }
+
+                userRepository.updateUsername(userId, newUsername)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        userName = newUsername,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e.message ?: "Failed to update username"
+                    )
+                }
+            }
+        }
+    }
+
 }

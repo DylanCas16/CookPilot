@@ -16,7 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.example.cookpilot.ui.components.auth.unloggedMessage
+import com.example.cookpilot.ui.components.auth.LogInMessage
 import com.example.cookpilot.ui.components.recipe.RecipeForm
 import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.viewmodel.RecipeViewModel
@@ -35,7 +35,7 @@ fun CreatePage(
     val uiState by userViewModel.uiState.collectAsState()
 
     if (!uiState.isLoggedIn) {
-        unloggedMessage(
+        LogInMessage(
             onGoToAuthMenu = onGoToAuthMenu,
             text = "You must be logged in to create a recipe"
             )

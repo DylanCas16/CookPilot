@@ -67,23 +67,33 @@ class UserRepository(private val appContext: Context) {
             true
         }
 
-    suspend fun getProfilePictureId(userId: String): String? = withContext(Dispatchers.IO) {
-        try {
-            val userDocs = databases.listDocuments(
-                databaseId = databaseId,
-                collectionId = usersCollectionId,
-                queries = listOf(
-                    Query.equal("userId", userId),
-                    Query.limit(1)
+    suspend fun updateUsername(userId: String, newUsername: String): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                val userDocs = databases.listDocuments(
+                    databaseId = databaseId,
+                    collectionId = usersCollectionId,
+                    queries = listOf(
+                        Query.equal("userId", userId),
+                        Query.limit(1)
+                    )
                 )
-            )
 
-            if (userDocs.documents.isEmpty()) return@withContext null
-            userDocs.documents[0].data["profilePictureId"] as? String
-        } catch (_: Exception) {
-            null
+                if (userDocs.documents.isEmpty()) throw Exception("User not found")
+
+                val documentId = userDocs.documents[0].id
+                databases.updateDocument(
+                    databaseId = databaseId,
+                    collectionId = usersCollectionId,
+                    documentId = documentId,
+                    data = mapOf("username" to newUsername)
+                )
+
+                true
+            } catch (e: Exception) {
+                throw Exception("Failed to update username: ${e.message}")
+            }
         }
-    }
 
     suspend fun deleteProfilePicture(fileId: String): Boolean = withContext(Dispatchers.IO) {
         storage.deleteFile(
