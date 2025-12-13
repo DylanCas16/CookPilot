@@ -61,8 +61,4 @@ class HistoryViewModel(
             _historyRecipes.value = emptyList()
         }
     }
-
-    fun clearError() {
-        _error.value = null
-    }
 }

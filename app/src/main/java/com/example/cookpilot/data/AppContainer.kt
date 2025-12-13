@@ -10,7 +10,7 @@ import com.example.cookpilot.repository.UserRepository
 import io.appwrite.services.Databases
 import io.appwrite.services.Storage
 
-class AppContainer(private val context: Context) {
+class AppContainer(context: Context) {
     val databases = Databases(AppwriteClient.client)
     val storage = Storage(AppwriteClient.client)
 

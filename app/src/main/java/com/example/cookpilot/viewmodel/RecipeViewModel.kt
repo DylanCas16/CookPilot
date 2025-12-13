@@ -34,10 +34,7 @@ class RecipeViewModel(
     val userRecipes: StateFlow<List<Recipe>> = _userRecipes.asStateFlow()
 
     private val _loadAllRecipesState = MutableStateFlow<UiState<List<Recipe>>>(UiState.Idle)
-    val loadAllRecipesState: StateFlow<UiState<List<Recipe>>> = _loadAllRecipesState.asStateFlow()
-
     private val _loadUserRecipesState = MutableStateFlow<UiState<List<Recipe>>>(UiState.Idle)
-    val loadUserRecipesState: StateFlow<UiState<List<Recipe>>> = _loadUserRecipesState.asStateFlow()
 
     fun loadAllRecipes() {
         viewModelScope.launch {
