@@ -82,4 +82,25 @@ class HistoryRepository {
             emptyList()
         }
     }
+
+    suspend fun clearUserHistory(userId: String) = withContext(Dispatchers.IO) {
+        try {
+            val historyDocs = AppwriteClient.databases.listDocuments(
+                databaseId = databaseId,
+                collectionId = historyCollectionId,
+                queries = listOf(
+                    Query.equal("userId", userId)
+                )
+            )
+
+            historyDocs.documents.forEach { doc ->
+                AppwriteClient.databases.deleteDocument(
+                    databaseId = databaseId,
+                    collectionId = historyCollectionId,
+                    documentId = doc.id
+                )
+            }
+        } catch (_: Exception) { }
+    }
+
 }

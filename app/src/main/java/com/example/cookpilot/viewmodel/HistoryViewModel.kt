@@ -28,4 +28,11 @@ class HistoryViewModel(application: Application) : AndroidViewModel(application)
             historyRepository.saveRecipeView(userId, recipeId)
         }
     }
+
+    fun clearHistory(userId: String) {
+        viewModelScope.launch {
+            historyRepository.clearUserHistory(userId)
+            _historyRecipes.value = emptyList()
+        }
+    }
 }
