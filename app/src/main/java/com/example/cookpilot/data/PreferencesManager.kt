@@ -5,6 +5,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.cookpilot.model.MealPreferences
+import com.example.cookpilot.utils.DEFAULT_BREAKFAST_HOUR
+import com.example.cookpilot.utils.DEFAULT_DINNER_HOUR
+import com.example.cookpilot.utils.DEFAULT_LUNCH_HOUR
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalTime
@@ -32,15 +35,15 @@ class PreferencesManager(private val context: Context) {
     val mealPreferencesFlow: Flow<MealPreferences> = context.dataStore.data.map { preferences ->
         MealPreferences(
             breakfastTime = LocalTime.of(
-                preferences[BREAKFAST_HOUR] ?: 8,
+                preferences[BREAKFAST_HOUR] ?: DEFAULT_BREAKFAST_HOUR,
                 preferences[BREAKFAST_MINUTE] ?: 0
             ),
             lunchTime = LocalTime.of(
-                preferences[LUNCH_HOUR] ?: 14,
+                preferences[LUNCH_HOUR] ?: DEFAULT_LUNCH_HOUR,
                 preferences[LUNCH_MINUTE] ?: 0
             ),
             dinnerTime = LocalTime.of(
-                preferences[DINNER_HOUR] ?: 21,
+                preferences[DINNER_HOUR] ?: DEFAULT_DINNER_HOUR,
                 preferences[DINNER_MINUTE] ?: 0
             ),
             notificationsEnabled = preferences[NOTIFICATIONS_ENABLED] ?: false

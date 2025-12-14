@@ -5,6 +5,7 @@ import APPWRITE_HISTORY_COLLECTION_ID
 import APPWRITE_RECIPE_COLLECTION_ID
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.utils.ErrorType
+import com.example.cookpilot.utils.HISTORY_TOTAL_SLOTS
 import com.example.cookpilot.utils.UiState
 import io.appwrite.ID
 import io.appwrite.Query
@@ -60,14 +61,14 @@ class HistoryRepository(private val databases: Databases) {
                 queries = listOf(
                     Query.equal("userId", userId),
                     Query.orderDesc("viewedAt"),
-                    Query.limit(20)
+                    Query.limit(HISTORY_TOTAL_SLOTS)
                 )
             )
 
             val recipeIds = historyDocs.documents.map { it.data["recipeId"] as String }
             if (recipeIds.isEmpty()) return@withContext UiState.Success(emptyList())
 
-            val recipesQueries = recipeIds.take(10).map { Query.equal("\$id", it) }
+            val recipesQueries = recipeIds.take(HISTORY_TOTAL_SLOTS).map { Query.equal("\$id", it) }
             val recipesDocs = databases.listDocuments(
                 databaseId = databaseId,
                 collectionId = recipesCollectionId,

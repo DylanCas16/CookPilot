@@ -568,11 +568,11 @@ fun RubricItem(stars: Int, description: String) {
 
 fun difficultyText(diff: Int): String =
     when (diff) {
-        1 -> "Beginner"
-        2 -> "Easy"
-        3 -> "Medium"
-        4 -> "Hard"
-        5 -> "CP master"
+        DIFFICULTY_BEGINNER -> "Beginner"
+        DIFFICULTY_EASY -> "Easy"
+        DIFFICULTY_MEDIUM -> "Medium"
+        DIFFICULTY_HARD -> "Hard"
+        DIFFICULTY_MASTER -> "CP master"
         else -> ""
     }
 

@@ -48,6 +48,10 @@ import com.example.cookpilot.R
 import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.utils.CARD_HEIGHT_FRACTION
+import com.example.cookpilot.utils.ICON_SIZE_FRACTION
+import com.example.cookpilot.utils.MAX_DIFFICULTY
+import com.example.cookpilot.utils.MIN_DIFFICULTY
 
 
 data class RecipeAction(
@@ -95,13 +99,13 @@ fun RecipeCard(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.LightGray.copy(alpha = 0.5f)),
+                        .background(Color.LightGray.copy(alpha = ICON_SIZE_FRACTION)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Restaurant,
                         contentDescription = "Placeholder recipe",
-                        modifier = Modifier.fillMaxSize(0.5f),
+                        modifier = Modifier.fillMaxSize(ICON_SIZE_FRACTION),
                         tint = Color.Gray
                     )
                 }
@@ -122,7 +126,7 @@ fun RecipeCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
-                    .background(Color.Black.copy(alpha = 0.5f))
+                    .background(Color.Black.copy(alpha = ICON_SIZE_FRACTION))
                     .padding(vertical = 8.dp, horizontal = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -157,7 +161,7 @@ fun RecipeDetailDialog(
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
-                .fillMaxHeight(0.8f)
+                .fillMaxHeight(CARD_HEIGHT_FRACTION)
                 .fillMaxWidth(),
             shape = MaterialTheme.shapes.large,
             elevation = CardDefaults.cardElevation(8.dp)
@@ -170,7 +174,7 @@ fun RecipeDetailDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(200.dp)
-                                .background(Color.LightGray.copy(alpha = 0.5f)),
+                                .background(Color.LightGray.copy(alpha = ICON_SIZE_FRACTION)),
                             contentAlignment = Alignment.Center
                         ) {
                             if (imageUrl != null) {
@@ -185,7 +189,7 @@ fun RecipeDetailDialog(
                                 Icon(
                                     imageVector = Icons.Filled.Restaurant,
                                     contentDescription = "Placeholder",
-                                    modifier = Modifier.fillMaxSize(0.5f),
+                                    modifier = Modifier.fillMaxSize(ICON_SIZE_FRACTION),
                                     tint = Color.Gray
                                 )
                             }
@@ -236,7 +240,7 @@ fun RecipeDetailDialog(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
 
-                                for (i in 1..5) {
+                                for (i in MIN_DIFFICULTY..MAX_DIFFICULTY) {
                                     Icon(
                                         imageVector = if (i <= recipe.difficulty) Icons.Filled.Star else Icons.Outlined.Star,
                                         contentDescription = "Difficulty $i",

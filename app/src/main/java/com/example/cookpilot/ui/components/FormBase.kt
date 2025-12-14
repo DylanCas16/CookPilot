@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.utils.FORM_BACKGROUND_ALPHA
 
 @Composable
 fun FormBase(
@@ -24,7 +25,7 @@ fun FormBase(
     formTitle: String,
     buttonText: String,
     onConfirmClick: () -> Unit,
-    color: Color = MaterialTheme.colorScheme.surface.copy(0.7f),
+    color: Color = MaterialTheme.colorScheme.surface.copy(FORM_BACKGROUND_ALPHA),
     snackbarHostState: SnackbarHostState? = null,
     content: @Composable () -> Unit
 ) {

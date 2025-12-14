@@ -60,6 +60,9 @@ import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.CustomDivider
 import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.utils.DIALOG_HEIGHT_FRACTION
+import com.example.cookpilot.utils.MAX_DIFFICULTY
+import com.example.cookpilot.utils.MIN_DIFFICULTY
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -129,7 +132,7 @@ fun EditRecipeDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.9f),
+                .fillMaxHeight(DIALOG_HEIGHT_FRACTION),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
@@ -323,7 +326,7 @@ fun EditRecipeDialog(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        for (i in 1..5) {
+                        for (i in MIN_DIFFICULTY..MAX_DIFFICULTY) {
                             Icon(
                                 imageVector = if (i <= difficulty) Icons.Filled.Star else Icons.Outlined.Star,
                                 contentDescription = "Difficulty $i",
