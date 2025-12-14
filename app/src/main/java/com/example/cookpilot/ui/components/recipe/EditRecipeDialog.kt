@@ -96,8 +96,8 @@ fun EditRecipeDialog(
         onResult = { uri -> selectedImageUri = uri }
     )
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    val snackbarHostState = snackbarHostState
+    val scope = scope
     val handleSaveClick: () -> Unit = {
         if (title.isBlank()) {
             showCustomMessage(
