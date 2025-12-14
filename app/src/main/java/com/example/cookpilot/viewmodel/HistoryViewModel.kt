@@ -52,6 +52,7 @@ class HistoryViewModel(
     fun saveRecipeView(userId: String, recipeId: String) {
         viewModelScope.launch {
             historyRepository.saveRecipeView(userId, recipeId)
+            loadUserHistory(userId)
         }
     }
 
@@ -59,6 +60,7 @@ class HistoryViewModel(
         viewModelScope.launch {
             historyRepository.clearUserHistory(userId)
             _historyRecipes.value = emptyList()
+            loadUserHistory(userId)
         }
     }
 }

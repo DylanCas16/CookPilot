@@ -68,22 +68,25 @@ class HistoryRepository(private val databases: Databases) {
             val recipeIds = historyDocs.documents.map { it.data["recipeId"] as String }
             if (recipeIds.isEmpty()) return@withContext UiState.Success(emptyList())
 
-            val recipesQueries = recipeIds.take(HISTORY_TOTAL_SLOTS).map { Query.equal("\$id", it) }
-            val recipesDocs = databases.listDocuments(
-                databaseId = databaseId,
-                collectionId = recipesCollectionId,
-                queries = recipesQueries
-            )
+            val recipes = recipeIds.mapNotNull { recipeId ->
+                try {
+                    val recipeDoc = databases.getDocument(
+                        databaseId = databaseId,
+                        collectionId = recipesCollectionId,
+                        documentId = recipeId
+                    )
+                    Recipe.fromMap(recipeDoc.id, recipeDoc.data)
+                } catch (_: Exception) {
+                    null
+                }
+            }
 
-            val recipesMap = recipesDocs.documents
-                .map { Recipe.fromMap(it.id, it.data) }
-                .associateBy { it.id }
-
-            UiState.Success(recipeIds.mapNotNull { recipesMap[it] })
+            UiState.Success(recipes)
         } catch (e: Exception) {
             UiState.Error("Failed to load history: ${e.message}", ErrorType.NETWORK)
         }
     }
+
 
     suspend fun clearUserHistory(userId: String) = withContext(Dispatchers.IO) {
         try {

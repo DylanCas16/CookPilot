@@ -116,6 +116,12 @@ fun SearchPage(
     }
 
     selectedRecipe?.let { recipe ->
+        LaunchedEffect(recipe.id) {
+            uiState.userId?.let { userId ->
+                historyViewModel.saveRecipeView(userId, recipe.id.toString())
+            }
+        }
+
         RecipeDetailDialog(
             recipe = recipe,
             actions = listOf(RecipeAction("Close") { selectedRecipe = null }),
