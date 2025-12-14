@@ -83,37 +83,59 @@ class UserViewModel(
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            try {
-                authRepository.loginUser(email, password)
-                val user = authRepository.getCurrentUser()
-                user?.id?.let { userId ->
-                    when (val result = authRepository.getUserData(userId)) {
-                        is UiState.Success -> {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    isLoggedIn = true,
-                                    userId = userId,
-                                    userName = result.data?.get("username") as? String,
-                                    profilePictureId = result.data?.get("profilePictureId") as? String,
-                                    success = true,
-                                    error = null
-                                )
-                            }
+            performLogin(email, password)
+        }
+    }
+
+    private suspend fun performLogin(email: String, password: String) {
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        try {
+            authRepository.loginUser(email, password)
+            val user = authRepository.getCurrentUser()
+            user?.id?.let { userId ->
+                val result = authRepository.getUserData(userId)
+                when (result) {
+                    is UiState.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                userId = userId,
+                                userName = result.data?.get("username") as? String,
+                                profilePictureId = result.data?.get("profilePictureId") as? String,
+                                success = true,
+                                error = null
+                            )
                         }
-                        is UiState.Error -> {
-                            _uiState.update {
-                                it.copy(isLoading = false, success = false, error = result.message)
-                            }
-                        }
-                        UiState.Idle -> {}
-                        UiState.Loading -> {}
                     }
+                    is UiState.Error -> {
+                        _uiState.update {
+                            it.copy(isLoading = false, success = false, error = result.message)
+                        }
+                    }
+                    else -> { _uiState.update { it.copy(isLoading = false) } }
                 }
+            }
+        } catch (e: Exception) {
+            _uiState.update {
+                it.copy(isLoading = false, success = false, error = e.message ?: "Login failed")
+            }
+        }
+    }
+
+    fun register(user: RegisterUser) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null, success = false) }
+            try {
+                authRepository.registerUser(user)
+                performLogin(user.email, user.password)
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(isLoading = false, success = false, error = e.message ?: "Unknown error")
+                    it.copy(
+                        isLoading = false,
+                        success = false,
+                        error = e.message ?: "Registration failed"
+                    )
                 }
             }
         }
@@ -157,22 +179,6 @@ class UserViewModel(
                 }
                 UiState.Idle -> {}
                 UiState.Loading -> {}
-            }
-        }
-    }
-
-    fun register(user: RegisterUser) {
-        viewModelScope.launch {
-            _uiState.value = UserUiState(isLoading = true)
-            try {
-                authRepository.registerUser(user)
-                _uiState.value = UserUiState(success = true)
-                login(user.email, user.password)
-            } catch (e: Exception) {
-                _uiState.value = UserUiState(
-                    success = false,
-                    error = e.message ?: "Unknown error"
-                )
             }
         }
     }

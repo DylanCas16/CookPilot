@@ -121,7 +121,7 @@ fun CookPilotApp(onRestartApp: () -> Unit = {}) {
                 showCustomMessage(
                     scope = scope,
                     snackbarHostState = snackbarHostState,
-                    message = "Welcome back! CP chef",
+                    message = "Welcome! CP chef",
                     actionLabel = "Let me cook",
                     duration = SnackbarDuration.Long
                 )
