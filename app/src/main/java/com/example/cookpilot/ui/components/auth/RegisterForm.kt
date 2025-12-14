@@ -98,6 +98,10 @@ fun UserRegistrationForm(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    fun isValid(): Boolean =
+        user.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() &&
+                confirmPassword == password && birthdateMillis != null
+
     FormBase(
         formTitle = "SIGN UP",
         buttonText = "REGISTER",
@@ -105,17 +109,14 @@ fun UserRegistrationForm(
         snackbarHostState = snackbarHostState,
         color = MaterialTheme.colorScheme.surface.copy(1f),
         onConfirmClick = {
-            if (user.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword == password && birthdateMillis != null) {
-                onRegisterUser(RegisterUser(user, birthdateMillis!!, email, password))
-            } else {
-                showCustomMessage(
-                    scope = scope,
-                    snackbarHostState = snackbarHostState,
-                    message = "Fill, all fields please",
-                    actionLabel = "I got it",
-                    duration = SnackbarDuration.Long
-                )
-            }
+            if (isValid()) onRegisterUser(RegisterUser(user, birthdateMillis!!, email, password))
+            else showCustomMessage(
+                scope = scope,
+                snackbarHostState = snackbarHostState,
+                message = "Fill, all fields please",
+                actionLabel = "I got it",
+                duration = SnackbarDuration.Long
+            )
         }
     ) {
         // ================== USERNAME ==================

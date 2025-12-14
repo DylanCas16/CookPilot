@@ -14,6 +14,7 @@ import com.example.cookpilot.ui.components.history.ClearHistoryFab
 import com.example.cookpilot.ui.components.history.HistoryGrid
 import com.example.cookpilot.ui.components.recipe.RecipeAction
 import com.example.cookpilot.ui.components.recipe.RecipeDetailDialog
+import com.example.cookpilot.utils.HISTORY_TOTAL_SLOTS
 import com.example.cookpilot.viewmodel.HistoryViewModel
 import com.example.cookpilot.viewmodel.UserViewModel
 
@@ -30,7 +31,7 @@ fun HistoryPage(
     var showClearDialog by remember { mutableStateOf(false) }
 
 
-    val totalSlots = 10
+    val totalSlots = HISTORY_TOTAL_SLOTS
     val filledSlots: List<Recipe> = historyRecipes.take(totalSlots)
     val emptySlots = (totalSlots - filledSlots.size).coerceAtLeast(0)
 

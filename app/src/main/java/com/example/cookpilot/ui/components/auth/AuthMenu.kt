@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.utils.ErrorType
+import com.example.cookpilot.utils.UiState
 import com.example.cookpilot.viewmodel.UserViewModel
 
 @Composable
@@ -78,6 +80,7 @@ fun AuthMenu(
                     try {
                         userViewModel.register(it)
                     } catch (e: Exception) {
+                        UiState.Error("Could not register: ${e.message}", ErrorType.AUTHENTICATION)
                     }
                 },
                 onLoginClick = {

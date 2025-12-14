@@ -44,7 +44,6 @@ android {
     }
 }
 
-// Configuración de Detekt
 detekt {
     toolVersion = "1.23.7"
     config.setFrom(file("$rootDir/config/detekt/detekt.yml"))

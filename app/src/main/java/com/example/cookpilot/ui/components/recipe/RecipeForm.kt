@@ -59,6 +59,13 @@ import com.example.cookpilot.model.Recipe
 import com.example.cookpilot.ui.components.FormBase
 import com.example.cookpilot.ui.components.showCustomMessage
 import com.example.cookpilot.ui.theme.CustomColors
+import com.example.cookpilot.utils.DIFFICULTY_BEGINNER
+import com.example.cookpilot.utils.DIFFICULTY_EASY
+import com.example.cookpilot.utils.DIFFICULTY_HARD
+import com.example.cookpilot.utils.DIFFICULTY_MASTER
+import com.example.cookpilot.utils.DIFFICULTY_MEDIUM
+import com.example.cookpilot.utils.MAX_DIFFICULTY
+import com.example.cookpilot.utils.MIN_DIFFICULTY
 import com.example.cookpilot.utils.PermissionUtils
 import java.io.File
 
@@ -218,9 +225,7 @@ fun RecipeForm(
                         val uri = context.createImageUri()
                         tempPhotoUri = uri
                         cameraLauncher.launch(uri)
-                    } else {
-                        permissionLauncher.launch(Manifest.permission.CAMERA)
-                    }
+                    } else permissionLauncher.launch(Manifest.permission.CAMERA)
                 },
                 modifier = Modifier.weight(1f),
                 colors = CustomColors.customSecondaryButtonColor()
@@ -353,9 +358,8 @@ fun RecipeForm(
                     value = ingredient,
                     onValueChange = { newValue ->
                         ingredients[index] = newValue
-                        if (index == ingredients.lastIndex && newValue.isNotEmpty()) {
+                        if (index == ingredients.lastIndex && newValue.isNotEmpty())
                             ingredients.add("")
-                        }
                     },
                     label = { Text("Ingredient ${index + 1}") },
                     placeholder = {
@@ -408,11 +412,7 @@ fun RecipeForm(
         DietaryTagSelector(
             selectedTags = selectedDietaryTags,
             onTagToggle = { tag ->
-                if (selectedDietaryTags.contains(tag)) {
-                    selectedDietaryTags.remove(tag)
-                } else {
-                    selectedDietaryTags.add(tag)
-                }
+                if (selectedDietaryTags.contains(tag)) selectedDietaryTags.remove(tag) else selectedDietaryTags.add(tag)
             },
             modifier = Modifier.fillMaxWidth()
         )
@@ -452,7 +452,7 @@ fun RecipeForm(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            for (i in 1..5) {
+            for (i in MIN_DIFFICULTY..MAX_DIFFICULTY) {
                 Icon(
                     imageVector = if (i <= difficulty) Icons.Filled.Star else Icons.Outlined.Star,
                     contentDescription = "Difficulty $i",
@@ -486,11 +486,11 @@ fun RecipeForm(
                 title = { Text("Difficulty guide") },
                 text = {
                     Column {
-                        RubricItem(1, "Beginner: Simple steps without cooking time.")
-                        RubricItem(2, "Easy: Few ingredients and cooking time.")
-                        RubricItem(3, "Medium: Steps more elaborated.")
-                        RubricItem(4, "Hard: Lots of ingredients and long cooking time.")
-                        RubricItem(5, "CP master: May require days or advanced skills.")
+                        RubricItem(DIFFICULTY_BEGINNER, "Beginner: Simple steps without cooking time.")
+                        RubricItem(DIFFICULTY_EASY, "Easy: Few ingredients and cooking time.")
+                        RubricItem(DIFFICULTY_MEDIUM, "Medium: Steps more elaborated.")
+                        RubricItem(DIFFICULTY_HARD, "Hard: Lots of ingredients and long cooking time.")
+                        RubricItem(DIFFICULTY_MASTER, "CP master: May require days or advanced skills.")
                     }
                 },
                 confirmButton = {
