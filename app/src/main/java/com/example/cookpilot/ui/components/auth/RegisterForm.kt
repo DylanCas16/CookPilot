@@ -159,6 +159,8 @@ fun UserRegistrationForm(
         )
 
         // ================== PASSWORD ==================
+        val isPasswordValid = password.length == 8
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -166,22 +168,24 @@ fun UserRegistrationForm(
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    if (passwordVisible) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_eye_open),
-                            contentDescription = "Hide password"
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_eye_closed),
-                            contentDescription = "Show password"
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_eye_open),
+                        contentDescription = "Hide password"
+                    )
+                }
+            },
+            isError = !isPasswordValid && password.isNotEmpty(),
+            supportingText = {
+                if (password.isEmpty()) {
+                    Text("At least 8 characters")
+                } else if (!isPasswordValid) {
+                    Text("Password must be 8 characters at least.", color = MaterialTheme.colorScheme.error)
                 }
             },
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             colors = CustomColors.customTextFieldColors()
         )
+
 
         // ================== CONFIRM PASSWORD ==================
         OutlinedTextField(
