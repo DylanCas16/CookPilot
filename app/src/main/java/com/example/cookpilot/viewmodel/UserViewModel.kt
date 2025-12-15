@@ -81,6 +81,10 @@ class UserViewModel(
         }
     }
 
+    suspend fun getUsernameById(userId: String): String {
+        return userRepository.getUsernameById(userId)
+    }
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             performLogin(email, password)

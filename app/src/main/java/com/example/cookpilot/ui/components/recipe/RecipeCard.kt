@@ -33,6 +33,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +57,7 @@ import com.example.cookpilot.utils.CARD_HEIGHT_FRACTION
 import com.example.cookpilot.utils.ICON_SIZE_FRACTION
 import com.example.cookpilot.utils.MAX_DIFFICULTY
 import com.example.cookpilot.utils.MIN_DIFFICULTY
+import com.example.cookpilot.viewmodel.UserViewModel
 
 
 data class RecipeAction(
@@ -154,9 +160,15 @@ fun RecipeCard(
 fun RecipeDetailDialog(
     recipe: Recipe,
     actions: List<RecipeAction>,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    userViewModel: UserViewModel
 ) {
     val imageUrl = buildImageUrl(recipe.fileId)
+    var creatorName by remember { mutableStateOf("Loading...") }
+
+    LaunchedEffect(recipe.creator) {
+        creatorName = userViewModel.getUsernameById(recipe.creator)
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -224,7 +236,7 @@ fun RecipeDetailDialog(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text("CP Chef:", fontWeight = FontWeight.SemiBold)
-                                Text(recipe.creator)
+                                Text(creatorName)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
 

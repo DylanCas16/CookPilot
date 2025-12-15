@@ -231,7 +231,8 @@ fun UserPage(
         RecipeDetailDialog(
             recipe = recipe,
             actions = userRecipeActions(recipe),
-            onDismiss = { selectedRecipe = null }
+            onDismiss = { selectedRecipe = null },
+            userViewModel = userViewModel
         )
     }
 

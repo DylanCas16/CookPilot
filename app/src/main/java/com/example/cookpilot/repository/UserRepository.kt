@@ -48,6 +48,26 @@ class UserRepository(
         }
     }
 
+    suspend fun getUsernameById(userId: String): String {
+        return withContext(Dispatchers.IO) {
+            try {
+                val userDocs = databases.listDocuments(
+                    databaseId = databaseId,
+                    collectionId = usersCollectionId,
+                    queries = listOf(Query.equal("userId", userId), Query.limit(1))
+                )
+
+                if (userDocs.documents.isEmpty()) {
+                    return@withContext "Anon"
+                }
+
+                userDocs.documents[0].data["username"] as? String ?: "Anon"
+            } catch (e: Exception) {
+                print(e).toString()
+            }
+        }
+    }
+
     suspend fun uploadProfilePicture(imageUri: Uri): UiState<String> = withContext(Dispatchers.IO) {
         try {
             val inputStream = appContext.contentResolver.openInputStream(imageUri)

@@ -85,7 +85,8 @@ fun HistoryPage(
         RecipeDetailDialog(
             recipe = recipe,
             actions = listOf(RecipeAction("Close") { selectedRecipe = null }),
-            onDismiss = { selectedRecipe = null }
+            onDismiss = { selectedRecipe = null },
+            userViewModel = userViewModel
         )
     }
 }
