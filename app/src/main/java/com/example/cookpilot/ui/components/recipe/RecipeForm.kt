@@ -355,9 +355,9 @@ fun RecipeForm(
                 modifier = Modifier.padding(bottom = 8.dp)
             ) {
                 OutlinedTextField(
-                    value = ingredient,
+                    value = ingredient.lowercase(),
                     onValueChange = { newValue ->
-                        ingredients[index] = newValue
+                        ingredients[index] = newValue.lowercase()
                         if (index == ingredients.lastIndex && newValue.isNotEmpty())
                             ingredients.add("")
                     },
