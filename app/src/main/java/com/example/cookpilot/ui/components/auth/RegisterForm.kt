@@ -159,7 +159,7 @@ fun UserRegistrationForm(
         )
 
         // ================== PASSWORD ==================
-        val isPasswordValid = password.length == 8
+        val isPasswordValid = password.length >= 8
 
         OutlinedTextField(
             value = password,
@@ -169,8 +169,10 @@ fun UserRegistrationForm(
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_eye_open),
-                        contentDescription = "Hide password"
+                        painter = painterResource(
+                            id = if (passwordVisible) R.drawable.ic_eye_closed else R.drawable.ic_eye_open
+                        ),
+                        contentDescription = if (passwordVisible) "Hide password" else "Show password"
                     )
                 }
             },
